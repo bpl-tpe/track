@@ -1,62 +1,59 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TrackIt · 活動人次登記</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: #F6F9FA; color: #1E2030; -webkit-tap-highlight-color: transparent; }
-  input, select { font-family: 'DM Sans', sans-serif; font-size: 15px; border: 1.5px solid #D8DEEC; border-radius: 12px; padding: 11px 14px; outline: none; background: #fff; color: #1E2030; transition: border-color .15s, box-shadow .15s; width: 100%; }
-  input:focus, select:focus { border-color: #9B8EC7; box-shadow: 0 0 0 3px rgba(155,142,199,.18); }
-  input[type=number] { -moz-appearance: textfield; }
-  input[type=number]::-webkit-inner-spin-button { opacity: .3; }
-  button { font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; font-size: 14px; transition: all .15s; border-radius: 12px; }
-  button:active { transform: scale(.96); }
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-thumb { background: #BEC8DC; border-radius: 4px; }
-  @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes spin    { to { transform: rotate(360deg); } }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:#F6F9FA;color:#1E2030;-webkit-tap-highlight-color:transparent}
+input,select{font-family:'DM Sans',sans-serif;font-size:15px;border:1.5px solid #D8DEEC;border-radius:12px;padding:11px 14px;outline:none;background:#fff;color:#1E2030;transition:border-color .15s,box-shadow .15s;width:100%}
+input:focus,select:focus{border-color:#9B8EC7;box-shadow:0 0 0 3px rgba(155,142,199,.18)}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button{opacity:.3}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;font-size:14px;transition:all .15s;border-radius:12px}
+button:active{transform:scale(.96)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:#BEC8DC;border-radius:4px}
+@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" />
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap"/>
 </head>
 <body>
 <div id="root"></div>
 
-<!-- React + ReactDOM (UMD, loads synchronously) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<!-- Step 1: Load React UMD (synchronous, no module needed) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin></script>
 
-<!-- Bootstrap: load Firebase + Babel in parallel, then mount app -->
+<!-- Step 2: Load Firebase + Babel in parallel, then compile & run app -->
 <script type="module">
-  const [fbApp, fbDb] = await Promise.all([
-    import("https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"),
-    import("https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js"),
-    new Promise((res, rej) => {
-      const s = document.createElement("script");
-      s.src = "https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.5/babel.min.js";
-      s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    }),
-  ]);
-  const { initializeApp } = fbApp;
-  const { getDatabase, ref, set, onValue, remove } = fbDb;
-  window.__firebase = { initializeApp, getDatabase, ref, set, onValue, remove };
-
-  // Babel ready — transform JSX and run
-  const src = document.getElementById("app-src").textContent;
-  const code = Babel.transform(src, { presets: ["react"] }).code;
-  new Function(code)();
+const [fbApp, fbDb] = await Promise.all([
+  import("https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"),
+  import("https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js"),
+  new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.5/babel.min.js";s.crossOrigin="anonymous";s.onload=res;s.onerror=rej;document.head.appendChild(s);}),
+]);
+window.__fb = {
+  initializeApp: fbApp.initializeApp,
+  getDatabase:   fbDb.getDatabase,
+  ref:           fbDb.ref,
+  set:           fbDb.set,
+  onValue:       fbDb.onValue,
+  remove:        fbDb.remove,
+};
+const src  = document.getElementById("app").textContent;
+const code = Babel.transform(src, {presets:["react"]}).code;
+new Function(code)();
 </script>
 
-<script id="app-src" type="text/plain">
-const { useState, useRef, useEffect, useCallback } = React;
+<!-- Step 3: App source (compiled by Babel above) -->
+<script id="app" type="text/plain">
+const {useState,useRef,useEffect,useCallback} = React;
+const {initializeApp,getDatabase,ref,set,onValue,remove} = window.__fb;
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// ★ 填入你的 Firebase 設定（從 Firebase Console 複製）
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── Firebase ──────────────────────────────────────────────────────────────
 const firebaseConfig = {
   apiKey:            "AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ",
   authDomain:        "project-1794474641398451810.firebaseapp.com",
@@ -66,758 +63,561 @@ const firebaseConfig = {
   messagingSenderId: "660717432614",
   appId:             "1:660717432614:web:5067d9a791339b6c275be7",
 };
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const db = getDatabase(initializeApp(firebaseConfig));
 
-// Firebase is initialised before the app mounts (see bootstrap script above)
-const { initializeApp, getDatabase, ref: _ref, set: _set, onValue: _onValue, remove: _remove } = window.__firebase;
-const _db = getDatabase(initializeApp(firebaseConfig));
-function getDb() { return _db; }
-
-// ── Color system ─────────────────────────────────────────────────────────
+// ── Tokens ────────────────────────────────────────────────────────────────
 const C = {
-  bg:          "#F6F9FA", bgCard: "#FFFFFF", bgSurface: "#E8ECF4",
-  border:      "#D8DEEC", borderMid: "#BEC8DC",
-  accent:      "#9B8EC7", accentDark: "#7A6BAA", accentLight: "#F0EDF9",
-  text:        "#1E2030", textMid: "#4A5068", textMuted: "#8A90A8",
-  success:     "#3D8A6A", successBg: "#E8F4EE",
-  danger:      "#A83838", dangerBorder: "#E8C4C4",
+  bg:"#F6F9FA",bgCard:"#FFFFFF",bgSurface:"#E8ECF4",
+  border:"#D8DEEC",borderMid:"#BEC8DC",
+  accent:"#9B8EC7",accentDark:"#7A6BAA",accentLight:"#F0EDF9",
+  text:"#1E2030",textMid:"#4A5068",textMuted:"#8A90A8",
+  success:"#3D8A6A",successBg:"#E8F4EE",
+  danger:"#A83838",dangerBorder:"#E8C4C4",
 };
-const PALETTE = ["#5B8DD9","#4EAA80","#D4A843","#D05858","#E0784A","#9B8EC7","#4EA8C0","#7ABD5E"];
-const EMPTY   = { ownerPin: "1234", projects: [], records: [] };
-const LBL     = { fontSize: 13, color: "#4A5068", display: "block", marginBottom: 6, fontWeight: 500 };
+const PALETTE=["#5B8DD9","#4EAA80","#D4A843","#D05858","#E0784A","#9B8EC7","#4EA8C0","#7ABD5E"];
+const EMPTY={ownerPin:"1234",projects:[],records:[]};
+const LBL={fontSize:13,color:"#4A5068",display:"block",marginBottom:6,fontWeight:500};
 
-function uid()          { return Math.random().toString(36).slice(2, 9); }
-function todayStr()     { return new Date().toISOString().slice(0, 10); }
-function toDisplay(iso) { if (!iso) return ""; const [y,m,d] = iso.split("-"); return `${y.slice(2)}/${m}/${d}`; }
-function toISO(s)       { if (!s) return ""; const c = s.trim(); if (/^\d{4}-\d{2}-\d{2}$/.test(c)) return c; const m = c.match(/^(\d{2})\/(\d{2})\/(\d{2})$/); return m ? `20${m[1]}-${m[2]}-${m[3]}` : c; }
-
-function exportCSV(proj, records) {
-  const dates = [...new Set(records.filter(r => r.projectId === proj.id).map(r => r.date))].sort();
-  const header = ["日期", ...proj.items.map(i => i.name), "合計"].join(",");
-  const rows = dates.map(d => {
-    const vals = proj.items.map(i => { const r = records.find(r => r.projectId === proj.id && r.itemId === i.id && r.date === d); return r ? r.value : ""; });
-    return [d, ...vals, vals.reduce((s,v) => s + (Number(v)||0), 0)].join(",");
-  });
-  const tot = ["總計", ...proj.items.map(i => records.filter(r => r.projectId === proj.id && r.itemId === i.id).reduce((s,r) => s+r.value,0)), records.filter(r => r.projectId === proj.id).reduce((s,r) => s+r.value,0)].join(",");
-  const blob = new Blob(["\uFEFF" + [header,...rows,tot].join("\n")], { type: "text/csv;charset=utf-8;" });
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${proj.name}_人次數據.csv`; a.click();
+// ── Helpers ───────────────────────────────────────────────────────────────
+function uid(){return Math.random().toString(36).slice(2,9)}
+function todayStr(){return new Date().toISOString().slice(0,10)}
+function toDisplay(iso){if(!iso)return"";const[y,m,d]=iso.split("-");return`${y.slice(2)}/${m}/${d}`}
+function toISO(s){if(!s)return"";const c=s.trim();if(/^\d{4}-\d{2}-\d{2}$/.test(c))return c;const m=c.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);return m?`20${m[1]}-${m[2]}-${m[3]}`:c}
+function exportCSV(proj,records){
+  const dates=[...new Set(records.filter(r=>r.projectId===proj.id).map(r=>r.date))].sort();
+  const header=["日期",...proj.items.map(i=>i.name),"合計"].join(",");
+  const rows=dates.map(d=>{const vals=proj.items.map(i=>{const r=records.find(r=>r.projectId===proj.id&&r.itemId===i.id&&r.date===d);return r?r.value:""});return[d,...vals,vals.reduce((s,v)=>s+(Number(v)||0),0)].join(",")});
+  const tot=["總計",...proj.items.map(i=>records.filter(r=>r.projectId===proj.id&&r.itemId===i.id).reduce((s,r)=>s+r.value,0)),records.filter(r=>r.projectId===proj.id).reduce((s,r)=>s+r.value,0)].join(",");
+  const blob=new Blob(["\uFEFF",[header,...rows,tot].join("\n")],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${proj.name}_人次數據.csv`;a.click();
 }
 
-// ── Shared UI components ─────────────────────────────────────────────────
-function PrimaryBtn({ children, onClick, full, color, disabled, style: s }) {
-  return <button onClick={onClick} disabled={disabled} style={{ background: disabled ? "#D5CFC6" : (color||C.accent), color: disabled ? "#fff" : "#fff", fontWeight: 700, padding: "13px 22px", fontSize: 15, borderRadius: 14, width: full ? "100%" : undefined, opacity: disabled ? .6 : 1, cursor: disabled ? "default" : "pointer", ...s }}>{children}</button>;
+// ── Shared components ─────────────────────────────────────────────────────
+function PBtn({children,onClick,full,color,disabled,style:s}){
+  return <button onClick={onClick} disabled={disabled} style={{background:disabled?"#ccc":(color||C.accent),color:"#fff",fontWeight:700,padding:"13px 22px",fontSize:15,borderRadius:14,width:full?"100%":undefined,opacity:disabled?.6:1,cursor:disabled?"default":"pointer",...s}}>{children}</button>;
 }
-function GhostBtn({ children, onClick, danger, style: s }) {
-  return <button onClick={onClick} style={{ background: "transparent", border: `1.5px solid ${danger ? "#F0C4C4" : C.border}`, color: danger ? C.danger : C.textMid, fontWeight: 500, padding: "9px 16px", fontSize: 14, borderRadius: 12, ...s }}>{children}</button>;
+function GBtn({children,onClick,danger,style:s}){
+  return <button onClick={onClick} style={{background:"transparent",border:`1.5px solid ${danger?"#F0C4C4":C.border}`,color:danger?C.danger:C.textMid,fontWeight:500,padding:"9px 16px",fontSize:14,borderRadius:12,...s}}>{children}</button>;
 }
-function Card({ children, style: s }) {
-  return <div style={{ background: C.bgCard, borderRadius: 18, border: `1px solid ${C.border}`, padding: "18px 20px", ...s }}>{children}</div>;
+function Card({children,style:s}){
+  return <div style={{background:C.bgCard,borderRadius:18,border:`1px solid ${C.border}`,padding:"18px 20px",...s}}>{children}</div>;
 }
-function LogoMark({ size = 26 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" style={{ borderRadius: 7, flexShrink: 0 }}>
-      <rect width="32" height="32" rx="8" fill={C.accent}/>
-      <rect x="7" y="8"  width="11" height="2.8" rx="1.4" fill="white" opacity=".9"/>
-      <rect x="7" y="14" width="18" height="2.8" rx="1.4" fill="white"/>
-      <rect x="7" y="20" width="14" height="2.8" rx="1.4" fill="white" opacity=".75"/>
-      <circle cx="24.5" cy="9.5" r="4.5" fill="#C4B8E8"/>
-      <path d="M22.8 9.5l1.4 1.4 2.4-2.4" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    </svg>
-  );
+function Logo({size=26}){
+  return <svg width={size} height={size} viewBox="0 0 32 32" style={{borderRadius:7,flexShrink:0}}>
+    <rect width="32" height="32" rx="8" fill={C.accent}/>
+    <rect x="7" y="8" width="11" height="2.8" rx="1.4" fill="white" opacity=".9"/>
+    <rect x="7" y="14" width="18" height="2.8" rx="1.4" fill="white"/>
+    <rect x="7" y="20" width="14" height="2.8" rx="1.4" fill="white" opacity=".75"/>
+    <circle cx="24.5" cy="9.5" r="4.5" fill="#C4B8E8"/>
+    <path d="M22.8 9.5l1.4 1.4 2.4-2.4" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+  </svg>;
 }
-function ModalShell({ open, onBackdrop, children }) {
-  if (!open) return null;
-  return (
-    <div onClick={e => e.target === e.currentTarget && onBackdrop()}
-      style={{ position:"fixed", inset:0, background:"rgba(26,23,19,.3)", display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:100 }}>
-      <div style={{ background: C.bgCard, borderRadius:"22px 22px 0 0", padding:"28px 22px 40px", width:"100%", maxWidth:540, boxShadow:"0 -12px 48px rgba(0,0,0,.1)", animation:"slideUp .22s ease forwards" }}>
-        {children}
-      </div>
+function ModalShell({open,onClose,children}){
+  if(!open)return null;
+  return <div onClick={e=>e.target===e.currentTarget&&onClose()} style={{position:"fixed",inset:0,background:"rgba(26,23,19,.3)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:100}}>
+    <div style={{background:C.bgCard,borderRadius:"22px 22px 0 0",padding:"28px 22px 40px",width:"100%",maxWidth:540,boxShadow:"0 -12px 48px rgba(0,0,0,.1)",animation:"slideUp .22s ease forwards"}}>
+      {children}
     </div>
-  );
+  </div>;
+}
+function Topbar({back,title,right}){
+  return <div style={{position:"sticky",top:0,zIndex:20,background:"rgba(246,249,250,.94)",backdropFilter:"blur(14px)",borderBottom:`1px solid ${C.border}`,height:54,padding:"0 16px",display:"flex",alignItems:"center",gap:10}}>
+    {back?<button onClick={back} style={{background:"none",border:"none",color:C.textMuted,fontSize:24,lineHeight:1,padding:"0 6px 0 0",cursor:"pointer"}}>‹</button>:<Logo/>}
+    <span style={{flex:1,fontWeight:back?600:700,fontSize:back?16:19,fontFamily:back?"'DM Sans'":"'DM Serif Display'",letterSpacing:back?0:-.3}}>{title||"TrackIt"}</span>
+    {right}
+  </div>;
 }
 
-// ── Main App ─────────────────────────────────────────────────────────────
-function App() {
-  const [data, setData]             = useState(EMPTY);
-  const [loading, setLoading]       = useState(true);
-  const [role, setRole]             = useState(null);
-  const [screen, setScreen]         = useState("projects");
-  const [activeProjId, setActiveProjId] = useState(null);
-  const [ownerTab, setOwnerTab]     = useState("data");
-  const [dashView, setDashView]     = useState("date");
-  const [modal, setModal]           = useState(null);
-  const [form, setForm]             = useState({});
-  const [pinInput, setPinInput]     = useState("");
-  const [pinErr, setPinErr]         = useState("");
-  const [formErr, setFormErr]       = useState("");
-  const [toast, setToast]           = useState(null);
-  const [editCell, setEditCell]     = useState(null);
-  const [editVal, setEditVal]       = useState("");
-  const [confirmState, setConfirmState] = useState(null);
-  const [dragId, setDragId]         = useState(null);
-  const [dragOver, setDragOver]     = useState(null);
-  const toastTimer = useRef(null);
+// ── App ───────────────────────────────────────────────────────────────────
+function App(){
+  const [data,setData]           = useState(EMPTY);
+  const [loading,setLoading]     = useState(true);
+  const [role,setRole]           = useState(null);
+  const [screen,setScreen]       = useState("projects");
+  const [activeProjId,setActiveProjId] = useState(null);
+  const [ownerTab,setOwnerTab]   = useState("data");
+  const [dashView,setDashView]   = useState("date");
+  const [modal,setModal]         = useState(null);
+  const [form,setForm]           = useState({});
+  const [pinInput,setPinInput]   = useState("");
+  const [pinErr,setPinErr]       = useState("");
+  const [formErr,setFormErr]     = useState("");
+  const [toast,setToast]         = useState(null);
+  const [editCell,setEditCell]   = useState(null);
+  const [editVal,setEditVal]     = useState("");
+  const [confirm,setConfirm]     = useState(null);
+  const [dragId,setDragId]       = useState(null);
+  const [dragOver,setDragOver]   = useState(null);
+  const [dateSearch,setDateSearch]     = useState("");
+  const [dateSearchOpen,setDateSearchOpen] = useState(false);
+  const toastRef = useRef(null);
 
   // Favicon
-  useEffect(() => {
-    document.title = "TrackIt · 活動人次登記";
-    const svg = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%239B8EC7'/><rect x='7' y='8' width='11' height='2.8' rx='1.4' fill='white' opacity='.9'/><rect x='7' y='14' width='18' height='2.8' rx='1.4' fill='white'/><rect x='7' y='20' width='14' height='2.8' rx='1.4' fill='white' opacity='.75'/></svg>`;
-    let link = document.querySelector("link[rel~='icon']");
-    if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
-    link.href = svg;
-  }, []);
+  useEffect(()=>{
+    document.title="TrackIt · 活動人次登記";
+    const svg="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%239B8EC7'/><rect x='7' y='8' width='11' height='2.8' rx='1.4' fill='white' opacity='.9'/><rect x='7' y='14' width='18' height='2.8' rx='1.4' fill='white'/><rect x='7' y='20' width='14' height='2.8' rx='1.4' fill='white' opacity='.75'/></svg>";
+    let link=document.querySelector("link[rel~='icon']");
+    if(!link){link=document.createElement("link");link.rel="icon";document.head.appendChild(link);}
+    link.href=svg;
+  },[]);
 
-  // Firebase is already initialised — subscribe immediately
-  useEffect(() => {
-    const { ref, onValue } = window.__firebase;
-    const unsub = onValue(ref(getDb(), "trackit"), snap => {
-      const raw = snap.val() || {};
+  // Firebase realtime listener
+  useEffect(()=>{
+    const unsub=onValue(ref(db,"trackit"),snap=>{
+      const raw=snap.val()||{};
       setData({
-        ownerPin: raw.ownerPin || "1234",
-        projects: raw.projects ? Object.values(raw.projects).sort((a,b) => (a.sortOrder??0)-(b.sortOrder??0)) : [],
-        records:  raw.records  ? Object.values(raw.records) : [],
+        ownerPin:raw.ownerPin||"1234",
+        projects:raw.projects?Object.values(raw.projects).sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0)):[],
+        records:raw.records?Object.values(raw.records):[],
       });
       setLoading(false);
     });
-    return () => unsub();
-  }, []);
+    return()=>unsub();
+  },[]);
 
-  const save = useCallback((d) => {
-    setData(d);
-    const { ref, set } = window.__firebase;
-    const database = getDb();
-    const pm = {}; d.projects.forEach((p,i) => { pm[p.id] = { ...p, sortOrder: i }; });
-    set(ref(database, "trackit/projects"), pm).catch(console.error);
-    const rm = {}; d.records.forEach(r => { rm[r.id] = r; });
-    set(ref(database, "trackit/records"), Object.keys(rm).length ? rm : null).catch(console.error);
-  }, []);
+  const notify=useCallback(msg=>{clearTimeout(toastRef.current);setToast(msg);toastRef.current=setTimeout(()=>setToast(null),2200);},[]);
+  const getProj=id=>data.projects.find(p=>p.id===(id??activeProjId));
 
-  const saveRecord = useCallback((rec) => {
-    const { ref, set } = window.__firebase;
-    set(ref(getDb(), `trackit/records/${rec.id}`), rec).catch(console.error);
-  }, []);
-
-  const savePin = useCallback((pin) => {
-    const { ref, set } = window.__firebase;
-    set(ref(getDb(), "trackit/ownerPin"), pin).catch(console.error);
-  }, []);
-
-  const notify = useCallback((msg) => {
-    clearTimeout(toastTimer.current);
-    setToast(msg);
-    toastTimer.current = setTimeout(() => setToast(null), 2200);
-  }, []);
-
-  const getProj = id => data.projects.find(p => p.id === (id ?? activeProjId));
-
-  function doLogin() {
-    if (pinInput === data.ownerPin) { setRole("owner"); setPinInput(""); setPinErr(""); setModal(null); }
+  function doLogin(){
+    if(pinInput===data.ownerPin){setRole("owner");setPinInput("");setPinErr("");setModal(null);}
     else setPinErr("密碼錯誤，請再試一次");
   }
-  function doLogout() { setRole(null); setScreen("projects"); setActiveProjId(null); }
-  function closeModal() { setModal(null); setForm({}); setPinErr(""); setFormErr(""); }
+  function doLogout(){setRole(null);setScreen("projects");setActiveProjId(null);}
+  function closeModal(){setModal(null);setForm({});setPinErr("");setFormErr("");}
+  function getRecord(pid,iid,date){return data.records.find(r=>r.projectId===pid&&r.itemId===iid&&r.date===date);}
 
-  function getRecord(pid, iid, date) { return data.records.find(r => r.projectId===pid && r.itemId===iid && r.date===date); }
-
-  function upsertRecord(pid, iid, date, raw, base) {
-    const d = base || data;
-    const value = parseInt(raw, 10);
-    if (isNaN(value) || value < 0) return d;
-    const ex = d.records.find(r => r.projectId===pid && r.itemId===iid && r.date===date);
-    const rec = ex ? { ...ex, value } : { id: uid(), projectId: pid, itemId: iid, date, value };
-    saveRecord(rec);
-    const records = ex ? d.records.map(r => r.id===ex.id ? rec : r) : [...d.records, rec];
-    return { ...d, records };
+  function saveData(d){
+    setData(d);
+    const pm={};d.projects.forEach((p,i)=>{pm[p.id]={...p,sortOrder:i};});
+    set(ref(db,"trackit/projects"),pm).catch(console.error);
+    const rm={};d.records.forEach(r=>{rm[r.id]=r;});
+    set(ref(db,"trackit/records"),Object.keys(rm).length?rm:null).catch(console.error);
   }
-  function batchUpsert(pid, entries, date) {
-    let d = data;
-    entries.forEach(({ iid, val }) => { d = upsertRecord(pid, iid, date, val, d); });
+  function saveRec(rec){set(ref(db,`trackit/records/${rec.id}`),rec).catch(console.error);}
+  function savePin(pin){set(ref(db,"trackit/ownerPin"),pin).catch(console.error);}
+
+  function upsertRecord(pid,iid,date,raw,base){
+    const d=base||data;
+    const value=parseInt(raw,10);
+    if(isNaN(value)||value<0)return d;
+    const ex=d.records.find(r=>r.projectId===pid&&r.itemId===iid&&r.date===date);
+    const rec=ex?{...ex,value}:{id:uid(),projectId:pid,itemId:iid,date,value};
+    saveRec(rec);
+    const records=ex?d.records.map(r=>r.id===ex.id?rec:r):[...d.records,rec];
+    return{...d,records};
+  }
+  function batchUpsert(pid,entries,date){
+    let d=data;
+    entries.forEach(({iid,val})=>{d=upsertRecord(pid,iid,date,val,d);});
     setData(d);
   }
-  function allDates(pid) { return [...new Set(data.records.filter(r => r.projectId===pid).map(r => r.date))].sort(); }
+  function allDates(pid){return[...new Set(data.records.filter(r=>r.projectId===pid).map(r=>r.date))].sort();}
 
-  function submitModal() {
-    if (modal === "newProject") {
-      if (!form.name?.trim()) { setFormErr("請填寫專案名稱"); return; }
-      if (!form.dateRange?.trim()) { setFormErr("請填寫活動日期"); return; }
-      if (!/^\d{2}\/\d{2}\/\d{2}/.test(form.dateRange.trim())) { setFormErr("日期格式應為 YY/MM/DD"); return; }
-      const p = { id: uid(), name: form.name.trim(), dateRange: form.dateRange.trim(), description: form.desc?.trim()||"", color: form.color||C.accent, published: false, items: [] };
-      save({ ...data, projects: [...data.projects, p] }); notify("專案已建立");
-    } else if (modal === "editProject") {
-      if (!form.name?.trim()) { setFormErr("請填寫專案名稱"); return; }
-      if (!form.dateRange?.trim()) { setFormErr("請填寫活動日期"); return; }
-      if (!/^\d{2}\/\d{2}\/\d{2}/.test(form.dateRange.trim())) { setFormErr("日期格式應為 YY/MM/DD"); return; }
-      save({ ...data, projects: data.projects.map(p => p.id===activeProjId ? { ...p, name: form.name.trim(), dateRange: form.dateRange.trim(), description: form.desc?.trim()||"", color: form.color||p.color } : p) }); notify("已更新");
-    } else if (modal === "newItem") {
-      if (!form.name?.trim()) { setFormErr("請填寫項目名稱"); return; }
-      save({ ...data, projects: data.projects.map(p => p.id===activeProjId ? { ...p, items: [...p.items, { id: uid(), name: form.name.trim() }] } : p) }); notify("項目已新增");
-    } else if (modal === "editItem") {
-      if (!form.name?.trim()) { setFormErr("請填寫項目名稱"); return; }
-      save({ ...data, projects: data.projects.map(p => p.id!==activeProjId ? p : { ...p, items: p.items.map(i => i.id===form.itemId ? { ...i, name: form.name.trim() } : i) }) }); notify("已更新");
-    } else if (modal === "changePin") {
-      if (!form.currentPin) { setFormErr("請輸入目前密碼"); return; }
-      if (form.currentPin !== data.ownerPin) { setFormErr("目前密碼錯誤"); return; }
-      if (!form.newPin || form.newPin.length < 4) { setFormErr("新密碼至少 4 碼"); return; }
-      if (form.newPin !== form.confirm) { setFormErr("兩次輸入不一致"); return; }
-      savePin(form.newPin); setData(d => ({ ...d, ownerPin: form.newPin })); notify("密碼已更新");
+  function submitModal(){
+    if(modal==="newProject"){
+      if(!form.name?.trim()){setFormErr("請填寫專案名稱");return;}
+      if(!form.dateRange?.trim()){setFormErr("請填寫活動日期");return;}
+      if(!/^\d{2}\/\d{2}\/\d{2}/.test(form.dateRange.trim())){setFormErr("日期格式應為 YY/MM/DD");return;}
+      const p={id:uid(),name:form.name.trim(),dateRange:form.dateRange.trim(),description:form.desc?.trim()||"",color:form.color||C.accent,published:false,items:[]};
+      saveData({...data,projects:[...data.projects,p]});notify("專案已建立");
+    }else if(modal==="editProject"){
+      if(!form.name?.trim()){setFormErr("請填寫專案名稱");return;}
+      if(!form.dateRange?.trim()){setFormErr("請填寫活動日期");return;}
+      if(!/^\d{2}\/\d{2}\/\d{2}/.test(form.dateRange.trim())){setFormErr("日期格式應為 YY/MM/DD");return;}
+      saveData({...data,projects:data.projects.map(p=>p.id===activeProjId?{...p,name:form.name.trim(),dateRange:form.dateRange.trim(),description:form.desc?.trim()||"",color:form.color||p.color}:p)});notify("已更新");
+    }else if(modal==="newItem"){
+      if(!form.name?.trim()){setFormErr("請填寫項目名稱");return;}
+      saveData({...data,projects:data.projects.map(p=>p.id===activeProjId?{...p,items:[...p.items,{id:uid(),name:form.name.trim()}]}:p)});notify("項目已新增");
+    }else if(modal==="editItem"){
+      if(!form.name?.trim()){setFormErr("請填寫項目名稱");return;}
+      saveData({...data,projects:data.projects.map(p=>p.id!==activeProjId?p:{...p,items:p.items.map(i=>i.id===form.itemId?{...i,name:form.name.trim()}:i)})});notify("已更新");
+    }else if(modal==="changePin"){
+      if(!form.currentPin){setFormErr("請輸入目前密碼");return;}
+      if(form.currentPin!==data.ownerPin){setFormErr("目前密碼錯誤");return;}
+      if(!form.newPin||form.newPin.length<4){setFormErr("新密碼至少 4 碼");return;}
+      if(form.newPin!==form.confirm){setFormErr("兩次輸入不一致");return;}
+      savePin(form.newPin);setData(d=>({...d,ownerPin:form.newPin}));notify("密碼已更新");
     }
     closeModal();
   }
 
-  function customConfirm(msg, onOk) { setConfirmState({ msg, onOk }); }
-
-  function deleteProject(id) {
-    customConfirm("確定刪除此專案及所有記錄？此操作無法復原。", () => {
-      const { ref, set, remove } = window.__firebase;
-      const database = getDb();
-      remove(ref(database, `trackit/projects/${id}`)).catch(console.error);
-      const remaining = data.records.filter(r => r.projectId !== id);
-      const rm = {}; remaining.forEach(r => { rm[r.id] = r; });
-      set(ref(database, "trackit/records"), Object.keys(rm).length ? rm : null).catch(console.error);
-      setData(d => ({ ...d, projects: d.projects.filter(p => p.id!==id), records: remaining }));
-      setScreen("projects"); notify("已刪除");
-    });
+  function deleteProject(id){
+    setConfirm({msg:"確定刪除此專案及所有記錄？此操作無法復原。",onOk:()=>{
+      remove(ref(db,`trackit/projects/${id}`)).catch(console.error);
+      const remaining=data.records.filter(r=>r.projectId!==id);
+      const rm={};remaining.forEach(r=>{rm[r.id]=r;});
+      set(ref(db,"trackit/records"),Object.keys(rm).length?rm:null).catch(console.error);
+      setData(d=>({...d,projects:d.projects.filter(p=>p.id!==id),records:remaining}));
+      setScreen("projects");notify("已刪除");
+    }});
   }
-  function deleteItem(itemId) {
-    customConfirm("確定刪除此項目及所有記錄？此操作無法復原。", () => {
-      const newData = { ...data, projects: data.projects.map(p => p.id!==activeProjId ? p : { ...p, items: p.items.filter(i => i.id!==itemId) }), records: data.records.filter(r => !(r.projectId===activeProjId && r.itemId===itemId)) };
-      save(newData); notify("已刪除");
-    });
+  function deleteItem(itemId){
+    setConfirm({msg:"確定刪除此項目及所有記錄？此操作無法復原。",onOk:()=>{
+      const newData={...data,projects:data.projects.map(p=>p.id!==activeProjId?p:{...p,items:p.items.filter(i=>i.id!==itemId)}),records:data.records.filter(r=>!(r.projectId===activeProjId&&r.itemId===itemId))};
+      saveData(newData);notify("已刪除");
+    }});
   }
-  function togglePublished(id) { save({ ...data, projects: data.projects.map(p => p.id===id ? { ...p, published: !p.published } : p) }); }
-  function reorderProjects(fromId, toId) {
-    if (fromId === toId) return;
-    const ps = [...data.projects];
-    const fi = ps.findIndex(p => p.id===fromId), ti = ps.findIndex(p => p.id===toId);
-    ps.splice(ti, 0, ps.splice(fi, 1)[0]);
-    save({ ...data, projects: ps });
+  function togglePublished(id){saveData({...data,projects:data.projects.map(p=>p.id===id?{...p,published:!p.published}:p)});}
+  function reorderProjects(fromId,toId){
+    if(fromId===toId)return;
+    const ps=[...data.projects];
+    const fi=ps.findIndex(p=>p.id===fromId),ti=ps.findIndex(p=>p.id===toId);
+    ps.splice(ti,0,ps.splice(fi,1)[0]);
+    saveData({...data,projects:ps});
   }
-  function commitCellEdit(pid) {
-    if (!editCell) return;
-    const d = upsertRecord(pid, editCell.itemId, editCell.date, editVal);
-    save(d); setEditCell(null); setEditVal(""); notify("數據已更新");
+  function commitCellEdit(pid){
+    if(!editCell)return;
+    const d=upsertRecord(pid,editCell.itemId,editCell.date,editVal);
+    saveData(d);setEditCell(null);setEditVal("");notify("數據已更新");
   }
 
-  // ── Topbar ──────────────────────────────────────────────────────────────
-  function Topbar({ back, title, right }) {
-    return (
-      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(246,249,250,.94)", backdropFilter:"blur(14px)", borderBottom:`1px solid ${C.border}`, height:54, padding:"0 16px", display:"flex", alignItems:"center", gap:10 }}>
-        {back ? <button onClick={back} style={{ background:"none", border:"none", color:C.textMuted, fontSize:24, lineHeight:1, padding:"0 6px 0 0", cursor:"pointer" }}>‹</button> : <LogoMark />}
-        <span style={{ flex:1, fontWeight: back?600:700, fontSize: back?16:19, fontFamily: back?"'DM Sans'":"'DM Serif Display'", letterSpacing: back?0:-.3 }}>{title||"TrackIt"}</span>
-        {right}
-      </div>
-    );
+  // ── Modal content ─────────────────────────────────────────────────────
+  function MHead({title}){
+    return <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:22}}>
+      <span style={{fontSize:18,fontWeight:700}}>{title}</span>
+      <button onClick={closeModal} style={{background:C.bgSurface,border:"none",borderRadius:20,width:30,height:30,fontSize:18,color:C.textMuted,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>×</button>
+    </div>;
   }
-
-  // ── Modal content ────────────────────────────────────────────────────────
-  function ModalHeader({ title }) {
-    return (
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:22 }}>
-        <span style={{ fontSize:18, fontWeight:700 }}>{title}</span>
-        <button onClick={closeModal} style={{ background:C.bgSurface, border:"none", borderRadius:20, width:30, height:30, fontSize:18, color:C.textMuted, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>×</button>
-      </div>
-    );
+  function MFoot(){
+    return <div style={{display:"flex",gap:10,marginTop:6}}>
+      <GBtn onClick={closeModal} style={{flex:1}}>取消</GBtn>
+      <PBtn onClick={submitModal} style={{flex:2}}>確認</PBtn>
+    </div>;
   }
-  function MFooter() {
-    return (
-      <div style={{ display:"flex", gap:10, marginTop:6 }}>
-        <GhostBtn onClick={closeModal} style={{ flex:1 }}>取消</GhostBtn>
-        <PrimaryBtn onClick={submitModal} style={{ flex:2 }}>確認</PrimaryBtn>
-      </div>
-    );
-  }
-  function modalContent() {
-    switch (modal) {
-      case "login": return (
-        <>
-          <ModalHeader title="擁有者登入" />
-          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-            <div>
-              <label style={LBL}>密碼</label>
-              <input type="password" placeholder="請輸入密碼" value={pinInput} autoFocus onChange={e => { setPinInput(e.target.value); setPinErr(""); }} onKeyDown={e => e.key==="Enter" && doLogin()} />
-              {pinErr && <p style={{ color:C.danger, fontSize:13, marginTop:5 }}>{pinErr}</p>}
+  function modalContent(){
+    switch(modal){
+      case"login":return<>
+        <MHead title="擁有者登入"/>
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          <div>
+            <label style={LBL}>密碼</label>
+            <input type="password" placeholder="請輸入密碼" value={pinInput} autoFocus onChange={e=>{setPinInput(e.target.value);setPinErr("");}} onKeyDown={e=>e.key==="Enter"&&doLogin()}/>
+            {pinErr&&<p style={{color:C.danger,fontSize:13,marginTop:5}}>{pinErr}</p>}
+          </div>
+          <PBtn full onClick={doLogin}>登入</PBtn>
+        </div>
+      </>;
+      case"newProject":case"editProject":return<>
+        <MHead title={modal==="newProject"?"新增專案":"編輯專案"}/>
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          <div><label style={LBL}>專案名稱 *</label><input autoFocus value={form.name||""} onChange={e=>{setForm(f=>({...f,name:e.target.value}));setFormErr("");}} placeholder="例：2025 社區博覽會"/></div>
+          <div>
+            <label style={LBL}>活動日期 * <span style={{color:C.textMuted,fontWeight:400}}>(YY/MM/DD，範圍如 25/05/01–25/05/05)</span></label>
+            <input value={form.dateRange||""} onChange={e=>{setForm(f=>({...f,dateRange:e.target.value}));setFormErr("");}} placeholder="25/05/01"/>
+          </div>
+          <div><label style={LBL}>說明（選填）</label><input value={form.desc||""} onChange={e=>setForm(f=>({...f,desc:e.target.value}))} placeholder="備註說明"/></div>
+          <div>
+            <label style={LBL}>主題色彩</label>
+            <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+              {PALETTE.map(c=><div key={c} onClick={()=>setForm(f=>({...f,color:c}))} style={{width:34,height:34,borderRadius:10,background:c,cursor:"pointer",outline:form.color===c?`3px solid ${C.text}`:"3px solid transparent",outlineOffset:2}}/>)}
             </div>
-            <PrimaryBtn full onClick={doLogin}>登入</PrimaryBtn>
           </div>
-        </>
-      );
-      case "newProject": case "editProject": return (
-        <>
-          <ModalHeader title={modal==="newProject" ? "新增專案" : "編輯專案"} />
-          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-            <div><label style={LBL}>專案名稱 *</label><input autoFocus value={form.name||""} onChange={e => { setForm(f => ({...f, name:e.target.value})); setFormErr(""); }} placeholder="例：2025 社區博覽會" /></div>
-            <div>
-              <label style={LBL}>活動日期 * <span style={{ color:C.textMuted, fontWeight:400 }}>(YY/MM/DD，範圍如 25/05/01–25/05/05)</span></label>
-              <input value={form.dateRange||""} onChange={e => { setForm(f => ({...f, dateRange:e.target.value})); setFormErr(""); }} placeholder="25/05/01" />
-            </div>
-            <div><label style={LBL}>說明（選填）</label><input value={form.desc||""} onChange={e => setForm(f => ({...f, desc:e.target.value}))} placeholder="備註說明" /></div>
-            <div>
-              <label style={LBL}>主題色彩</label>
-              <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-                {PALETTE.map(c => <div key={c} onClick={() => setForm(f => ({...f, color:c}))} style={{ width:34, height:34, borderRadius:10, background:c, cursor:"pointer", outline: form.color===c ? `3px solid ${C.text}` : "3px solid transparent", outlineOffset:2 }} />)}
-              </div>
-            </div>
-            {formErr && <p style={{ color:C.danger, fontSize:13 }}>{formErr}</p>}
-            <MFooter />
-          </div>
-        </>
-      );
-      case "newItem": case "editItem": return (
-        <>
-          <ModalHeader title={modal==="newItem" ? "新增登記項目" : "編輯項目"} />
-          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-            <div><label style={LBL}>項目名稱 *</label><input autoFocus value={form.name||""} onChange={e => { setForm(f => ({...f, name:e.target.value})); setFormErr(""); }} placeholder="例：參觀人數" onKeyDown={e => e.key==="Enter" && submitModal()} /></div>
-            {formErr && <p style={{ color:C.danger, fontSize:13 }}>{formErr}</p>}
-            <MFooter />
-          </div>
-        </>
-      );
-      case "changePin": return (
-        <>
-          <ModalHeader title="修改登入密碼" />
-          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-            <div><label style={LBL}>目前密碼</label><input type="password" autoFocus placeholder="請輸入目前密碼" value={form.currentPin||""} onChange={e => { setForm(f => ({...f, currentPin:e.target.value})); setFormErr(""); }} /></div>
-            <div style={{ height:1, background:C.border }} />
-            <div><label style={LBL}>新密碼（至少 4 碼）</label><input type="password" placeholder="請輸入新密碼" value={form.newPin||""} onChange={e => { setForm(f => ({...f, newPin:e.target.value})); setFormErr(""); }} /></div>
-            <div><label style={LBL}>確認新密碼</label><input type="password" placeholder="再次輸入新密碼" value={form.confirm||""} onChange={e => { setForm(f => ({...f, confirm:e.target.value})); setFormErr(""); }} /></div>
-            {formErr && <p style={{ color:C.danger, fontSize:13 }}>{formErr}</p>}
-            <MFooter />
-          </div>
-        </>
-      );
-      default: return null;
+          {formErr&&<p style={{color:C.danger,fontSize:13}}>{formErr}</p>}
+          <MFoot/>
+        </div>
+      </>;
+      case"newItem":case"editItem":return<>
+        <MHead title={modal==="newItem"?"新增登記項目":"編輯項目"}/>
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          <div><label style={LBL}>項目名稱 *</label><input autoFocus value={form.name||""} onChange={e=>{setForm(f=>({...f,name:e.target.value}));setFormErr("");}} placeholder="例：參觀人數" onKeyDown={e=>e.key==="Enter"&&submitModal()}/></div>
+          {formErr&&<p style={{color:C.danger,fontSize:13}}>{formErr}</p>}
+          <MFoot/>
+        </div>
+      </>;
+      case"changePin":return<>
+        <MHead title="修改登入密碼"/>
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          <div><label style={LBL}>目前密碼</label><input type="password" autoFocus placeholder="請輸入目前密碼" value={form.currentPin||""} onChange={e=>{setForm(f=>({...f,currentPin:e.target.value}));setFormErr("");}}/></div>
+          <div style={{height:1,background:C.border}}/>
+          <div><label style={LBL}>新密碼（至少 4 碼）</label><input type="password" placeholder="請輸入新密碼" value={form.newPin||""} onChange={e=>{setForm(f=>({...f,newPin:e.target.value}));setFormErr("");}}/></div>
+          <div><label style={LBL}>確認新密碼</label><input type="password" placeholder="再次輸入新密碼" value={form.confirm||""} onChange={e=>{setForm(f=>({...f,confirm:e.target.value}));setFormErr("");}}/></div>
+          {formErr&&<p style={{color:C.danger,fontSize:13}}>{formErr}</p>}
+          <MFoot/>
+        </div>
+      </>;
+      default:return null;
     }
   }
 
-  // ── Viewer: Project List ─────────────────────────────────────────────────
-  function ViewerProjectList() {
-    return (
-      <div style={{ minHeight:"100vh" }}>
-        <Topbar right={
-          <button onClick={() => { setModal("login"); setPinInput(""); setPinErr(""); }}
-            style={{ background:C.accentLight, border:"none", borderRadius:20, padding:"6px 14px", fontSize:13, color:C.accent, fontWeight:600, cursor:"pointer" }}>
-            登入管理
-          </button>
-        } />
-        <div style={{ padding:"28px 16px 48px", maxWidth:500, margin:"0 auto" }}>
-          <h1 style={{ fontFamily:"'DM Serif Display'", fontSize:28, fontWeight:400, letterSpacing:-.4, marginBottom:6 }}>選擇活動</h1>
-          <p style={{ color:C.textMuted, fontSize:14, marginBottom:24 }}>點選活動以登記人次</p>
-          {(() => {
-            const visible = data.projects.filter(p => p.published);
-            return visible.length === 0
-              ? <Card style={{ textAlign:"center", padding:"48px 20px" }}><p style={{ fontSize:38, marginBottom:10 }}>📋</p><p style={{ color:C.textMuted }}>目前沒有開放中的活動</p></Card>
-              : <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                  {visible.map(p => (
-                    <button key={p.id} onClick={() => { setActiveProjId(p.id); setScreen("entry"); }}
-                      style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:18, padding:"18px 20px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:14, width:"100%", transition:"box-shadow .18s, border-color .18s" }}
-                      onMouseEnter={e => { e.currentTarget.style.boxShadow=`0 4px 20px rgba(155,142,199,.16)`; e.currentTarget.style.borderColor=p.color; }}
-                      onMouseLeave={e => { e.currentTarget.style.boxShadow="none"; e.currentTarget.style.borderColor=C.border; }}>
-                      <div style={{ width:12, height:12, borderRadius:3, background:p.color, flexShrink:0 }} />
-                      <div style={{ flex:1, minWidth:0 }}>
-                        <p style={{ fontWeight:700, fontSize:16, marginBottom:2 }}>{p.name}</p>
-                        {p.dateRange && <p style={{ fontSize:12, color:C.textMuted }}>{p.dateRange}</p>}
-                        <p style={{ fontSize:12, color:C.textMuted, marginTop:2 }}>{p.items.length} 個項目</p>
-                      </div>
-                      <span style={{ fontSize:18, color:C.borderMid, flexShrink:0 }}>›</span>
-                    </button>
-                  ))}
-                </div>;
-          })()}
-        </div>
+  // ── Viewer: Project List ───────────────────────────────────────────────
+  function ViewerList(){
+    const visible=data.projects.filter(p=>p.published);
+    return <div style={{minHeight:"100vh"}}>
+      <Topbar right={
+        <button onClick={()=>{setModal("login");setPinInput("");setPinErr("");}} style={{background:C.accentLight,border:"none",borderRadius:20,padding:"6px 14px",fontSize:13,color:C.accent,fontWeight:600,cursor:"pointer"}}>登入管理</button>
+      }/>
+      <div style={{padding:"28px 16px 48px",maxWidth:500,margin:"0 auto"}}>
+        <h1 style={{fontFamily:"'DM Serif Display'",fontSize:28,fontWeight:400,letterSpacing:-.4,marginBottom:6}}>選擇活動</h1>
+        <p style={{color:C.textMuted,fontSize:14,marginBottom:24}}>點選活動以登記人次</p>
+        {visible.length===0
+          ?<Card style={{textAlign:"center",padding:"48px 20px"}}><p style={{fontSize:38,marginBottom:10}}>📋</p><p style={{color:C.textMuted}}>目前沒有開放中的活動</p></Card>
+          :<div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {visible.map(p=><button key={p.id} onClick={()=>{setActiveProjId(p.id);setScreen("entry");}}
+              style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:18,padding:"18px 20px",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,width:"100%",transition:"box-shadow .18s,border-color .18s"}}
+              onMouseEnter={e=>{e.currentTarget.style.boxShadow=`0 4px 20px rgba(155,142,199,.16)`;e.currentTarget.style.borderColor=p.color;}}
+              onMouseLeave={e=>{e.currentTarget.style.boxShadow="none";e.currentTarget.style.borderColor=C.border;}}>
+              <div style={{width:12,height:12,borderRadius:3,background:p.color,flexShrink:0}}/>
+              <div style={{flex:1,minWidth:0}}>
+                <p style={{fontWeight:700,fontSize:16,marginBottom:2}}>{p.name}</p>
+                {p.dateRange&&<p style={{fontSize:12,color:C.textMuted}}>{p.dateRange}</p>}
+                <p style={{fontSize:12,color:C.textMuted,marginTop:2}}>{p.items.length} 個項目</p>
+              </div>
+              <span style={{fontSize:18,color:C.borderMid,flexShrink:0}}>›</span>
+            </button>)}
+          </div>}
       </div>
-    );
+    </div>;
   }
 
-  // ── Viewer: Entry ────────────────────────────────────────────────────────
-  function ViewerEntry() {
-    const p = getProj(activeProjId);
-    const [selDate, setSelDate] = useState(todayStr);
-    const [localVals, setLocalVals] = useState({});
-    const [submitted, setSubmitted] = useState(false);
-    if (!p) return null;
-    const anyFilled = p.items.some(i => localVals[i.id] !== undefined && localVals[i.id] !== "");
-    const dayTotal = p.items.reduce((s, i) => { const v = localVals[i.id] !== undefined ? parseInt(localVals[i.id],10) : (getRecord(p.id,i.id,selDate)?.value??0); return s+(isNaN(v)?0:v); }, 0);
-    function changeDate(d) { setSelDate(d); setLocalVals({}); setSubmitted(false); }
-    function handleSubmit() {
-      const entries = p.items.filter(i => localVals[i.id]!==undefined && localVals[i.id]!=="").map(i => ({ iid:i.id, val:localVals[i.id] }));
-      if (!entries.length) return;
-      batchUpsert(p.id, entries, selDate);
-      setSubmitted(true); notify("回報成功！數據已送出 ✓");
+  // ── Viewer: Entry ──────────────────────────────────────────────────────
+  function ViewerEntry(){
+    const p=getProj(activeProjId);
+    const[selDate,setSelDate]=useState(todayStr);
+    const[localVals,setLocalVals]=useState({});
+    const[submitted,setSubmitted]=useState(false);
+    if(!p)return null;
+    const anyFilled=p.items.some(i=>localVals[i.id]!==undefined&&localVals[i.id]!=="");
+    const dayTotal=p.items.reduce((s,i)=>{const v=localVals[i.id]!==undefined?parseInt(localVals[i.id],10):(getRecord(p.id,i.id,selDate)?.value??0);return s+(isNaN(v)?0:v);},0);
+    function changeDate(d){setSelDate(d);setLocalVals({});setSubmitted(false);}
+    function handleSubmit(){
+      const entries=p.items.filter(i=>localVals[i.id]!==undefined&&localVals[i.id]!=="").map(i=>({iid:i.id,val:localVals[i.id]}));
+      if(!entries.length)return;
+      batchUpsert(p.id,entries,selDate);
+      setSubmitted(true);notify("回報成功！數據已送出 ✓");
     }
-    return (
-      <div style={{ minHeight:"100vh" }}>
-        <Topbar back={() => { setScreen("projects"); setActiveProjId(null); }} title={p.name} />
-        <div style={{ padding:"20px 16px 60px", maxWidth:500, margin:"0 auto" }}>
-          <Card style={{ marginBottom:14, display:"flex", alignItems:"center", gap:14 }}>
-            <div style={{ flex:1 }}>
-              <label style={{ ...LBL, marginBottom:4 }}>登記日期</label>
-              <input type="date" value={selDate} onChange={e => changeDate(e.target.value)}
-                style={{ border:"none", padding:0, fontSize:15, fontWeight:700, width:"auto", background:"none", outline:"none", boxShadow:"none" }} />
-            </div>
-            <div style={{ textAlign:"right", flexShrink:0 }}>
-              <p style={{ fontSize:11, color:C.textMuted, marginBottom:2 }}>本日小計</p>
-              <p style={{ fontSize:26, fontWeight:800, color:p.color, lineHeight:1 }}>{dayTotal.toLocaleString()}</p>
-            </div>
-          </Card>
-
-          {submitted && (
-            <div style={{ background:C.successBg, border:"1px solid #b2d8b2", borderRadius:14, padding:"14px 18px", marginBottom:14, display:"flex", alignItems:"center", justifyContent:"space-between", animation:"fadeIn .3s ease" }}>
-              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                <span style={{ fontSize:20 }}>✅</span>
-                <div>
-                  <p style={{ fontWeight:700, color:C.success, fontSize:14 }}>數據已成功送出</p>
-                  <p style={{ fontSize:12, color:C.success, opacity:.8 }}>感謝你的回報！</p>
-                </div>
-              </div>
-              <button onClick={() => { setLocalVals({}); setSubmitted(false); }} style={{ background:C.success, color:"#fff", border:"none", borderRadius:10, padding:"7px 14px", fontSize:13, fontWeight:600, cursor:"pointer" }}>再填一次</button>
-            </div>
-          )}
-
-          {p.items.length === 0
-            ? <Card style={{ textAlign:"center", padding:"40px 20px", color:C.textMuted }}><p>此活動尚無登記項目</p></Card>
-            : <>
-                <div style={{ display:"flex", flexDirection:"column", gap:10, marginBottom:16 }}>
-                  {p.items.map((item, idx) => {
-                    const existing = getRecord(p.id, item.id, selDate);
-                    return (
-                      <Card key={item.id} style={{ display:"flex", alignItems:"center", gap:14, padding:"16px 18px", opacity:submitted?.65:1 }}>
-                        <div style={{ width:9, height:9, borderRadius:3, background:p.color, flexShrink:0 }} />
-                        <div style={{ flex:1 }}>
-                          <p style={{ fontWeight:600, fontSize:16 }}>{item.name}</p>
-                          {existing && !submitted && <p style={{ fontSize:11, color:C.textMuted, marginTop:2 }}>已有記錄：{existing.value.toLocaleString()}（可覆蓋）</p>}
-                        </div>
-                        <input type="number" min="0" inputMode="numeric"
-                          placeholder={existing ? String(existing.value) : "0"}
-                          value={localVals[item.id]??""}
-                          disabled={submitted}
-                          autoFocus={idx===0}
-                          onChange={e => setLocalVals(v => ({...v, [item.id]:e.target.value}))}
-                          style={{ width:100, textAlign:"right", fontSize:24, fontWeight:800, color:p.color, border:"none", borderBottom:`2.5px solid ${p.color}55`, borderRadius:0, padding:"6px 4px", background:"none", boxShadow:"none" }} />
-                      </Card>
-                    );
-                  })}
-                </div>
-                {!submitted && <>
-                  <PrimaryBtn full onClick={handleSubmit} disabled={!anyFilled} color={p.color} style={{ fontSize:16, padding:"15px", borderRadius:16 }}>送出回報</PrimaryBtn>
-                  {!anyFilled && <p style={{ textAlign:"center", fontSize:12, color:C.textMuted, marginTop:8 }}>請至少填入一項數值後送出</p>}
-                </>}
-              </>}
-        </div>
-      </div>
-    );
-  }
-
-  // ── Owner: Project List ──────────────────────────────────────────────────
-  function OwnerProjectList() {
-    return (
-      <div style={{ minHeight:"100vh" }}>
-        <Topbar right={
-          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-            <span style={{ fontSize:12, fontWeight:600, padding:"3px 10px", borderRadius:20, background:C.accentLight, color:C.accent }}>擁有者</span>
-            <GhostBtn onClick={() => { setModal("changePin"); setForm({}); setFormErr(""); }} style={{ padding:"5px 12px", fontSize:13 }}>密碼設定</GhostBtn>
-            <GhostBtn onClick={doLogout} style={{ padding:"5px 12px", fontSize:13 }}>登出</GhostBtn>
+    return <div style={{minHeight:"100vh"}}>
+      <Topbar back={()=>{setScreen("projects");setActiveProjId(null);}} title={p.name}/>
+      <div style={{padding:"20px 16px 60px",maxWidth:500,margin:"0 auto"}}>
+        <Card style={{marginBottom:14,display:"flex",alignItems:"center",gap:14}}>
+          <div style={{flex:1}}>
+            <label style={{...LBL,marginBottom:4}}>登記日期</label>
+            <input type="date" value={selDate} onChange={e=>changeDate(e.target.value)} style={{border:"none",padding:0,fontSize:15,fontWeight:700,width:"auto",background:"none",outline:"none",boxShadow:"none"}}/>
           </div>
-        } />
-        <div style={{ maxWidth:800, margin:"0 auto", padding:"32px 24px" }}>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:28 }}>
-            <div>
-              <h1 style={{ fontFamily:"'DM Serif Display'", fontSize:30, fontWeight:400, letterSpacing:-.5, marginBottom:4 }}>活動專案</h1>
-              <p style={{ color:C.textMuted, fontSize:14 }}>{data.projects.length} 個專案</p>
-            </div>
-            <PrimaryBtn onClick={() => { setModal("newProject"); setForm({ color:C.accent }); setFormErr(""); }}>＋ 新增專案</PrimaryBtn>
+          <div style={{textAlign:"right",flexShrink:0}}>
+            <p style={{fontSize:11,color:C.textMuted,marginBottom:2}}>本日小計</p>
+            <p style={{fontSize:26,fontWeight:800,color:p.color,lineHeight:1}}>{dayTotal.toLocaleString()}</p>
           </div>
-          {data.projects.length === 0
-            ? <Card style={{ textAlign:"center", padding:"60px 20px" }}>
-                <p style={{ fontSize:42, marginBottom:12 }}>📋</p>
-                <p style={{ color:C.textMuted, marginBottom:20 }}>尚無活動專案</p>
-                <PrimaryBtn onClick={() => { setModal("newProject"); setForm({ color:C.accent }); setFormErr(""); }}>建立第一個專案</PrimaryBtn>
-              </Card>
-            : <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-                <p style={{ fontSize:12, color:C.textMuted, marginBottom:4 }}>拖移可調整順序</p>
-                {data.projects.map(p => (
-                  <div key={p.id} draggable
-                    onDragStart={() => setDragId(p.id)}
-                    onDragEnd={() => { setDragId(null); setDragOver(null); }}
-                    onDragOver={e => { e.preventDefault(); setDragOver(p.id); }}
-                    onDrop={() => { reorderProjects(dragId, p.id); setDragId(null); setDragOver(null); }}
-                    style={{ background:C.bgCard, border:`1.5px solid ${dragOver===p.id?C.accent:C.border}`, borderRadius:16, padding:"16px 18px", display:"flex", alignItems:"center", gap:14, opacity:dragId===p.id?.45:1, transition:"border-color .15s,opacity .15s,box-shadow .15s", boxShadow:dragOver===p.id?`0 0 0 3px ${C.accentLight}`:"none", cursor:"grab" }}>
-                    <div style={{ display:"flex", flexDirection:"column", gap:2.5, flexShrink:0, paddingRight:2, opacity:.5 }}>
-                      {[0,1,2].map(i => <div key={i} style={{ width:12, height:1.5, borderRadius:1, background:C.textMuted }} />)}
-                    </div>
-                    <div style={{ width:12, height:12, borderRadius:3, background:p.color, flexShrink:0 }} />
-                    <div style={{ flex:1, minWidth:0, cursor:"pointer" }} onClick={() => { setActiveProjId(p.id); setOwnerTab("data"); setScreen("ownerProj"); }}>
-                      <p style={{ fontWeight:700, fontSize:15, marginBottom:1 }}>{p.name}</p>
-                      {p.dateRange && <p style={{ fontSize:12, color:C.textMuted }}>{p.dateRange}</p>}
-                    </div>
-                    <span style={{ fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:20, flexShrink:0, background:p.published?"#E6F4EC":C.bgSurface, color:p.published?"#2E7D4F":C.textMuted, border:`1px solid ${p.published?"#B6DECA":C.border}` }}>
-                      {p.published ? "● 上架中" : "○ 已下架"}
-                    </span>
-                    <span style={{ fontSize:12, color:C.textMuted, flexShrink:0 }}>{p.items.length} 項</span>
-                    <span style={{ fontSize:18, color:C.borderMid, flexShrink:0, cursor:"pointer" }} onClick={() => { setActiveProjId(p.id); setOwnerTab("data"); setScreen("ownerProj"); }}>›</span>
+        </Card>
+        {submitted&&<div style={{background:C.successBg,border:"1px solid #b2d8b2",borderRadius:14,padding:"14px 18px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",animation:"fadeIn .3s ease"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:20}}>✅</span>
+            <div><p style={{fontWeight:700,color:C.success,fontSize:14}}>數據已成功送出</p><p style={{fontSize:12,color:C.success,opacity:.8}}>感謝你的回報！</p></div>
+          </div>
+          <button onClick={()=>{setLocalVals({});setSubmitted(false);}} style={{background:C.success,color:"#fff",border:"none",borderRadius:10,padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer"}}>再填一次</button>
+        </div>}
+        {p.items.length===0
+          ?<Card style={{textAlign:"center",padding:"40px 20px",color:C.textMuted}}><p>此活動尚無登記項目</p></Card>
+          :<>
+            <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
+              {p.items.map((item,idx)=>{
+                const existing=getRecord(p.id,item.id,selDate);
+                return <Card key={item.id} style={{display:"flex",alignItems:"center",gap:14,padding:"16px 18px",opacity:submitted?.65:1}}>
+                  <div style={{width:9,height:9,borderRadius:3,background:p.color,flexShrink:0}}/>
+                  <div style={{flex:1}}>
+                    <p style={{fontWeight:600,fontSize:16}}>{item.name}</p>
+                    {existing&&!submitted&&<p style={{fontSize:11,color:C.textMuted,marginTop:2}}>已有記錄：{existing.value.toLocaleString()}（可覆蓋）</p>}
                   </div>
-                ))}
-              </div>}
-        </div>
+                  <input type="number" min="0" inputMode="numeric" placeholder={existing?String(existing.value):"0"} value={localVals[item.id]??""} disabled={submitted} autoFocus={idx===0} onChange={e=>setLocalVals(v=>({...v,[item.id]:e.target.value}))} style={{width:100,textAlign:"right",fontSize:24,fontWeight:800,color:p.color,border:"none",borderBottom:`2.5px solid ${p.color}55`,borderRadius:0,padding:"6px 4px",background:"none",boxShadow:"none"}}/>
+                </Card>;
+              })}
+            </div>
+            {!submitted&&<>
+              <PBtn full onClick={handleSubmit} disabled={!anyFilled} color={p.color} style={{fontSize:16,padding:"15px",borderRadius:16}}>送出回報</PBtn>
+              {!anyFilled&&<p style={{textAlign:"center",fontSize:12,color:C.textMuted,marginTop:8}}>請至少填入一項數值後送出</p>}
+            </>}
+          </>}
       </div>
-    );
+    </div>;
   }
 
-  // ── Owner: Project Detail ────────────────────────────────────────────────
-  function OwnerProjScreen() {
-    const p = getProj(activeProjId);
-    if (!p) return null;
-    const dates = allDates(activeProjId);
-    const [dateSearch, setDateSearch] = useState("");
-    const [dateSearchOpen, setDateSearchOpen] = useState(false);
-    function val(iid, date) { const r = data.records.find(r => r.projectId===activeProjId && r.itemId===iid && r.date===date); return r?r.value:null; }
-    function dateSum(date) { return p.items.reduce((s,i) => { const v=val(i.id,date); return s+(v??0); }, 0); }
-    function itemSum(iid) { return dates.reduce((s,d) => { const v=val(iid,d); return s+(v??0); }, 0); }
-    const grand = p.items.reduce((s,i) => s+itemSum(i.id), 0);
-    const TH = { padding:"11px 14px", textAlign:"right", fontWeight:600, color:C.textMid, fontSize:13, whiteSpace:"nowrap", background:C.bgSurface, borderBottom:`1px solid ${C.border}` };
-    const TD = { padding:"10px 14px", textAlign:"right", fontSize:13, borderTop:`1px solid ${C.bgSurface}` };
+  // ── Owner: Project List ────────────────────────────────────────────────
+  function OwnerList(){
+    return <div style={{minHeight:"100vh"}}>
+      <Topbar right={
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <span style={{fontSize:12,fontWeight:600,padding:"3px 10px",borderRadius:20,background:C.accentLight,color:C.accent}}>擁有者</span>
+          <GBtn onClick={()=>{setModal("changePin");setForm({});setFormErr("");}} style={{padding:"5px 12px",fontSize:13}}>密碼設定</GBtn>
+          <GBtn onClick={doLogout} style={{padding:"5px 12px",fontSize:13}}>登出</GBtn>
+        </div>
+      }/>
+      <div style={{maxWidth:800,margin:"0 auto",padding:"32px 24px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:28}}>
+          <div>
+            <h1 style={{fontFamily:"'DM Serif Display'",fontSize:30,fontWeight:400,letterSpacing:-.5,marginBottom:4}}>活動專案</h1>
+            <p style={{color:C.textMuted,fontSize:14}}>{data.projects.length} 個專案</p>
+          </div>
+          <PBtn onClick={()=>{setModal("newProject");setForm({color:C.accent});setFormErr("");}}>＋ 新增專案</PBtn>
+        </div>
+        {data.projects.length===0
+          ?<Card style={{textAlign:"center",padding:"60px 20px"}}>
+              <p style={{fontSize:42,marginBottom:12}}>📋</p>
+              <p style={{color:C.textMuted,marginBottom:20}}>尚無活動專案</p>
+              <PBtn onClick={()=>{setModal("newProject");setForm({color:C.accent});setFormErr("");}}>建立第一個專案</PBtn>
+            </Card>
+          :<div style={{display:"flex",flexDirection:"column",gap:8}}>
+              <p style={{fontSize:12,color:C.textMuted,marginBottom:4}}>拖移可調整順序</p>
+              {data.projects.map(p=><div key={p.id} draggable
+                onDragStart={()=>setDragId(p.id)}
+                onDragEnd={()=>{setDragId(null);setDragOver(null);}}
+                onDragOver={e=>{e.preventDefault();setDragOver(p.id);}}
+                onDrop={()=>{reorderProjects(dragId,p.id);setDragId(null);setDragOver(null);}}
+                style={{background:C.bgCard,border:`1.5px solid ${dragOver===p.id?C.accent:C.border}`,borderRadius:16,padding:"16px 18px",display:"flex",alignItems:"center",gap:14,opacity:dragId===p.id?.45:1,transition:"border-color .15s,opacity .15s",boxShadow:dragOver===p.id?`0 0 0 3px ${C.accentLight}`:"none",cursor:"grab"}}>
+                <div style={{display:"flex",flexDirection:"column",gap:2.5,flexShrink:0,paddingRight:2,opacity:.5}}>
+                  {[0,1,2].map(i=><div key={i} style={{width:12,height:1.5,borderRadius:1,background:C.textMuted}}/>)}
+                </div>
+                <div style={{width:12,height:12,borderRadius:3,background:p.color,flexShrink:0}}/>
+                <div style={{flex:1,minWidth:0,cursor:"pointer"}} onClick={()=>{setActiveProjId(p.id);setOwnerTab("data");setScreen("ownerProj");}}>
+                  <p style={{fontWeight:700,fontSize:15,marginBottom:1}}>{p.name}</p>
+                  {p.dateRange&&<p style={{fontSize:12,color:C.textMuted}}>{p.dateRange}</p>}
+                </div>
+                <span style={{fontSize:11,fontWeight:700,padding:"3px 10px",borderRadius:20,flexShrink:0,background:p.published?"#E6F4EC":C.bgSurface,color:p.published?"#2E7D4F":C.textMuted,border:`1px solid ${p.published?"#B6DECA":C.border}`}}>
+                  {p.published?"● 上架中":"○ 已下架"}
+                </span>
+                <span style={{fontSize:12,color:C.textMuted,flexShrink:0}}>{p.items.length} 項</span>
+                <span style={{fontSize:18,color:C.borderMid,flexShrink:0,cursor:"pointer"}} onClick={()=>{setActiveProjId(p.id);setOwnerTab("data");setScreen("ownerProj");}}>›</span>
+              </div>)}
+            </div>}
+      </div>
+    </div>;
+  }
 
-    function CellContent({ iid, date }) {
-      const v = val(iid, date);
-      const isEditing = editCell?.itemId===iid && editCell?.date===date;
-      if (isEditing) return (
-        <input type="number" min="0" value={editVal} autoFocus onChange={e => setEditVal(e.target.value)}
-          onBlur={() => commitCellEdit(p.id)}
-          onKeyDown={e => { if(e.key==="Enter") commitCellEdit(p.id); if(e.key==="Escape"){setEditCell(null);setEditVal("");} }}
-          style={{ width:80, textAlign:"right", fontSize:13, fontWeight:700, color:p.color, border:`1.5px solid ${p.color}`, borderRadius:6, padding:"3px 6px", background:C.accentLight }} />
-      );
-      return (
-        <span onClick={() => { setEditCell({itemId:iid,date}); setEditVal(v!=null?String(v):""); }} title="點擊編輯"
-          style={{ color:v!=null?C.text:C.border, cursor:"pointer", padding:"3px 6px", borderRadius:6, display:"inline-block" }}
-          onMouseEnter={e => e.currentTarget.style.background=C.accentLight}
-          onMouseLeave={e => e.currentTarget.style.background="transparent"}>
-          {v!=null?v.toLocaleString():"—"}
-        </span>
-      );
+  // ── Owner: Project Detail ──────────────────────────────────────────────
+  function OwnerProj(){
+    const p=getProj(activeProjId);
+    if(!p)return null;
+    const dates=allDates(activeProjId);
+    function val(iid,date){const r=data.records.find(r=>r.projectId===activeProjId&&r.itemId===iid&&r.date===date);return r?r.value:null;}
+    function dateSum(date){return p.items.reduce((s,i)=>{const v=val(i.id,date);return s+(v??0);},0);}
+    function itemSum(iid){return dates.reduce((s,d)=>{const v=val(iid,d);return s+(v??0);},0);}
+    const grand=p.items.reduce((s,i)=>s+itemSum(i.id),0);
+    const TH={padding:"11px 14px",textAlign:"right",fontWeight:600,color:C.textMid,fontSize:13,whiteSpace:"nowrap",background:C.bgSurface,borderBottom:`1px solid ${C.border}`};
+    const TD={padding:"10px 14px",textAlign:"right",fontSize:13,borderTop:`1px solid ${C.bgSurface}`};
+    function Cell({iid,date}){
+      const v=val(iid,date);
+      const isE=editCell?.itemId===iid&&editCell?.date===date;
+      if(isE)return<input type="number" min="0" value={editVal} autoFocus onChange={e=>setEditVal(e.target.value)} onBlur={()=>commitCellEdit(p.id)} onKeyDown={e=>{if(e.key==="Enter")commitCellEdit(p.id);if(e.key==="Escape"){setEditCell(null);setEditVal("");}}} style={{width:80,textAlign:"right",fontSize:13,fontWeight:700,color:p.color,border:`1.5px solid ${p.color}`,borderRadius:6,padding:"3px 6px",background:C.accentLight}}/>;
+      return<span onClick={()=>{setEditCell({itemId:iid,date});setEditVal(v!=null?String(v):"");}} title="點擊編輯" style={{color:v!=null?C.text:C.border,cursor:"pointer",padding:"3px 6px",borderRadius:6,display:"inline-block"}} onMouseEnter={e=>e.currentTarget.style.background=C.accentLight} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>{v!=null?v.toLocaleString():"—"}</span>;
     }
-
-    return (
-      <div style={{ minHeight:"100vh" }}>
-        <Topbar back={() => setScreen("projects")} title={p.name} right={
-          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-            <span style={{ fontSize:12, fontWeight:600, padding:"3px 10px", borderRadius:20, background:C.accentLight, color:C.accent }}>擁有者</span>
-            <span style={{ fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:20, background:p.published?"#E6F4EC":C.bgSurface, color:p.published?"#2E7D4F":C.textMuted, border:`1px solid ${p.published?"#B6DECA":C.border}` }}>
-              {p.published?"● 上架中":"○ 已下架"}
-            </span>
-            <GhostBtn onClick={doLogout} style={{ padding:"5px 12px", fontSize:13 }}>登出</GhostBtn>
-          </div>
-        } />
-        <div style={{ background:C.bgCard, borderBottom:`1px solid ${C.border}`, display:"flex", padding:"0 24px" }}>
-          {[["data","📊 數據"],["manage","⚙️ 管理項目"]].map(([v,label]) => (
-            <button key={v} onClick={() => setOwnerTab(v)}
-              style={{ padding:"13px 20px", border:"none", background:"transparent", fontWeight:ownerTab===v?700:500, fontSize:14, color:ownerTab===v?p.color:C.textMuted, borderBottom:ownerTab===v?`2.5px solid ${p.color}`:"2.5px solid transparent", borderRadius:0, transition:"color .15s" }}>
-              {label}
-            </button>
-          ))}
+    const fd=dateSearch?dates.filter(d=>d===toISO(dateSearch)):dates;
+    const fg=p.items.reduce((s,i)=>s+fd.reduce((ss,d)=>{const v=val(i.id,d);return ss+(v??0);},0),0);
+    return <div style={{minHeight:"100vh"}}>
+      <Topbar back={()=>setScreen("projects")} title={p.name} right={
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <span style={{fontSize:12,fontWeight:600,padding:"3px 10px",borderRadius:20,background:C.accentLight,color:C.accent}}>擁有者</span>
+          <span style={{fontSize:11,fontWeight:700,padding:"3px 10px",borderRadius:20,background:p.published?"#E6F4EC":C.bgSurface,color:p.published?"#2E7D4F":C.textMuted,border:`1px solid ${p.published?"#B6DECA":C.border}`}}>{p.published?"● 上架中":"○ 已下架"}</span>
+          <GBtn onClick={doLogout} style={{padding:"5px 12px",fontSize:13}}>登出</GBtn>
         </div>
-
-        <div style={{ maxWidth:960, margin:"0 auto", padding:"28px 24px 48px" }}>
-          {ownerTab === "data" && (
-            <>
-              {p.items.length > 0 && (
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(160px, 1fr))", gap:10, marginBottom:20 }}>
-                  {p.items.map(item => (
-                    <Card key={item.id} style={{ padding:"14px 16px" }}>
-                      <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:8 }}>
-                        <div style={{ width:8, height:8, borderRadius:2, background:p.color, flexShrink:0 }} />
-                        <p style={{ fontSize:13, fontWeight:600, color:C.textMid, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{item.name}</p>
-                      </div>
-                      <p style={{ fontSize:28, fontWeight:800, color:p.color, lineHeight:1 }}>{itemSum(item.id).toLocaleString()}</p>
-                    </Card>
-                  ))}
-                </div>
-              )}
-
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dateSearchOpen?0:10, flexWrap:"wrap", gap:10 }}>
-                <div style={{ display:"flex", background:C.bgSurface, borderRadius:12, padding:3 }}>
-                  {[["date","按日期"],["item","按項目"]].map(([v,label]) => (
-                    <button key={v} onClick={() => setDashView(v)}
-                      style={{ padding:"7px 18px", borderRadius:10, border:"none", fontWeight:dashView===v?700:500, fontSize:13, background:dashView===v?C.bgCard:"transparent", color:dashView===v?C.text:C.textMuted, boxShadow:dashView===v?"0 1px 6px rgba(0,0,0,.07)":"none", transition:"all .15s" }}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-                  <button onClick={() => { setDateSearchOpen(o => !o); if(dateSearchOpen) setDateSearch(""); }} title="搜尋日期"
-                    style={{ width:36, height:36, borderRadius:10, border:`1.5px solid ${dateSearchOpen||dateSearch?C.accent:C.border}`, background:dateSearchOpen||dateSearch?C.accentLight:"transparent", color:dateSearchOpen||dateSearch?C.accent:C.textMuted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, cursor:"pointer", flexShrink:0, transition:"all .15s" }}>
-                    🔍
-                  </button>
-                  <button onClick={() => exportCSV(p, data.records)}
-                    style={{ background:C.accent, color:"#fff", fontWeight:700, fontSize:13, padding:"8px 18px", borderRadius:12, display:"flex", alignItems:"center", gap:6 }}>
-                    ⬇ 下載 CSV
-                  </button>
-                </div>
-              </div>
-
-              {dateSearchOpen && (
-                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12, padding:"12px 16px", background:C.accentLight, borderRadius:12, border:`1px solid ${C.border}`, animation:"fadeIn .15s ease" }}>
-                  <span style={{ fontSize:14, color:C.accent, flexShrink:0 }}>🔍</span>
-                  <input type="text" value={dateSearch} autoFocus placeholder="YY/MM/DD" onChange={e => setDateSearch(e.target.value)} style={{ flex:1, maxWidth:160, fontSize:14, fontWeight:600, padding:"7px 12px" }} />
-                  {dateSearch && <button onClick={() => setDateSearch("")} style={{ background:"transparent", border:"none", color:C.accent, fontSize:13, fontWeight:600, cursor:"pointer", padding:"4px 8px", borderRadius:8 }}>清除</button>}
-                  {dateSearch && <span style={{ fontSize:12, color:C.textMuted, flexShrink:0 }}>{dates.filter(d => d===toISO(dateSearch)).length>0?`找到 ${dateSearch}`:`無此日期資料`}</span>}
-                </div>
-              )}
-
-              <p style={{ fontSize:12, color:C.textMuted, marginBottom:10 }}>點擊數字可直接編輯修正</p>
-
-              {(() => {
-                const fd = dateSearch ? dates.filter(d => d===toISO(dateSearch)) : dates;
-                const fg = p.items.reduce((s,i) => s + fd.reduce((ss,d) => { const v=val(i.id,d); return ss+(v??0); },0), 0);
-                return (
-                  <div style={{ overflowX:"auto", borderRadius:18, border:`1px solid ${C.border}`, background:C.bgCard }}>
-                    {dateSearch && fd.length===0 && <div style={{ padding:32, textAlign:"center" }}><p style={{ fontSize:32, marginBottom:8 }}>🔍</p><p style={{ color:C.textMuted, fontSize:14 }}>找不到 {dateSearch} 的記錄</p></div>}
-                    {fd.length>0 && dashView==="date" && (
-                      <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
-                        <thead><tr>
-                          <th style={{...TH, textAlign:"left"}}>日期</th>
-                          {p.items.map(i => <th key={i.id} style={TH}>{i.name}</th>)}
-                          <th style={{...TH, color:p.color}}>合計</th>
-                        </tr></thead>
-                        <tbody>
-                          {fd.map(d => (
-                            <tr key={d}>
-                              <td style={{...TD, textAlign:"left", fontWeight:600}}>{toDisplay(d)}</td>
-                              {p.items.map(i => <td key={i.id} style={TD}><CellContent iid={i.id} date={d} /></td>)}
-                              <td style={{...TD, fontWeight:800, color:p.color}}>{dateSum(d).toLocaleString()}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                        <tfoot><tr style={{ borderTop:`2px solid ${C.border}`, background:C.bgSurface }}>
-                          <td style={{ padding:"11px 14px", fontWeight:800, fontSize:13 }}>總計</td>
-                          {p.items.map(i => <td key={i.id} style={{...TD, borderTop:`2px solid ${C.border}`, fontWeight:700}}>{fd.reduce((s,d)=>{const v=val(i.id,d);return s+(v??0);},0).toLocaleString()}</td>)}
-                          <td style={{...TD, borderTop:`2px solid ${C.border}`, fontWeight:800, color:p.color}}>{fg.toLocaleString()}</td>
-                        </tr></tfoot>
-                      </table>
-                    )}
-                    {fd.length>0 && dashView==="item" && (
-                      <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
-                        <thead><tr>
-                          <th style={{...TH, textAlign:"left"}}>項目</th>
-                          {fd.map(d => <th key={d} style={TH}>{toDisplay(d)}</th>)}
-                          <th style={{...TH, color:p.color}}>合計</th>
-                        </tr></thead>
-                        <tbody>
-                          {p.items.length===0
-                            ? <tr><td colSpan={fd.length+2} style={{ padding:32, textAlign:"center", color:C.textMuted }}>尚無項目</td></tr>
-                            : p.items.map(item => (
-                              <tr key={item.id}>
-                                <td style={{...TD, textAlign:"left", fontWeight:600}}>{item.name}</td>
-                                {fd.map(d => <td key={d} style={TD}><CellContent iid={item.id} date={d} /></td>)}
-                                <td style={{...TD, fontWeight:800, color:p.color}}>{fd.reduce((s,d)=>{const v=val(item.id,d);return s+(v??0);},0).toLocaleString()}</td>
-                              </tr>
-                            ))}
-                        </tbody>
-                        <tfoot><tr style={{ borderTop:`2px solid ${C.border}`, background:C.bgSurface }}>
-                          <td style={{ padding:"11px 14px", fontWeight:800, fontSize:13 }}>合計</td>
-                          {fd.map(d => <td key={d} style={{...TD, borderTop:`2px solid ${C.border}`, fontWeight:700}}>{dateSum(d).toLocaleString()}</td>)}
-                          <td style={{...TD, borderTop:`2px solid ${C.border}`, fontWeight:800, color:p.color}}>{fg.toLocaleString()}</td>
-                        </tr></tfoot>
-                      </table>
-                    )}
-                  </div>
-                );
-              })()}
-            </>
-          )}
-
-          {ownerTab === "manage" && (
-            <div style={{ maxWidth:560 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-                <h3 style={{ fontSize:18, fontWeight:700 }}>登記項目</h3>
-                <PrimaryBtn onClick={() => { setModal("newItem"); setForm({}); setFormErr(""); }} style={{ padding:"9px 18px", fontSize:14 }}>＋ 新增項目</PrimaryBtn>
-              </div>
-              {p.items.length === 0
-                ? <Card style={{ textAlign:"center", padding:"40px 20px", color:C.textMuted }}>
-                    <p style={{ marginBottom:14 }}>尚無登記項目</p>
-                    <PrimaryBtn onClick={() => { setModal("newItem"); setForm({}); setFormErr(""); }}>新增第一個項目</PrimaryBtn>
-                  </Card>
-                : <Card style={{ padding:0, overflow:"hidden" }}>
-                    {p.items.map((item,idx) => (
-                      <div key={item.id} style={{ display:"flex", alignItems:"center", gap:14, padding:"14px 18px", borderTop:idx>0?`1px solid ${C.bgSurface}`:"none" }}>
-                        <div style={{ width:9, height:9, borderRadius:3, background:p.color, flexShrink:0 }} />
-                        <span style={{ flex:1, fontWeight:600, fontSize:15 }}>{item.name}</span>
-                        <span style={{ fontSize:13, color:C.textMuted, marginRight:8 }}>累計 {itemSum(item.id).toLocaleString()}</span>
-                        <GhostBtn onClick={() => { setModal("editItem"); setForm({itemId:item.id, name:item.name}); setFormErr(""); }} style={{ padding:"5px 12px", fontSize:13 }}>編輯</GhostBtn>
-                        <GhostBtn danger onClick={() => deleteItem(item.id)} style={{ padding:"5px 12px", fontSize:13 }}>刪除</GhostBtn>
-                      </div>
-                    ))}
-                  </Card>}
-
-              <div style={{ marginTop:32, paddingTop:24, borderTop:`1px solid ${C.bgSurface}` }}>
-                <p style={{ fontSize:14, fontWeight:700, color:C.textMid, marginBottom:12 }}>專案設定</p>
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 18px", background:p.published?"#F0FAF4":C.bgSurface, border:`1px solid ${p.published?"#B6DECA":C.border}`, borderRadius:14, marginBottom:12 }}>
-                  <div>
-                    <p style={{ fontWeight:600, fontSize:14, color:p.published?"#2E7D4F":C.textMid }}>{p.published?"● 上架中":"○ 已下架"}</p>
-                    <p style={{ fontSize:12, color:C.textMuted, marginTop:2 }}>{p.published?"檢視者可在前台看到並登記此專案":"僅擁有者可見，檢視者前台不顯示"}</p>
-                  </div>
-                  <button onClick={() => togglePublished(p.id)} style={{ padding:"8px 18px", borderRadius:10, border:"none", fontWeight:700, fontSize:13, cursor:"pointer", background:p.published?"#FBF0F0":"#E6F4EC", color:p.published?"#A83838":"#2E7D4F" }}>
-                    {p.published?"下架":"上架"}
-                  </button>
-                </div>
-                <div style={{ display:"flex", gap:10 }}>
-                  <GhostBtn onClick={() => { setModal("editProject"); setForm({name:p.name, dateRange:p.dateRange||"", desc:p.description, color:p.color}); setFormErr(""); }} style={{ padding:"9px 18px" }}>編輯專案資訊</GhostBtn>
-                  <GhostBtn danger onClick={() => deleteProject(p.id)} style={{ padding:"9px 18px" }}>刪除此專案</GhostBtn>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      }/>
+      <div style={{background:C.bgCard,borderBottom:`1px solid ${C.border}`,display:"flex",padding:"0 24px"}}>
+        {[["data","📊 數據"],["manage","⚙️ 管理項目"]].map(([v,label])=><button key={v} onClick={()=>setOwnerTab(v)} style={{padding:"13px 20px",border:"none",background:"transparent",fontWeight:ownerTab===v?700:500,fontSize:14,color:ownerTab===v?p.color:C.textMuted,borderBottom:ownerTab===v?`2.5px solid ${p.color}`:"2.5px solid transparent",borderRadius:0,transition:"color .15s"}}>{label}</button>)}
       </div>
-    );
+      <div style={{maxWidth:960,margin:"0 auto",padding:"28px 24px 48px"}}>
+        {ownerTab==="data"&&<>
+          {p.items.length>0&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:10,marginBottom:20}}>
+            {p.items.map(item=><Card key={item.id} style={{padding:"14px 16px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
+                <div style={{width:8,height:8,borderRadius:2,background:p.color,flexShrink:0}}/>
+                <p style={{fontSize:13,fontWeight:600,color:C.textMid,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.name}</p>
+              </div>
+              <p style={{fontSize:28,fontWeight:800,color:p.color,lineHeight:1}}>{itemSum(item.id).toLocaleString()}</p>
+            </Card>)}
+          </div>}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:dateSearchOpen?0:10,flexWrap:"wrap",gap:10}}>
+            <div style={{display:"flex",background:C.bgSurface,borderRadius:12,padding:3}}>
+              {[["date","按日期"],["item","按項目"]].map(([v,label])=><button key={v} onClick={()=>setDashView(v)} style={{padding:"7px 18px",borderRadius:10,border:"none",fontWeight:dashView===v?700:500,fontSize:13,background:dashView===v?C.bgCard:"transparent",color:dashView===v?C.text:C.textMuted,boxShadow:dashView===v?"0 1px 6px rgba(0,0,0,.07)":"none",transition:"all .15s"}}>{label}</button>)}
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <button onClick={()=>{setDateSearchOpen(o=>!o);if(dateSearchOpen)setDateSearch("");}} title="搜尋日期" style={{width:36,height:36,borderRadius:10,border:`1.5px solid ${dateSearchOpen||dateSearch?C.accent:C.border}`,background:dateSearchOpen||dateSearch?C.accentLight:"transparent",color:dateSearchOpen||dateSearch?C.accent:C.textMuted,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,cursor:"pointer",flexShrink:0,transition:"all .15s"}}>🔍</button>
+              <button onClick={()=>exportCSV(p,data.records)} style={{background:C.accent,color:"#fff",fontWeight:700,fontSize:13,padding:"8px 18px",borderRadius:12,display:"flex",alignItems:"center",gap:6}}>⬇ 下載 CSV</button>
+            </div>
+          </div>
+          {dateSearchOpen&&<div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,padding:"12px 16px",background:C.accentLight,borderRadius:12,border:`1px solid ${C.border}`,animation:"fadeIn .15s ease"}}>
+            <span style={{fontSize:14,color:C.accent,flexShrink:0}}>🔍</span>
+            <input type="text" value={dateSearch} autoFocus placeholder="YY/MM/DD" onChange={e=>setDateSearch(e.target.value)} style={{flex:1,maxWidth:160,fontSize:14,fontWeight:600,padding:"7px 12px"}}/>
+            {dateSearch&&<button onClick={()=>setDateSearch("")} style={{background:"transparent",border:"none",color:C.accent,fontSize:13,fontWeight:600,cursor:"pointer",padding:"4px 8px",borderRadius:8}}>清除</button>}
+            {dateSearch&&<span style={{fontSize:12,color:C.textMuted,flexShrink:0}}>{dates.filter(d=>d===toISO(dateSearch)).length>0?`找到 ${dateSearch}`:"無此日期資料"}</span>}
+          </div>}
+          <p style={{fontSize:12,color:C.textMuted,marginBottom:10}}>點擊數字可直接編輯修正</p>
+          <div style={{overflowX:"auto",borderRadius:18,border:`1px solid ${C.border}`,background:C.bgCard}}>
+            {dateSearch&&fd.length===0&&<div style={{padding:32,textAlign:"center"}}><p style={{fontSize:32,marginBottom:8}}>🔍</p><p style={{color:C.textMuted,fontSize:14}}>找不到 {dateSearch} 的記錄</p></div>}
+            {fd.length>0&&dashView==="date"&&<table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+              <thead><tr><th style={{...TH,textAlign:"left"}}>日期</th>{p.items.map(i=><th key={i.id} style={TH}>{i.name}</th>)}<th style={{...TH,color:p.color}}>合計</th></tr></thead>
+              <tbody>{fd.map(d=><tr key={d}><td style={{...TD,textAlign:"left",fontWeight:600}}>{toDisplay(d)}</td>{p.items.map(i=><td key={i.id} style={TD}><Cell iid={i.id} date={d}/></td>)}<td style={{...TD,fontWeight:800,color:p.color}}>{dateSum(d).toLocaleString()}</td></tr>)}</tbody>
+              <tfoot><tr style={{borderTop:`2px solid ${C.border}`,background:C.bgSurface}}><td style={{padding:"11px 14px",fontWeight:800,fontSize:13}}>總計</td>{p.items.map(i=><td key={i.id} style={{...TD,borderTop:`2px solid ${C.border}`,fontWeight:700}}>{fd.reduce((s,d)=>{const v=val(i.id,d);return s+(v??0);},0).toLocaleString()}</td>)}<td style={{...TD,borderTop:`2px solid ${C.border}`,fontWeight:800,color:p.color}}>{fg.toLocaleString()}</td></tr></tfoot>
+            </table>}
+            {fd.length>0&&dashView==="item"&&<table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+              <thead><tr><th style={{...TH,textAlign:"left"}}>項目</th>{fd.map(d=><th key={d} style={TH}>{toDisplay(d)}</th>)}<th style={{...TH,color:p.color}}>合計</th></tr></thead>
+              <tbody>{p.items.map(item=><tr key={item.id}><td style={{...TD,textAlign:"left",fontWeight:600}}>{item.name}</td>{fd.map(d=><td key={d} style={TD}><Cell iid={item.id} date={d}/></td>)}<td style={{...TD,fontWeight:800,color:p.color}}>{fd.reduce((s,d)=>{const v=val(item.id,d);return s+(v??0);},0).toLocaleString()}</td></tr>)}</tbody>
+              <tfoot><tr style={{borderTop:`2px solid ${C.border}`,background:C.bgSurface}}><td style={{padding:"11px 14px",fontWeight:800,fontSize:13}}>合計</td>{fd.map(d=><td key={d} style={{...TD,borderTop:`2px solid ${C.border}`,fontWeight:700}}>{dateSum(d).toLocaleString()}</td>)}<td style={{...TD,borderTop:`2px solid ${C.border}`,fontWeight:800,color:p.color}}>{fg.toLocaleString()}</td></tr></tfoot>
+            </table>}
+          </div>
+        </>}
+        {ownerTab==="manage"&&<div style={{maxWidth:560}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+            <h3 style={{fontSize:18,fontWeight:700}}>登記項目</h3>
+            <PBtn onClick={()=>{setModal("newItem");setForm({});setFormErr("");}} style={{padding:"9px 18px",fontSize:14}}>＋ 新增項目</PBtn>
+          </div>
+          {p.items.length===0
+            ?<Card style={{textAlign:"center",padding:"40px 20px",color:C.textMuted}}><p style={{marginBottom:14}}>尚無登記項目</p><PBtn onClick={()=>{setModal("newItem");setForm({});setFormErr("");}}>新增第一個項目</PBtn></Card>
+            :<Card style={{padding:0,overflow:"hidden"}}>
+              {p.items.map((item,idx)=><div key={item.id} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 18px",borderTop:idx>0?`1px solid ${C.bgSurface}`:"none"}}>
+                <div style={{width:9,height:9,borderRadius:3,background:p.color,flexShrink:0}}/>
+                <span style={{flex:1,fontWeight:600,fontSize:15}}>{item.name}</span>
+                <span style={{fontSize:13,color:C.textMuted,marginRight:8}}>累計 {itemSum(item.id).toLocaleString()}</span>
+                <GBtn onClick={()=>{setModal("editItem");setForm({itemId:item.id,name:item.name});setFormErr("");}} style={{padding:"5px 12px",fontSize:13}}>編輯</GBtn>
+                <GBtn danger onClick={()=>deleteItem(item.id)} style={{padding:"5px 12px",fontSize:13}}>刪除</GBtn>
+              </div>)}
+            </Card>}
+          <div style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${C.bgSurface}`}}>
+            <p style={{fontSize:14,fontWeight:700,color:C.textMid,marginBottom:12}}>專案設定</p>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 18px",background:p.published?"#F0FAF4":C.bgSurface,border:`1px solid ${p.published?"#B6DECA":C.border}`,borderRadius:14,marginBottom:12}}>
+              <div>
+                <p style={{fontWeight:600,fontSize:14,color:p.published?"#2E7D4F":C.textMid}}>{p.published?"● 上架中":"○ 已下架"}</p>
+                <p style={{fontSize:12,color:C.textMuted,marginTop:2}}>{p.published?"檢視者可在前台看到並登記此專案":"僅擁有者可見，檢視者前台不顯示"}</p>
+              </div>
+              <button onClick={()=>togglePublished(p.id)} style={{padding:"8px 18px",borderRadius:10,border:"none",fontWeight:700,fontSize:13,cursor:"pointer",background:p.published?"#FBF0F0":"#E6F4EC",color:p.published?"#A83838":"#2E7D4F"}}>{p.published?"下架":"上架"}</button>
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <GBtn onClick={()=>{setModal("editProject");setForm({name:p.name,dateRange:p.dateRange||"",desc:p.description,color:p.color});setFormErr("");}} style={{padding:"9px 18px"}}>編輯專案資訊</GBtn>
+              <GBtn danger onClick={()=>deleteProject(p.id)} style={{padding:"9px 18px"}}>刪除此專案</GBtn>
+            </div>
+          </div>
+        </div>}
+      </div>
+    </div>;
   }
 
-  // ── Root render ──────────────────────────────────────────────────────────
-  const isOwner = role === "owner";
+  // ── Render ─────────────────────────────────────────────────────────────
+  const isOwner=role==="owner";
+  if(loading)return<div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
+    <Logo size={48}/>
+    <p style={{color:C.textMuted,fontSize:14,fontWeight:500}}>載入中…</p>
+  </div>;
 
-  if (loading) return (
-    <div style={{ minHeight:"100vh", background:C.bg, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }}>
-      <LogoMark size={48} />
-      <p style={{ color:C.textMuted, fontSize:14, fontWeight:500 }}>載入中…</p>
-    </div>
-  );
+  return <div style={{minHeight:"100vh",background:C.bg}}>
+    {!isOwner&&screen==="projects"&&<ViewerList/>}
+    {!isOwner&&screen==="entry"&&<ViewerEntry/>}
+    {isOwner&&screen==="projects"&&<OwnerList/>}
+    {isOwner&&screen==="ownerProj"&&<OwnerProj/>}
 
-  return (
-    <div style={{ minHeight:"100vh", background:C.bg }}>
-      {!isOwner && screen==="projects" && <ViewerProjectList />}
-      {!isOwner && screen==="entry"    && <ViewerEntry />}
-      {isOwner  && screen==="projects" && <OwnerProjectList />}
-      {isOwner  && screen==="ownerProj"&& <OwnerProjScreen />}
+    <ModalShell open={!!modal} onClose={closeModal}>{modalContent()}</ModalShell>
 
-      <ModalShell open={!!modal} onBackdrop={closeModal}>
-        {modalContent()}
-      </ModalShell>
-
-      {confirmState && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(26,23,19,.35)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:200, padding:24 }}>
-          <div style={{ background:C.bgCard, borderRadius:18, padding:"28px 24px", maxWidth:360, width:"100%", boxShadow:"0 16px 48px rgba(0,0,0,.14)" }}>
-            <p style={{ fontWeight:600, fontSize:16, marginBottom:8 }}>確認操作</p>
-            <p style={{ fontSize:14, color:C.textMid, marginBottom:24, lineHeight:1.6 }}>{confirmState.msg}</p>
-            <div style={{ display:"flex", gap:10 }}>
-              <GhostBtn onClick={() => setConfirmState(null)} style={{ flex:1 }}>取消</GhostBtn>
-              <button onClick={() => { confirmState.onOk(); setConfirmState(null); }}
-                style={{ flex:1, background:C.danger, color:"#fff", fontWeight:700, padding:"10px", borderRadius:12, border:"none", cursor:"pointer", fontSize:14 }}>
-                確定刪除
-              </button>
-            </div>
-          </div>
+    {confirm&&<div style={{position:"fixed",inset:0,background:"rgba(26,23,19,.35)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:24}}>
+      <div style={{background:C.bgCard,borderRadius:18,padding:"28px 24px",maxWidth:360,width:"100%",boxShadow:"0 16px 48px rgba(0,0,0,.14)"}}>
+        <p style={{fontWeight:600,fontSize:16,marginBottom:8}}>確認操作</p>
+        <p style={{fontSize:14,color:C.textMid,marginBottom:24,lineHeight:1.6}}>{confirm.msg}</p>
+        <div style={{display:"flex",gap:10}}>
+          <GBtn onClick={()=>setConfirm(null)} style={{flex:1}}>取消</GBtn>
+          <button onClick={()=>{confirm.onOk();setConfirm(null);}} style={{flex:1,background:C.danger,color:"#fff",fontWeight:700,padding:"10px",borderRadius:12,border:"none",cursor:"pointer",fontSize:14}}>確定刪除</button>
         </div>
-      )}
+      </div>
+    </div>}
 
-      {toast && (
-        <div style={{ position:"fixed", bottom:28, left:"50%", transform:"translateX(-50%)", background:C.accent, color:"#fff", padding:"11px 24px", borderRadius:14, fontSize:13, fontWeight:700, zIndex:300, whiteSpace:"nowrap", boxShadow:"0 8px 28px rgba(0,0,0,.15)", pointerEvents:"none", animation:"fadeIn .2s ease" }}>
-          {toast}
-        </div>
-      )}
-    </div>
-  );
+    {toast&&<div style={{position:"fixed",bottom:28,left:"50%",transform:"translateX(-50%)",background:C.accent,color:"#fff",padding:"11px 24px",borderRadius:14,fontSize:13,fontWeight:700,zIndex:300,whiteSpace:"nowrap",boxShadow:"0 8px 28px rgba(0,0,0,.15)",pointerEvents:"none",animation:"fadeIn .2s ease"}}>{toast}</div>}
+  </div>;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
