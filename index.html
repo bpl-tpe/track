@@ -383,7 +383,7 @@ document.querySelectorAll('.modal-overlay').forEach(function(o) {
 // ==========================================================
 // ROLE SWITCH
 // ==========================================================
-window.switchRole = function() {
+function switchRole() {
   var next = currentRole === 'assistant' ? 'editor' : 'assistant';
   currentRole = next;
   document.getElementById('switchRoleBtn').textContent =
@@ -395,7 +395,8 @@ window.switchRole = function() {
     showView('viewEditor');
     renderEditorProjects();
   }
-};
+}
+window.switchRole = switchRole;
 
 // ==========================================================
 // RENDER
@@ -672,9 +673,11 @@ window.onDragEnd   = function(e) { e.currentTarget.classList.remove('dragging');
     var update = fbDb.update;
     var onValue= fbDb.onValue;
 
+    // Try to connect - Firebase Realtime DB URL varies by region
+    var dbURL = 'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/';
     var app = getApps().length
       ? getApps()[0]
-      : initializeApp({ databaseURL: 'https://project-1794474641398451810-default-rtdb.firebaseio.com/' });
+      : initializeApp({ databaseURL: dbURL });
     var db = getDatabase(app);
 
     // Live listener
