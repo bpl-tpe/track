@@ -2,442 +2,294 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>TrackIt · 活動人次登記</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:#F6F9FA;color:#1E2030;-webkit-tap-highlight-color:transparent}
-input,select{font-family:'DM Sans',sans-serif;font-size:15px;border:1.5px solid #D8DEEC;border-radius:12px;padding:11px 14px;outline:none;background:#fff;color:#1E2030;transition:border-color .15s,box-shadow .15s;width:100%}
-input:focus,select:focus{border-color:#9B8EC7;box-shadow:0 0 0 3px rgba(155,142,199,.18)}
+body{font-family:system-ui,sans-serif;background:#F6F9FA;color:#1E2030;min-height:100vh}
+input,select{font-family:inherit;font-size:14px;border:1.5px solid #D8DEEC;border-radius:10px;padding:9px 12px;outline:none;background:#fff;color:#1E2030;width:100%;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{border-color:#9B8EC7;box-shadow:0 0 0 3px rgba(155,142,199,.15)}
 input[type=number]{-moz-appearance:textfield}
 input[type=number]::-webkit-inner-spin-button{opacity:.3}
-button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;font-size:14px;transition:all .15s;border-radius:12px}
-button:active{transform:scale(.96)}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:#BEC8DC;border-radius:4px}
-@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+button{font-family:inherit;cursor:pointer;border:none;transition:all .12s;border-radius:10px}
+button:active{transform:scale(.97)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.anim{animation:fadeIn .2s ease}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"/>
 </head>
 <body>
-<div id="root"></div>
+<div id="app" style="font-family:'DM Sans',system-ui,sans-serif"></div>
 
-<!-- UMD builds — no ESM, no import, no module system issues -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-<!-- Firebase v9 compat (UMD) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// ── Firebase init ─────────────────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey:            "AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ",
-  authDomain:        "project-1794474641398451810.firebaseapp.com",
-  databaseURL:       "https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "project-1794474641398451810",
-  storageBucket:     "project-1794474641398451810.firebasestorage.app",
-  messagingSenderId: "660717432614",
-  appId:             "1:660717432614:web:5067d9a791339b6c275be7",
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+firebase.initializeApp({
+  apiKey:"AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ",
+  authDomain:"project-1794474641398451810.firebaseapp.com",
+  databaseURL:"https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"project-1794474641398451810",
+  storageBucket:"project-1794474641398451810.firebasestorage.app",
+  messagingSenderId:"660717432614",
+  appId:"1:660717432614:web:5067d9a791339b6c275be7"
+});
+const fdb=firebase.database();
 
-// ── Design tokens ─────────────────────────────────────────────────────────
-const C = {
-  bg:"#F6F9FA",bgCard:"#FFFFFF",bgSurface:"#E8ECF4",
-  border:"#D8DEEC",borderMid:"#BEC8DC",
-  accent:"#9B8EC7",accentLight:"#F0EDF9",
-  text:"#1E2030",textMid:"#4A5068",textMuted:"#8A90A8",
-  success:"#3D8A6A",successBg:"#E8F4EE",
-  danger:"#A83838",
-};
-const PALETTE = ["#5B8DD9","#4EAA80","#D4A843","#D05858","#E0784A","#9B8EC7","#4EA8C0","#7ABD5E"];
-const EMPTY = {ownerPin:"1234",projects:[],records:[]};
-const LBL = {fontSize:13,color:"#4A5068",display:"block",marginBottom:6,fontWeight:500};
+const {createElement:r,useState,useEffect,useRef,useCallback,Fragment}=React;
 
-// ── Helpers ───────────────────────────────────────────────────────────────
+const A="#9B8EC7",AL="#F0EDF9",C={bg:"#F6F9FA",card:"#fff",surf:"#EEF0F8",bdr:"#D8DEEC",txt:"#1E2030",mid:"#4A5068",muted:"#8A90A8",ok:"#3D8A6A",okbg:"#E8F4EE",err:"#A83838"};
+const PAL=["#5B8DD9","#4EAA80","#D4A843","#D05858","#E0784A","#9B8EC7","#4EA8C0","#7ABD5E"];
+const EDATA={pin:"1234",projects:[],records:[]};
+
 function uid(){return Math.random().toString(36).slice(2,9)}
-function todayStr(){return new Date().toISOString().slice(0,10)}
-function toDisplay(iso){if(!iso)return"";const[y,m,d]=iso.split("-");return`${y.slice(2)}/${m}/${d}`}
-function toISO(s){if(!s)return"";const c=s.trim();if(/^\d{4}-\d{2}-\d{2}$/.test(c))return c;const mt=c.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);return mt?`20${mt[1]}-${mt[2]}-${mt[3]}`:c}
-function exportCSV(proj,records){
-  const dates=[...new Set(records.filter(r=>r.projectId===proj.id).map(r=>r.date))].sort();
-  const hdr=["日期",...proj.items.map(i=>i.name),"合計"].join(",");
-  const rows=dates.map(d=>{const v=proj.items.map(i=>{const r=records.find(r=>r.projectId===proj.id&&r.itemId===i.id&&r.date===d);return r?r.value:""});return[d,...v,v.reduce((s,x)=>s+(Number(x)||0),0)].join(",")});
-  const tot=["總計",...proj.items.map(i=>records.filter(r=>r.projectId===proj.id&&r.itemId===i.id).reduce((s,r)=>s+r.value,0)),records.filter(r=>r.projectId===proj.id).reduce((s,r)=>s+r.value,0)].join(",");
-  const blob=new Blob(["\uFEFF",[hdr,...rows,tot].join("\n")],{type:"text/csv;charset=utf-8;"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${proj.name}_人次數據.csv`;a.click();
-}
+function today(){return new Date().toISOString().slice(0,10)}
+function fmt(iso){if(!iso)return"";const[y,m,d]=iso.split("-");return`${y.slice(2)}/${m}/${d}`}
+function parseDate(s){const c=s.trim();if(/^\d{4}-\d{2}-\d{2}$/.test(c))return c;const m=c.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);return m?`20${m[1]}-${m[2]}-${m[3]}`:c}
 
-// ── React aliases ─────────────────────────────────────────────────────────
-const {createElement:h,useState,useRef,useEffect,useCallback,Fragment} = React;
-const e = h;
+function PBtn({ch,onClick,color,full,disabled,sm,style:s}){
+  return r("button",{onClick,disabled,style:{background:disabled?"#bbb":(color||A),color:"#fff",fontWeight:600,padding:sm?"7px 14px":"11px 20px",fontSize:sm?13:14,borderRadius:10,width:full?"100%":undefined,opacity:disabled?.5:1,cursor:disabled?"default":"pointer",...s}},ch)
+}
+function GBtn({ch,onClick,red,sm,style:s}){
+  return r("button",{onClick,style:{background:"transparent",border:`1.5px solid ${red?"#F0C4C4":C.bdr}`,color:red?C.err:C.mid,fontWeight:500,padding:sm?"6px 12px":"9px 16px",fontSize:sm?12:14,borderRadius:10,...s}},ch)
+}
+function Card({ch,style:s}){return r("div",{style:{background:C.card,borderRadius:14,border:`1px solid ${C.bdr}`,padding:"16px 18px",...s}},ch)}
+function Label({t}){return r("label",{style:{fontSize:12,color:C.mid,fontWeight:500,display:"block",marginBottom:5}},t)}
 
-// ── Shared components ─────────────────────────────────────────────────────
-function PBtn({children,onClick,full,color,disabled,style:s}){
-  return e("button",{onClick,disabled,style:{background:disabled?"#ccc":(color||C.accent),color:"#fff",fontWeight:700,padding:"13px 22px",fontSize:15,borderRadius:14,width:full?"100%":undefined,opacity:disabled?.6:1,cursor:disabled?"default":"pointer",...s}},children);
-}
-function GBtn({children,onClick,danger,style:s}){
-  return e("button",{onClick,style:{background:"transparent",border:`1.5px solid ${danger?"#F0C4C4":C.border}`,color:danger?C.danger:C.textMid,fontWeight:500,padding:"9px 16px",fontSize:14,borderRadius:12,...s}},children);
-}
-function Card({children,style:s}){
-  return e("div",{style:{background:C.bgCard,borderRadius:18,border:`1px solid ${C.border}`,padding:"18px 20px",...s}},children);
-}
-function Logo({size=26}){
-  return e("svg",{width:size,height:size,viewBox:"0 0 32 32",style:{borderRadius:7,flexShrink:0}},
-    e("rect",{width:32,height:32,rx:8,fill:C.accent}),
-    e("rect",{x:7,y:8,width:11,height:2.8,rx:1.4,fill:"white",opacity:.9}),
-    e("rect",{x:7,y:14,width:18,height:2.8,rx:1.4,fill:"white"}),
-    e("rect",{x:7,y:20,width:14,height:2.8,rx:1.4,fill:"white",opacity:.75}),
-    e("circle",{cx:24.5,cy:9.5,r:4.5,fill:"#C4B8E8"}),
-    e("path",{d:"M22.8 9.5l1.4 1.4 2.4-2.4",stroke:"white",strokeWidth:1.4,strokeLinecap:"round",strokeLinejoin:"round",fill:"none"})
-  );
-}
-function Topbar({back,title,right}){
-  return e("div",{style:{position:"sticky",top:0,zIndex:20,background:"rgba(246,249,250,.96)",backdropFilter:"blur(14px)",borderBottom:`1px solid ${C.border}`,height:54,padding:"0 16px",display:"flex",alignItems:"center",gap:10}},
-    back?e("button",{onClick:back,style:{background:"none",border:"none",color:C.textMuted,fontSize:24,lineHeight:1,padding:"0 6px 0 0",cursor:"pointer"}},"\u2039"):e(Logo),
-    e("span",{style:{flex:1,fontWeight:back?600:700,fontSize:back?16:19,fontFamily:back?"'DM Sans'":"'DM Serif Display'",letterSpacing:back?0:-.3}},title||"TrackIt"),
-    right
-  );
-}
-function ModalShell({open,onClose,children}){
-  if(!open)return null;
-  return e("div",{onClick:ev=>ev.target===ev.currentTarget&&onClose(),style:{position:"fixed",inset:0,background:"rgba(26,23,19,.3)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:100}},
-    e("div",{style:{background:C.bgCard,borderRadius:"22px 22px 0 0",padding:"28px 22px 40px",width:"100%",maxWidth:540,boxShadow:"0 -12px 48px rgba(0,0,0,.1)",animation:"slideUp .22s ease forwards"}},children)
-  );
-}
-
-// ── App ───────────────────────────────────────────────────────────────────
 function App(){
-  const [data,setData]=useState(EMPTY);
-  const [loading,setLoading]=useState(true);
-  const [role,setRole]=useState(null);
-  const [screen,setScreen]=useState("projects");
-  const [activeProjId,setActiveProjId]=useState(null);
-  const [ownerTab,setOwnerTab]=useState("data");
-  const [dashView,setDashView]=useState("date");
-  const [modal,setModal]=useState(null);
-  const [form,setForm]=useState({});
-  const [pinInput,setPinInput]=useState("");
-  const [pinErr,setPinErr]=useState("");
-  const [formErr,setFormErr]=useState("");
-  const [toast,setToast]=useState(null);
-  const [editCell,setEditCell]=useState(null);
-  const [editVal,setEditVal]=useState("");
-  const [confirm,setConfirm]=useState(null);
-  const [dragId,setDragId]=useState(null);
-  const [dragOver,setDragOver]=useState(null);
-  const [dateSearch,setDateSearch]=useState("");
-  const [dateSearchOpen,setDateSearchOpen]=useState(false);
-  const toastRef=useRef(null);
+  const[D,setD]=useState(EDATA);
+  const[loading,setLoading]=useState(true);
+  const[role,setRole]=useState(null);
+  const[page,setPage]=useState("home");
+  const[proj,setProj]=useState(null);
+  const[tab,setTab]=useState("data");
+  const[modal,setModal]=useState(null);
+  const[form,setForm]=useState({});
+  const[pin,setPin]=useState("");
+  const[pinErr,setPinErr]=useState("");
+  const[fErr,setFErr]=useState("");
+  const[toast,setToast]=useState(null);
+  const[editCell,setEditCell]=useState(null);
+  const[editVal,setEditVal]=useState("");
+  const[confirm,setConfirm]=useState(null);
+  const[dSearch,setDSearch]=useState("");
+  const[dSearchOpen,setDSearchOpen]=useState(false);
+  const[drag,setDrag]=useState(null);
+  const[dragOv,setDragOv]=useState(null);
+  const toastT=useRef(null);
 
   useEffect(()=>{
-    document.title="TrackIt · 活動人次登記";
-  },[]);
-
-  useEffect(()=>{
-    const rootRef=db.ref("trackit");
-    rootRef.on("value",snap=>{
+    const ref=fdb.ref("trackit");
+    ref.on("value",snap=>{
       const raw=snap.val()||{};
-      setData({
-        ownerPin:raw.ownerPin||"1234",
-        projects:raw.projects?Object.values(raw.projects).sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0)):[],
+      setD({
+        pin:raw.pin||"1234",
+        projects:raw.projects?Object.values(raw.projects).sort((a,b)=>(a.so??0)-(b.so??0)):[],
         records:raw.records?Object.values(raw.records):[],
       });
       setLoading(false);
     });
-    return()=>rootRef.off();
+    return()=>ref.off();
   },[]);
 
-  const notify=useCallback(msg=>{clearTimeout(toastRef.current);setToast(msg);toastRef.current=setTimeout(()=>setToast(null),2200);},[]);
-  const getProj=id=>data.projects.find(p=>p.id===(id??activeProjId));
-
-  function doLogin(){if(pinInput===data.ownerPin){setRole("owner");setPinInput("");setPinErr("");setModal(null);}else setPinErr("密碼錯誤，請再試一次");}
-  function doLogout(){setRole(null);setScreen("projects");setActiveProjId(null);}
-  function closeModal(){setModal(null);setForm({});setPinErr("");setFormErr("");}
-  function getRecord(pid,iid,date){return data.records.find(r=>r.projectId===pid&&r.itemId===iid&&r.date===date);}
-
-  function saveData(d){
-    setData(d);
-    const pm={};d.projects.forEach((p,i)=>{pm[p.id]={...p,sortOrder:i};});
-    db.ref("trackit/projects").set(pm).catch(console.error);
-    const rm={};d.records.forEach(r=>{rm[r.id]=r;});
-    db.ref("trackit/records").set(Object.keys(rm).length?rm:null).catch(console.error);
+  function sd(d){
+    setD(d);
+    const pm={};d.projects.forEach((p,i)=>{pm[p.id]={...p,so:i}});
+    fdb.ref("trackit/projects").set(pm).catch(console.error);
+    const rm={};d.records.forEach(x=>{rm[x.id]=x});
+    fdb.ref("trackit/records").set(Object.keys(rm).length?rm:null).catch(console.error);
   }
-  function saveRec(rec){db.ref(`trackit/records/${rec.id}`).set(rec).catch(console.error);}
-  function savePin(pin){db.ref("trackit/ownerPin").set(pin).catch(console.error);}
+  function sr(rec){fdb.ref("trackit/records/"+rec.id).set(rec).catch(console.error)}
+  function sp(p){fdb.ref("trackit/pin").set(p).catch(console.error)}
 
-  function upsertRecord(pid,iid,date,raw,base){
-    const d=base||data;const value=parseInt(raw,10);if(isNaN(value)||value<0)return d;
-    const ex=d.records.find(r=>r.projectId===pid&&r.itemId===iid&&r.date===date);
-    const rec=ex?{...ex,value}:{id:uid(),projectId:pid,itemId:iid,date,value};
-    saveRec(rec);
-    return{...d,records:ex?d.records.map(r=>r.id===ex.id?rec:r):[...d.records,rec]};
+  function notify(m){clearTimeout(toastT.current);setToast(m);toastT.current=setTimeout(()=>setToast(null),2000)}
+  function gp(id){return D.projects.find(p=>p.id===(id??proj))}
+  function gr(pid,iid,date){return D.records.find(x=>x.projectId===pid&&x.itemId===iid&&x.date===date)}
+
+  function login(){if(pin===D.pin){setRole("owner");setPin("");setPinErr("");setModal(null)}else setPinErr("密碼錯誤")}
+  function logout(){setRole(null);setPage("home");setProj(null)}
+  function cm(){setModal(null);setForm({});setPinErr("");setFErr("")}
+
+  function saveRec(pid,iid,date,raw,base){
+    const src=base||D;const v=parseInt(raw,10);if(isNaN(v)||v<0)return src;
+    const ex=src.records.find(x=>x.projectId===pid&&x.itemId===iid&&x.date===date);
+    const rec=ex?{...ex,value:v}:{id:uid(),projectId:pid,itemId:iid,date,value:v};
+    sr(rec);
+    return{...src,records:ex?src.records.map(x=>x.id===ex.id?rec:x):[...src.records,rec]};
   }
-  function batchUpsert(pid,entries,date){let d=data;entries.forEach(({iid,val})=>{d=upsertRecord(pid,iid,date,val,d);});setData(d);}
-  function allDates(pid){return[...new Set(data.records.filter(r=>r.projectId===pid).map(r=>r.date))].sort();}
+  function batchSave(pid,entries,date){let d=D;entries.forEach(({iid,val})=>{d=saveRec(pid,iid,date,val,d)});setD(d)}
+  function dates(pid){return[...new Set(D.records.filter(x=>x.projectId===pid).map(x=>x.date))].sort()}
 
-  function submitModal(){
-    if(modal==="newProject"){
-      if(!form.name?.trim()){setFormErr("請填寫專案名稱");return;}
-      if(!form.dateRange?.trim()){setFormErr("請填寫活動日期");return;}
-      if(!/^\d{2}\/\d{2}\/\d{2}/.test(form.dateRange.trim())){setFormErr("日期格式應為 YY/MM/DD");return;}
-      saveData({...data,projects:[...data.projects,{id:uid(),name:form.name.trim(),dateRange:form.dateRange.trim(),description:form.desc?.trim()||"",color:form.color||C.accent,published:false,items:[]}]});notify("專案已建立");
-    }else if(modal==="editProject"){
-      if(!form.name?.trim()){setFormErr("請填寫專案名稱");return;}
-      if(!form.dateRange?.trim()){setFormErr("請填寫活動日期");return;}
-      if(!/^\d{2}\/\d{2}\/\d{2}/.test(form.dateRange.trim())){setFormErr("日期格式應為 YY/MM/DD");return;}
-      saveData({...data,projects:data.projects.map(p=>p.id===activeProjId?{...p,name:form.name.trim(),dateRange:form.dateRange.trim(),description:form.desc?.trim()||"",color:form.color||p.color}:p)});notify("已更新");
-    }else if(modal==="newItem"){
-      if(!form.name?.trim()){setFormErr("請填寫項目名稱");return;}
-      saveData({...data,projects:data.projects.map(p=>p.id===activeProjId?{...p,items:[...p.items,{id:uid(),name:form.name.trim()}]}:p)});notify("項目已新增");
-    }else if(modal==="editItem"){
-      if(!form.name?.trim()){setFormErr("請填寫項目名稱");return;}
-      saveData({...data,projects:data.projects.map(p=>p.id!==activeProjId?p:{...p,items:p.items.map(i=>i.id===form.itemId?{...i,name:form.name.trim()}:i)})});notify("已更新");
+  function submit(){
+    if(modal==="newProj"||modal==="editProj"){
+      if(!form.name?.trim()){setFErr("請填寫專案名稱");return}
+      if(!form.date?.trim()){setFErr("請填寫活動日期");return}
+      if(!/^\d{2}\/\d{2}\/\d{2}/.test(form.date)){setFErr("格式：YY/MM/DD");return}
+      if(modal==="newProj"){sd({...D,projects:[...D.projects,{id:uid(),name:form.name.trim(),date:form.date.trim(),desc:form.desc?.trim()||"",color:form.color||A,published:false,items:[]}]});notify("專案已建立")}
+      else{sd({...D,projects:D.projects.map(q=>q.id===proj?{...q,name:form.name.trim(),date:form.date.trim(),desc:form.desc?.trim()||"",color:form.color||q.color}:q)});notify("已更新")}
+    }else if(modal==="newItem"||modal==="editItem"){
+      if(!form.name?.trim()){setFErr("請填寫項目名稱");return}
+      if(modal==="newItem"){sd({...D,projects:D.projects.map(q=>q.id===proj?{...q,items:[...q.items,{id:uid(),name:form.name.trim()}]}:q)});notify("已新增")}
+      else{sd({...D,projects:D.projects.map(q=>q.id!==proj?q:{...q,items:q.items.map(i=>i.id===form.itemId?{...i,name:form.name.trim()}:i)})});notify("已更新")}
     }else if(modal==="changePin"){
-      if(!form.currentPin){setFormErr("請輸入目前密碼");return;}
-      if(form.currentPin!==data.ownerPin){setFormErr("目前密碼錯誤");return;}
-      if(!form.newPin||form.newPin.length<4){setFormErr("新密碼至少 4 碼");return;}
-      if(form.newPin!==form.confirm){setFormErr("兩次輸入不一致");return;}
-      savePin(form.newPin);setData(d=>({...d,ownerPin:form.newPin}));notify("密碼已更新");
+      if(!form.cur){setFErr("請輸入目前密碼");return}
+      if(form.cur!==D.pin){setFErr("目前密碼錯誤");return}
+      if(!form.newP||form.newP.length<4){setFErr("新密碼至少 4 碼");return}
+      if(form.newP!==form.conf){setFErr("兩次不一致");return}
+      sp(form.newP);setD(d=>({...d,pin:form.newP}));notify("密碼已更新")
     }
-    closeModal();
+    cm()
   }
 
-  function deleteProject(id){setConfirm({msg:"確定刪除此專案及所有記錄？此操作無法復原。",onOk:()=>{
-    db.ref(`trackit/projects/${id}`).remove().catch(console.error);
-    const rem=data.records.filter(r=>r.projectId!==id);const rm={};rem.forEach(r=>{rm[r.id]=r;});
-    db.ref("trackit/records").set(Object.keys(rm).length?rm:null).catch(console.error);
-    setData(d=>({...d,projects:d.projects.filter(p=>p.id!==id),records:rem}));
-    setScreen("projects");notify("已刪除");
-  }});}
-  function deleteItem(itemId){setConfirm({msg:"確定刪除此項目及所有記錄？此操作無法復原。",onOk:()=>{
-    saveData({...data,projects:data.projects.map(p=>p.id!==activeProjId?p:{...p,items:p.items.filter(i=>i.id!==itemId)}),records:data.records.filter(r=>!(r.projectId===activeProjId&&r.itemId===itemId))});notify("已刪除");
-  }});}
-  function togglePublished(id){saveData({...data,projects:data.projects.map(p=>p.id===id?{...p,published:!p.published}:p)});}
-  function reorderProjects(fromId,toId){
-    if(fromId===toId)return;
-    const ps=[...data.projects];const fi=ps.findIndex(p=>p.id===fromId),ti=ps.findIndex(p=>p.id===toId);
-    ps.splice(ti,0,ps.splice(fi,1)[0]);saveData({...data,projects:ps});
+  function delProj(id){setConfirm({msg:"確定刪除此專案？",ok:()=>{
+    fdb.ref("trackit/projects/"+id).remove().catch(console.error);
+    const rem=D.records.filter(x=>x.projectId!==id);const rm={};rem.forEach(x=>{rm[x.id]=x});
+    fdb.ref("trackit/records").set(Object.keys(rm).length?rm:null).catch(console.error);
+    setD(d=>({...d,projects:d.projects.filter(p=>p.id!==id),records:rem}));
+    setPage("home");notify("已刪除")
+  }})}
+  function delItem(iid){setConfirm({msg:"確定刪除此項目？",ok:()=>{
+    sd({...D,projects:D.projects.map(p=>p.id!==proj?p:{...p,items:p.items.filter(i=>i.id!==iid)}),records:D.records.filter(x=>!(x.projectId===proj&&x.itemId===iid))});notify("已刪除")
+  }})}
+  function togglePub(id){sd({...D,projects:D.projects.map(p=>p.id===id?{...p,published:!p.published}:p)})}
+  function reorder(from,to){
+    if(from===to)return;const ps=[...D.projects];
+    const fi=ps.findIndex(p=>p.id===from),ti=ps.findIndex(p=>p.id===to);
+    ps.splice(ti,0,ps.splice(fi,1)[0]);sd({...D,projects:ps})
   }
-  function commitCellEdit(pid){
-    if(!editCell)return;
-    const d=upsertRecord(pid,editCell.itemId,editCell.date,editVal);
-    saveData(d);setEditCell(null);setEditVal("");notify("數據已更新");
+  function commitCell(pid){
+    if(!editCell)return;const d=saveRec(pid,editCell.iid,editCell.date,editVal);
+    sd(d);setEditCell(null);setEditVal("");notify("已更新")
   }
-
-  function MHead({title}){return e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:22}},e("span",{style:{fontSize:18,fontWeight:700}},title),e("button",{onClick:closeModal,style:{background:C.bgSurface,border:"none",borderRadius:20,width:30,height:30,fontSize:18,color:C.textMuted,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}},"×"));}
-  function MFoot(){return e("div",{style:{display:"flex",gap:10,marginTop:6}},e(GBtn,{onClick:closeModal,style:{flex:1}},"取消"),e(PBtn,{onClick:submitModal,style:{flex:2}},"確認"));}
-
-  function modalContent(){
-    if(modal==="login")return e(Fragment,null,e(MHead,{title:"擁有者登入"}),e("div",{style:{display:"flex",flexDirection:"column",gap:16}},e("div",null,e("label",{style:LBL},"密碼"),e("input",{type:"password",placeholder:"請輸入密碼",value:pinInput,autoFocus:true,onChange:ev=>{setPinInput(ev.target.value);setPinErr("");},onKeyDown:ev=>ev.key==="Enter"&&doLogin()}),pinErr&&e("p",{style:{color:C.danger,fontSize:13,marginTop:5}},pinErr)),e(PBtn,{full:true,onClick:doLogin},"登入")));
-    if(modal==="newProject"||modal==="editProject")return e(Fragment,null,e(MHead,{title:modal==="newProject"?"新增專案":"編輯專案"}),e("div",{style:{display:"flex",flexDirection:"column",gap:16}},
-      e("div",null,e("label",{style:LBL},"專案名稱 *"),e("input",{autoFocus:true,value:form.name||"",onChange:ev=>{setForm(f=>({...f,name:ev.target.value}));setFormErr("");},placeholder:"例：2025 社區博覽會"})),
-      e("div",null,e("label",{style:LBL},"活動日期 * (YY/MM/DD)"),e("input",{value:form.dateRange||"",onChange:ev=>{setForm(f=>({...f,dateRange:ev.target.value}));setFormErr("");},placeholder:"25/05/01"})),
-      e("div",null,e("label",{style:LBL},"說明（選填）"),e("input",{value:form.desc||"",onChange:ev=>setForm(f=>({...f,desc:ev.target.value})),placeholder:"備註說明"})),
-      e("div",null,e("label",{style:LBL},"主題色彩"),e("div",{style:{display:"flex",gap:10,flexWrap:"wrap"}},PALETTE.map(c=>e("div",{key:c,onClick:()=>setForm(f=>({...f,color:c})),style:{width:34,height:34,borderRadius:10,background:c,cursor:"pointer",outline:form.color===c?`3px solid ${C.text}`:"3px solid transparent",outlineOffset:2}})))),
-      formErr&&e("p",{style:{color:C.danger,fontSize:13}},formErr),e(MFoot)));
-    if(modal==="newItem"||modal==="editItem")return e(Fragment,null,e(MHead,{title:modal==="newItem"?"新增登記項目":"編輯項目"}),e("div",{style:{display:"flex",flexDirection:"column",gap:16}},e("div",null,e("label",{style:LBL},"項目名稱 *"),e("input",{autoFocus:true,value:form.name||"",onChange:ev=>{setForm(f=>({...f,name:ev.target.value}));setFormErr("");},placeholder:"例：參觀人數",onKeyDown:ev=>ev.key==="Enter"&&submitModal()})),formErr&&e("p",{style:{color:C.danger,fontSize:13}},formErr),e(MFoot)));
-    if(modal==="changePin")return e(Fragment,null,e(MHead,{title:"修改登入密碼"}),e("div",{style:{display:"flex",flexDirection:"column",gap:16}},
-      e("div",null,e("label",{style:LBL},"目前密碼"),e("input",{type:"password",autoFocus:true,placeholder:"請輸入目前密碼",value:form.currentPin||"",onChange:ev=>{setForm(f=>({...f,currentPin:ev.target.value}));setFormErr("");}})),
-      e("div",{style:{height:1,background:C.border}}),
-      e("div",null,e("label",{style:LBL},"新密碼（至少 4 碼）"),e("input",{type:"password",placeholder:"請輸入新密碼",value:form.newPin||"",onChange:ev=>{setForm(f=>({...f,newPin:ev.target.value}));setFormErr("");}})),
-      e("div",null,e("label",{style:LBL},"確認新密碼"),e("input",{type:"password",placeholder:"再次輸入新密碼",value:form.confirm||"",onChange:ev=>{setForm(f=>({...f,confirm:ev.target.value}));setFormErr("");}})),
-      formErr&&e("p",{style:{color:C.danger,fontSize:13}},formErr),e(MFoot)));
-    return null;
-  }
-
-  function ViewerList(){
-    const visible=data.projects.filter(p=>p.published);
-    return e("div",{style:{minHeight:"100vh"}},
-      e(Topbar,{right:e("button",{onClick:()=>{setModal("login");setPinInput("");setPinErr("");},style:{background:C.accentLight,border:"none",borderRadius:20,padding:"6px 14px",fontSize:13,color:C.accent,fontWeight:600,cursor:"pointer"}},"登入管理")}),
-      e("div",{style:{padding:"28px 16px 48px",maxWidth:500,margin:"0 auto"}},
-        e("h1",{style:{fontFamily:"'DM Serif Display'",fontSize:28,fontWeight:400,letterSpacing:-.4,marginBottom:6}},"選擇活動"),
-        e("p",{style:{color:C.textMuted,fontSize:14,marginBottom:24}},"點選活動以登記人次"),
-        visible.length===0?e(Card,{style:{textAlign:"center",padding:"48px 20px"}},e("p",{style:{fontSize:38,marginBottom:10}},"📋"),e("p",{style:{color:C.textMuted}},"目前沒有開放中的活動"))
-        :e("div",{style:{display:"flex",flexDirection:"column",gap:12}},visible.map(p=>e("button",{key:p.id,onClick:()=>{setActiveProjId(p.id);setScreen("entry");},
-          style:{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:18,padding:"18px 20px",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,width:"100%",transition:"box-shadow .18s,border-color .18s"},
-          onMouseEnter:ev=>{ev.currentTarget.style.boxShadow=`0 4px 20px rgba(155,142,199,.16)`;ev.currentTarget.style.borderColor=p.color;},
-          onMouseLeave:ev=>{ev.currentTarget.style.boxShadow="none";ev.currentTarget.style.borderColor=C.border;}},
-          e("div",{style:{width:12,height:12,borderRadius:3,background:p.color,flexShrink:0}}),
-          e("div",{style:{flex:1,minWidth:0}},e("p",{style:{fontWeight:700,fontSize:16,marginBottom:2}},p.name),p.dateRange&&e("p",{style:{fontSize:12,color:C.textMuted}},p.dateRange),e("p",{style:{fontSize:12,color:C.textMuted,marginTop:2}},`${p.items.length} 個項目`)),
-          e("span",{style:{fontSize:18,color:C.borderMid,flexShrink:0}},"›"))))
-      )
-    );
-  }
-
-  function ViewerEntry(){
-    const p=getProj(activeProjId);
-    const[selDate,setSelDate]=useState(todayStr);
-    const[localVals,setLocalVals]=useState({});
-    const[submitted,setSubmitted]=useState(false);
-    if(!p)return null;
-    const anyFilled=p.items.some(i=>localVals[i.id]!==undefined&&localVals[i.id]!=="");
-    const dayTotal=p.items.reduce((s,i)=>{const v=localVals[i.id]!==undefined?parseInt(localVals[i.id],10):(getRecord(p.id,i.id,selDate)?.value??0);return s+(isNaN(v)?0:v);},0);
-    return e("div",{style:{minHeight:"100vh"}},
-      e(Topbar,{back:()=>{setScreen("projects");setActiveProjId(null);},title:p.name}),
-      e("div",{style:{padding:"20px 16px 60px",maxWidth:500,margin:"0 auto"}},
-        e(Card,{style:{marginBottom:14,display:"flex",alignItems:"center",gap:14}},
-          e("div",{style:{flex:1}},e("label",{style:{...LBL,marginBottom:4}},"登記日期"),e("input",{type:"date",value:selDate,onChange:ev=>{setSelDate(ev.target.value);setLocalVals({});setSubmitted(false);},style:{border:"none",padding:0,fontSize:15,fontWeight:700,width:"auto",background:"none",outline:"none",boxShadow:"none"}})),
-          e("div",{style:{textAlign:"right",flexShrink:0}},e("p",{style:{fontSize:11,color:C.textMuted,marginBottom:2}},"本日小計"),e("p",{style:{fontSize:26,fontWeight:800,color:p.color,lineHeight:1}},dayTotal.toLocaleString()))
-        ),
-        submitted&&e("div",{style:{background:C.successBg,border:"1px solid #b2d8b2",borderRadius:14,padding:"14px 18px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",animation:"fadeIn .3s ease"}},
-          e("div",{style:{display:"flex",alignItems:"center",gap:10}},e("span",{style:{fontSize:20}},"✅"),e("div",null,e("p",{style:{fontWeight:700,color:C.success,fontSize:14}},"數據已成功送出"),e("p",{style:{fontSize:12,color:C.success,opacity:.8}},"感謝你的回報！"))),
-          e("button",{onClick:()=>{setLocalVals({});setSubmitted(false);},style:{background:C.success,color:"#fff",border:"none",borderRadius:10,padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer"}},"再填一次")
-        ),
-        p.items.length===0?e(Card,{style:{textAlign:"center",padding:"40px 20px",color:C.textMuted}},e("p",null,"此活動尚無登記項目"))
-        :e(Fragment,null,
-          e("div",{style:{display:"flex",flexDirection:"column",gap:10,marginBottom:16}},p.items.map((item,idx)=>{
-            const existing=getRecord(p.id,item.id,selDate);
-            return e(Card,{key:item.id,style:{display:"flex",alignItems:"center",gap:14,padding:"16px 18px",opacity:submitted?.65:1}},
-              e("div",{style:{width:9,height:9,borderRadius:3,background:p.color,flexShrink:0}}),
-              e("div",{style:{flex:1}},e("p",{style:{fontWeight:600,fontSize:16}},item.name),existing&&!submitted&&e("p",{style:{fontSize:11,color:C.textMuted,marginTop:2}},`已有記錄：${existing.value.toLocaleString()}（可覆蓋）`)),
-              e("input",{type:"number",min:0,inputMode:"numeric",placeholder:existing?String(existing.value):"0",value:localVals[item.id]??"",disabled:submitted,autoFocus:idx===0,onChange:ev=>setLocalVals(v=>({...v,[item.id]:ev.target.value})),style:{width:100,textAlign:"right",fontSize:24,fontWeight:800,color:p.color,border:"none",borderBottom:`2.5px solid ${p.color}55`,borderRadius:0,padding:"6px 4px",background:"none",boxShadow:"none"}})
-            );
-          })),
-          !submitted&&e(Fragment,null,
-            e(PBtn,{full:true,onClick:()=>{const entries=p.items.filter(i=>localVals[i.id]!==undefined&&localVals[i.id]!=="").map(i=>({iid:i.id,val:localVals[i.id]}));if(!entries.length)return;batchUpsert(p.id,entries,selDate);setSubmitted(true);notify("回報成功！");},disabled:!anyFilled,color:p.color,style:{fontSize:16,padding:"15px",borderRadius:16}},"送出回報"),
-            !anyFilled&&e("p",{style:{textAlign:"center",fontSize:12,color:C.textMuted,marginTop:8}},"請至少填入一項數值後送出")
-          )
-        )
-      )
-    );
-  }
-
-  function OwnerList(){
-    return e("div",{style:{minHeight:"100vh"}},
-      e(Topbar,{right:e("div",{style:{display:"flex",gap:8,alignItems:"center"}},e("span",{style:{fontSize:12,fontWeight:600,padding:"3px 10px",borderRadius:20,background:C.accentLight,color:C.accent}},"擁有者"),e(GBtn,{onClick:()=>{setModal("changePin");setForm({});setFormErr("");},style:{padding:"5px 12px",fontSize:13}},"密碼設定"),e(GBtn,{onClick:doLogout,style:{padding:"5px 12px",fontSize:13}},"登出"))}),
-      e("div",{style:{maxWidth:800,margin:"0 auto",padding:"32px 24px"}},
-        e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:28}},
-          e("div",null,e("h1",{style:{fontFamily:"'DM Serif Display'",fontSize:30,fontWeight:400,letterSpacing:-.5,marginBottom:4}},"活動專案"),e("p",{style:{color:C.textMuted,fontSize:14}},`${data.projects.length} 個專案`)),
-          e(PBtn,{onClick:()=>{setModal("newProject");setForm({color:C.accent});setFormErr("");}},"＋ 新增專案")
-        ),
-        data.projects.length===0?e(Card,{style:{textAlign:"center",padding:"60px 20px"}},e("p",{style:{fontSize:42,marginBottom:12}},"📋"),e("p",{style:{color:C.textMuted,marginBottom:20}},"尚無活動專案"),e(PBtn,{onClick:()=>{setModal("newProject");setForm({color:C.accent});setFormErr("");}},"建立第一個專案"))
-        :e("div",{style:{display:"flex",flexDirection:"column",gap:8}},
-          e("p",{style:{fontSize:12,color:C.textMuted,marginBottom:4}},"拖移可調整順序"),
-          data.projects.map(p=>e("div",{key:p.id,draggable:true,
-            onDragStart:()=>setDragId(p.id),onDragEnd:()=>{setDragId(null);setDragOver(null);},
-            onDragOver:ev=>{ev.preventDefault();setDragOver(p.id);},
-            onDrop:()=>{reorderProjects(dragId,p.id);setDragId(null);setDragOver(null);},
-            style:{background:C.bgCard,border:`1.5px solid ${dragOver===p.id?C.accent:C.border}`,borderRadius:16,padding:"16px 18px",display:"flex",alignItems:"center",gap:14,opacity:dragId===p.id?.45:1,transition:"border-color .15s,opacity .15s",boxShadow:dragOver===p.id?`0 0 0 3px ${C.accentLight}`:"none",cursor:"grab"}},
-            e("div",{style:{display:"flex",flexDirection:"column",gap:2.5,flexShrink:0,paddingRight:2,opacity:.5}},[0,1,2].map(i=>e("div",{key:i,style:{width:12,height:1.5,borderRadius:1,background:C.textMuted}}))),
-            e("div",{style:{width:12,height:12,borderRadius:3,background:p.color,flexShrink:0}}),
-            e("div",{style:{flex:1,minWidth:0,cursor:"pointer"},onClick:()=>{setActiveProjId(p.id);setOwnerTab("data");setScreen("ownerProj");}},e("p",{style:{fontWeight:700,fontSize:15,marginBottom:1}},p.name),p.dateRange&&e("p",{style:{fontSize:12,color:C.textMuted}},p.dateRange)),
-            e("span",{style:{fontSize:11,fontWeight:700,padding:"3px 10px",borderRadius:20,flexShrink:0,background:p.published?"#E6F4EC":C.bgSurface,color:p.published?"#2E7D4F":C.textMuted,border:`1px solid ${p.published?"#B6DECA":C.border}`}},p.published?"● 上架中":"○ 已下架"),
-            e("span",{style:{fontSize:12,color:C.textMuted,flexShrink:0}},`${p.items.length} 項`),
-            e("span",{style:{fontSize:18,color:C.borderMid,flexShrink:0,cursor:"pointer"},onClick:()=>{setActiveProjId(p.id);setOwnerTab("data");setScreen("ownerProj");}},"›")
-          ))
-        )
-      )
-    );
-  }
-
-  function OwnerProj(){
-    const p=getProj(activeProjId);if(!p)return null;
-    const dates=allDates(activeProjId);
-    function val(iid,date){const r=data.records.find(r=>r.projectId===activeProjId&&r.itemId===iid&&r.date===date);return r?r.value:null;}
-    function dateSum(date){return p.items.reduce((s,i)=>{const v=val(i.id,date);return s+(v??0);},0);}
-    function itemSum(iid){return dates.reduce((s,d)=>{const v=val(iid,d);return s+(v??0);},0);}
-    const grand=p.items.reduce((s,i)=>s+itemSum(i.id),0);
-    const TH={padding:"11px 14px",textAlign:"right",fontWeight:600,color:C.textMid,fontSize:13,whiteSpace:"nowrap",background:C.bgSurface,borderBottom:`1px solid ${C.border}`};
-    const TD={padding:"10px 14px",textAlign:"right",fontSize:13,borderTop:`1px solid ${C.bgSurface}`};
-    const fd=dateSearch?dates.filter(d=>d===toISO(dateSearch)):dates;
-    const fg=p.items.reduce((s,i)=>s+fd.reduce((ss,d)=>{const v=val(i.id,d);return ss+(v??0);},0),0);
-    function Cell({iid,date}){
-      const v=val(iid,date);const isE=editCell?.itemId===iid&&editCell?.date===date;
-      if(isE)return e("input",{type:"number",min:0,value:editVal,autoFocus:true,onChange:ev=>setEditVal(ev.target.value),onBlur:()=>commitCellEdit(p.id),onKeyDown:ev=>{if(ev.key==="Enter")commitCellEdit(p.id);if(ev.key==="Escape"){setEditCell(null);setEditVal("");}},style:{width:80,textAlign:"right",fontSize:13,fontWeight:700,color:p.color,border:`1.5px solid ${p.color}`,borderRadius:6,padding:"3px 6px",background:C.accentLight}});
-      return e("span",{onClick:()=>{setEditCell({itemId:iid,date});setEditVal(v!=null?String(v):"");},title:"點擊編輯",style:{color:v!=null?C.text:C.border,cursor:"pointer",padding:"3px 6px",borderRadius:6,display:"inline-block"},onMouseEnter:ev=>ev.currentTarget.style.background=C.accentLight,onMouseLeave:ev=>ev.currentTarget.style.background="transparent"},v!=null?v.toLocaleString():"—");
-    }
-    return e("div",{style:{minHeight:"100vh"}},
-      e(Topbar,{back:()=>setScreen("projects"),title:p.name,right:e("div",{style:{display:"flex",gap:8,alignItems:"center"}},
-        e("span",{style:{fontSize:12,fontWeight:600,padding:"3px 10px",borderRadius:20,background:C.accentLight,color:C.accent}},"擁有者"),
-        e("span",{style:{fontSize:11,fontWeight:700,padding:"3px 10px",borderRadius:20,background:p.published?"#E6F4EC":C.bgSurface,color:p.published?"#2E7D4F":C.textMuted,border:`1px solid ${p.published?"#B6DECA":C.border}`}},p.published?"● 上架中":"○ 已下架"),
-        e(GBtn,{onClick:doLogout,style:{padding:"5px 12px",fontSize:13}},"登出")
-      )}),
-      e("div",{style:{background:C.bgCard,borderBottom:`1px solid ${C.border}`,display:"flex",padding:"0 24px"}},[["data","📊 數據"],["manage","⚙️ 管理項目"]].map(([v,label])=>e("button",{key:v,onClick:()=>setOwnerTab(v),style:{padding:"13px 20px",border:"none",background:"transparent",fontWeight:ownerTab===v?700:500,fontSize:14,color:ownerTab===v?p.color:C.textMuted,borderBottom:ownerTab===v?`2.5px solid ${p.color}`:"2.5px solid transparent",borderRadius:0,transition:"color .15s"}},label))),
-      e("div",{style:{maxWidth:960,margin:"0 auto",padding:"28px 24px 48px"}},
-        ownerTab==="data"&&e(Fragment,null,
-          p.items.length>0&&e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:10,marginBottom:20}},p.items.map(item=>e(Card,{key:item.id,style:{padding:"14px 16px"}},e("div",{style:{display:"flex",alignItems:"center",gap:7,marginBottom:8}},e("div",{style:{width:8,height:8,borderRadius:2,background:p.color,flexShrink:0}}),e("p",{style:{fontSize:13,fontWeight:600,color:C.textMid,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},item.name)),e("p",{style:{fontSize:28,fontWeight:800,color:p.color,lineHeight:1}},itemSum(item.id).toLocaleString())))),
-          e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:dateSearchOpen?0:10,flexWrap:"wrap",gap:10}},
-            e("div",{style:{display:"flex",background:C.bgSurface,borderRadius:12,padding:3}},[["date","按日期"],["item","按項目"]].map(([v,label])=>e("button",{key:v,onClick:()=>setDashView(v),style:{padding:"7px 18px",borderRadius:10,border:"none",fontWeight:dashView===v?700:500,fontSize:13,background:dashView===v?C.bgCard:"transparent",color:dashView===v?C.text:C.textMuted,boxShadow:dashView===v?"0 1px 6px rgba(0,0,0,.07)":"none",transition:"all .15s"}},label))),
-            e("div",{style:{display:"flex",gap:8,alignItems:"center"}},
-              e("button",{onClick:()=>{setDateSearchOpen(o=>!o);if(dateSearchOpen)setDateSearch("");},title:"搜尋日期",style:{width:36,height:36,borderRadius:10,border:`1.5px solid ${dateSearchOpen||dateSearch?C.accent:C.border}`,background:dateSearchOpen||dateSearch?C.accentLight:"transparent",color:dateSearchOpen||dateSearch?C.accent:C.textMuted,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,cursor:"pointer",transition:"all .15s"}},"🔍"),
-              e("button",{onClick:()=>exportCSV(p,data.records),style:{background:C.accent,color:"#fff",fontWeight:700,fontSize:13,padding:"8px 18px",borderRadius:12,display:"flex",alignItems:"center",gap:6}},"⬇ 下載 CSV")
-            )
-          ),
-          dateSearchOpen&&e("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:12,padding:"12px 16px",background:C.accentLight,borderRadius:12,border:`1px solid ${C.border}`,animation:"fadeIn .15s ease"}},
-            e("span",{style:{fontSize:14,color:C.accent,flexShrink:0}},"🔍"),
-            e("input",{type:"text",value:dateSearch,autoFocus:true,placeholder:"YY/MM/DD",onChange:ev=>setDateSearch(ev.target.value),style:{flex:1,maxWidth:160,fontSize:14,fontWeight:600,padding:"7px 12px"}}),
-            dateSearch&&e("button",{onClick:()=>setDateSearch(""),style:{background:"transparent",border:"none",color:C.accent,fontSize:13,fontWeight:600,cursor:"pointer",padding:"4px 8px",borderRadius:8}},"清除"),
-            dateSearch&&e("span",{style:{fontSize:12,color:C.textMuted,flexShrink:0}},dates.filter(d=>d===toISO(dateSearch)).length>0?`找到 ${dateSearch}`:"無此日期資料")
-          ),
-          e("p",{style:{fontSize:12,color:C.textMuted,marginBottom:10}},"點擊數字可直接編輯修正"),
-          e("div",{style:{overflowX:"auto",borderRadius:18,border:`1px solid ${C.border}`,background:C.bgCard}},
-            dateSearch&&fd.length===0&&e("div",{style:{padding:32,textAlign:"center"}},e("p",{style:{fontSize:32,marginBottom:8}},"🔍"),e("p",{style:{color:C.textMuted,fontSize:14}},`找不到 ${dateSearch} 的記錄`)),
-            fd.length>0&&dashView==="date"&&e("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:13}},
-              e("thead",null,e("tr",null,e("th",{style:{...TH,textAlign:"left"}},"日期"),...p.items.map(i=>e("th",{key:i.id,style:TH},i.name)),e("th",{style:{...TH,color:p.color}},"合計"))),
-              e("tbody",null,...fd.map(d=>e("tr",{key:d},e("td",{style:{...TD,textAlign:"left",fontWeight:600}},toDisplay(d)),...p.items.map(i=>e("td",{key:i.id,style:TD},e(Cell,{iid:i.id,date:d}))),e("td",{style:{...TD,fontWeight:800,color:p.color}},dateSum(d).toLocaleString())))),
-              e("tfoot",null,e("tr",{style:{borderTop:`2px solid ${C.border}`,background:C.bgSurface}},e("td",{style:{padding:"11px 14px",fontWeight:800,fontSize:13}},"總計"),...p.items.map(i=>e("td",{key:i.id,style:{...TD,borderTop:`2px solid ${C.border}`,fontWeight:700}},fd.reduce((s,d)=>{const v=val(i.id,d);return s+(v??0);},0).toLocaleString())),e("td",{style:{...TD,borderTop:`2px solid ${C.border}`,fontWeight:800,color:p.color}},fg.toLocaleString())))
-            ),
-            fd.length>0&&dashView==="item"&&e("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:13}},
-              e("thead",null,e("tr",null,e("th",{style:{...TH,textAlign:"left"}},"項目"),...fd.map(d=>e("th",{key:d,style:TH},toDisplay(d))),e("th",{style:{...TH,color:p.color}},"合計"))),
-              e("tbody",null,...p.items.map(item=>e("tr",{key:item.id},e("td",{style:{...TD,textAlign:"left",fontWeight:600}},item.name),...fd.map(d=>e("td",{key:d,style:TD},e(Cell,{iid:item.id,date:d}))),e("td",{style:{...TD,fontWeight:800,color:p.color}},fd.reduce((s,d)=>{const v=val(item.id,d);return s+(v??0);},0).toLocaleString())))),
-              e("tfoot",null,e("tr",{style:{borderTop:`2px solid ${C.border}`,background:C.bgSurface}},e("td",{style:{padding:"11px 14px",fontWeight:800,fontSize:13}},"合計"),...fd.map(d=>e("td",{key:d,style:{...TD,borderTop:`2px solid ${C.border}`,fontWeight:700}},dateSum(d).toLocaleString())),e("td",{style:{...TD,borderTop:`2px solid ${C.border}`,fontWeight:800,color:p.color}},fg.toLocaleString())))
-            )
-          )
-        ),
-        ownerTab==="manage"&&e("div",{style:{maxWidth:560}},
-          e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}},e("h3",{style:{fontSize:18,fontWeight:700}},"登記項目"),e(PBtn,{onClick:()=>{setModal("newItem");setForm({});setFormErr("");},style:{padding:"9px 18px",fontSize:14}},"＋ 新增項目")),
-          p.items.length===0?e(Card,{style:{textAlign:"center",padding:"40px 20px",color:C.textMuted}},e("p",{style:{marginBottom:14}},"尚無登記項目"),e(PBtn,{onClick:()=>{setModal("newItem");setForm({});setFormErr("");}},"新增第一個項目"))
-          :e(Card,{style:{padding:0,overflow:"hidden"}},p.items.map((item,idx)=>e("div",{key:item.id,style:{display:"flex",alignItems:"center",gap:14,padding:"14px 18px",borderTop:idx>0?`1px solid ${C.bgSurface}`:"none"}},
-            e("div",{style:{width:9,height:9,borderRadius:3,background:p.color,flexShrink:0}}),
-            e("span",{style:{flex:1,fontWeight:600,fontSize:15}},item.name),
-            e("span",{style:{fontSize:13,color:C.textMuted,marginRight:8}},`累計 ${itemSum(item.id).toLocaleString()}`),
-            e(GBtn,{onClick:()=>{setModal("editItem");setForm({itemId:item.id,name:item.name});setFormErr("");},style:{padding:"5px 12px",fontSize:13}},"編輯"),
-            e(GBtn,{danger:true,onClick:()=>deleteItem(item.id),style:{padding:"5px 12px",fontSize:13}},"刪除")
-          ))),
-          e("div",{style:{marginTop:32,paddingTop:24,borderTop:`1px solid ${C.bgSurface}`}},
-            e("p",{style:{fontSize:14,fontWeight:700,color:C.textMid,marginBottom:12}},"專案設定"),
-            e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 18px",background:p.published?"#F0FAF4":C.bgSurface,border:`1px solid ${p.published?"#B6DECA":C.border}`,borderRadius:14,marginBottom:12}},
-              e("div",null,e("p",{style:{fontWeight:600,fontSize:14,color:p.published?"#2E7D4F":C.textMid}},p.published?"● 上架中":"○ 已下架"),e("p",{style:{fontSize:12,color:C.textMuted,marginTop:2}},p.published?"檢視者可在前台看到並登記此專案":"僅擁有者可見，檢視者前台不顯示")),
-              e("button",{onClick:()=>togglePublished(p.id),style:{padding:"8px 18px",borderRadius:10,border:"none",fontWeight:700,fontSize:13,cursor:"pointer",background:p.published?"#FBF0F0":"#E6F4EC",color:p.published?"#A83838":"#2E7D4F"}},p.published?"下架":"上架")
-            ),
-            e("div",{style:{display:"flex",gap:10}},
-              e(GBtn,{onClick:()=>{setModal("editProject");setForm({name:p.name,dateRange:p.dateRange||"",desc:p.description,color:p.color});setFormErr("");},style:{padding:"9px 18px"}},"編輯專案資訊"),
-              e(GBtn,{danger:true,onClick:()=>deleteProject(p.id),style:{padding:"9px 18px"}},"刪除此專案")
-            )
-          )
-        )
-      )
-    );
+  function exportCSV(p){
+    const ds=dates(p.id);
+    const rows=[["日期",...p.items.map(i=>i.name),"合計"].join(","),
+      ...ds.map(d=>{const vs=p.items.map(i=>{const x=D.records.find(x=>x.projectId===p.id&&x.itemId===i.id&&x.date===d);return x?x.value:""});return[d,...vs,vs.reduce((s,v)=>s+(Number(v)||0),0)].join(",")}),
+      ["總計",...p.items.map(i=>D.records.filter(x=>x.projectId===p.id&&x.itemId===i.id).reduce((s,x)=>s+x.value,0)),D.records.filter(x=>x.projectId===p.id).reduce((s,x)=>s+x.value,0)].join(",")
+    ];
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+rows.join("\n")],{type:"text/csv"}));a.download=p.name+".csv";a.click()
   }
 
   const isOwner=role==="owner";
-  if(loading)return e("div",{style:{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}},e(Logo,{size:48}),e("p",{style:{color:C.textMuted,fontSize:14,fontWeight:500}},"載入中…"));
-  return e("div",{style:{minHeight:"100vh",background:C.bg}},
-    !isOwner&&screen==="projects"&&e(ViewerList),
-    !isOwner&&screen==="entry"&&e(ViewerEntry),
-    isOwner&&screen==="projects"&&e(OwnerList),
-    isOwner&&screen==="ownerProj"&&e(OwnerProj),
-    e(ModalShell,{open:!!modal,onClose:closeModal},modalContent()),
-    confirm&&e("div",{style:{position:"fixed",inset:0,background:"rgba(26,23,19,.35)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:24}},
-      e("div",{style:{background:C.bgCard,borderRadius:18,padding:"28px 24px",maxWidth:360,width:"100%",boxShadow:"0 16px 48px rgba(0,0,0,.14)"}},
-        e("p",{style:{fontWeight:600,fontSize:16,marginBottom:8}},"確認操作"),
-        e("p",{style:{fontSize:14,color:C.textMid,marginBottom:24,lineHeight:1.6}},confirm.msg),
-        e("div",{style:{display:"flex",gap:10}},
-          e(GBtn,{onClick:()=>setConfirm(null),style:{flex:1}},"取消"),
-          e("button",{onClick:()=>{confirm.onOk();setConfirm(null);},style:{flex:1,background:C.danger,color:"#fff",fontWeight:700,padding:"10px",borderRadius:12,border:"none",cursor:"pointer",fontSize:14}},"確定刪除")
+  const topbar=(back,title,right)=>r("div",{style:{background:"rgba(246,249,250,.97)",borderBottom:`1px solid ${C.bdr}`,padding:"0 16px",height:52,display:"flex",alignItems:"center",gap:10,position:"sticky",top:0,zIndex:10}},
+    back?r("button",{onClick:back,style:{background:"none",border:"none",fontSize:22,color:C.muted,cursor:"pointer",lineHeight:1,padding:"0 4px 0 0"}},"‹"):r("svg",{width:24,height:24,viewBox:"0 0 32 32",style:{borderRadius:6,flexShrink:0}},r("rect",{width:32,height:32,rx:7,fill:A}),r("rect",{x:7,y:8,width:11,height:3,rx:1.5,fill:"white",opacity:.9}),r("rect",{x:7,y:14,width:18,height:3,rx:1.5,fill:"white"}),r("rect",{x:7,y:20,width:14,height:3,rx:1.5,fill:"white",opacity:.7})),
+    r("span",{style:{flex:1,fontWeight:600,fontSize:back?15:17}},title||"TrackIt"),
+    right
+  )
+
+  function ModalContent(){
+    if(modal==="login")return r(Fragment,null,r("div",{style:{fontSize:16,fontWeight:600,marginBottom:18}},"擁有者登入"),r(Label,{t:"密碼"}),r("input",{type:"password",placeholder:"請輸入密碼",value:pin,autoFocus:true,onChange:e=>{setPin(e.target.value);setPinErr("")},onKeyDown:e=>e.key==="Enter"&&login()}),pinErr&&r("p",{style:{color:C.err,fontSize:12,marginTop:4}},pinErr),r("div",{style:{marginTop:16}},r(PBtn,{ch:"登入",onClick:login,full:true})));
+    if(modal==="newProj"||modal==="editProj")return r(Fragment,null,r("div",{style:{fontSize:16,fontWeight:600,marginBottom:18}},modal==="newProj"?"新增專案":"編輯專案"),r("div",{style:{display:"flex",flexDirection:"column",gap:12}},r("div",null,r(Label,{t:"專案名稱 *"}),r("input",{autoFocus:true,value:form.name||"",onChange:e=>{setForm(f=>({...f,name:e.target.value}));setFErr("")},placeholder:"例：2025 社區博覽會"})),r("div",null,r(Label,{t:"活動日期 * (YY/MM/DD)"}),r("input",{value:form.date||"",onChange:e=>{setForm(f=>({...f,date:e.target.value}));setFErr("")},placeholder:"25/05/01"})),r("div",null,r(Label,{t:"說明（選填）"}),r("input",{value:form.desc||"",onChange:e=>setForm(f=>({...f,desc:e.target.value})),placeholder:"備註"})),r("div",null,r(Label,{t:"顏色"}),r("div",{style:{display:"flex",gap:8,flexWrap:"wrap"}},PAL.map(c=>r("div",{key:c,onClick:()=>setForm(f=>({...f,color:c})),style:{width:30,height:30,borderRadius:8,background:c,cursor:"pointer",outline:form.color===c?`3px solid #1E2030`:"3px solid transparent",outlineOffset:2}})))),fErr&&r("p",{style:{color:C.err,fontSize:12}},fErr),r("div",{style:{display:"flex",gap:8,marginTop:4}},r(GBtn,{ch:"取消",onClick:cm,style:{flex:1}}),r(PBtn,{ch:"確認",onClick:submit,style:{flex:2}}))));
+    if(modal==="newItem"||modal==="editItem")return r(Fragment,null,r("div",{style:{fontSize:16,fontWeight:600,marginBottom:18}},modal==="newItem"?"新增項目":"編輯項目"),r("div",null,r(Label,{t:"項目名稱 *"}),r("input",{autoFocus:true,value:form.name||"",onChange:e=>{setForm(f=>({...f,name:e.target.value}));setFErr("")},placeholder:"例：參觀人數",onKeyDown:e=>e.key==="Enter"&&submit()})),fErr&&r("p",{style:{color:C.err,fontSize:12,marginTop:4}},fErr),r("div",{style:{display:"flex",gap:8,marginTop:14}},r(GBtn,{ch:"取消",onClick:cm,style:{flex:1}}),r(PBtn,{ch:"確認",onClick:submit,style:{flex:2}})));
+    if(modal==="changePin")return r(Fragment,null,r("div",{style:{fontSize:16,fontWeight:600,marginBottom:18}},"修改密碼"),r("div",{style:{display:"flex",flexDirection:"column",gap:12}},r("div",null,r(Label,{t:"目前密碼"}),r("input",{type:"password",autoFocus:true,value:form.cur||"",onChange:e=>{setForm(f=>({...f,cur:e.target.value}));setFErr("")}})),r("div",{style:{height:1,background:C.bdr}}),r("div",null,r(Label,{t:"新密碼（至少 4 碼）"}),r("input",{type:"password",value:form.newP||"",onChange:e=>{setForm(f=>({...f,newP:e.target.value}));setFErr("")}})),r("div",null,r(Label,{t:"確認新密碼"}),r("input",{type:"password",value:form.conf||"",onChange:e=>{setForm(f=>({...f,conf:e.target.value}));setFErr("")}})),fErr&&r("p",{style:{color:C.err,fontSize:12}},fErr),r("div",{style:{display:"flex",gap:8,marginTop:4}},r(GBtn,{ch:"取消",onClick:cm,style:{flex:1}}),r(PBtn,{ch:"確認",onClick:submit,style:{flex:2}}))));
+    return null
+  }
+
+  function Home(){
+    const vis=isOwner?D.projects:D.projects.filter(p=>p.published);
+    if(loading)return r("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12,background:C.bg}},r("svg",{width:36,height:36,viewBox:"0 0 32 32"},r("rect",{width:32,height:32,rx:7,fill:A}),r("rect",{x:7,y:8,width:11,height:3,rx:1.5,fill:"white",opacity:.9}),r("rect",{x:7,y:14,width:18,height:3,rx:1.5,fill:"white"}),r("rect",{x:7,y:20,width:14,height:3,rx:1.5,fill:"white",opacity:.7})),r("div",{style:{color:C.muted,fontSize:14}},"載入中..."));
+    return r("div",{style:{minHeight:"100vh"}},
+      topbar(null,null,isOwner?r("div",{style:{display:"flex",gap:6,alignItems:"center"}},r("span",{style:{fontSize:11,fontWeight:600,padding:"2px 8px",borderRadius:20,background:AL,color:A}},"擁有者"),r(GBtn,{ch:"密碼",onClick:()=>{setModal("changePin");setForm({})},sm:true}),r(GBtn,{ch:"登出",onClick:logout,sm:true})):r("button",{onClick:()=>{setModal("login");setPin("");setPinErr("")},style:{background:AL,border:"none",borderRadius:20,padding:"5px 12px",fontSize:13,color:A,fontWeight:600,cursor:"pointer"}},"登入管理")),
+      r("div",{style:{padding:"24px 16px 48px",maxWidth:600,margin:"0 auto"}},
+        r("h1",{style:{fontSize:22,fontWeight:600,marginBottom:4}},"選擇活動"),
+        r("p",{style:{color:C.muted,fontSize:13,marginBottom:20}},"點選活動以登記人次"),
+        vis.length===0?r(Card,{ch:r("div",{style:{textAlign:"center",padding:"32px 0",color:C.muted}},isOwner?"尚無活動，請新增第一個專案":"目前沒有開放中的活動")}):
+        r("div",{style:{display:"flex",flexDirection:"column",gap:10}},vis.map(p=>r("button",{key:p.id,draggable:isOwner,
+          onDragStart:isOwner?()=>setDrag(p.id):undefined,onDragEnd:isOwner?()=>{setDrag(null);setDragOv(null)}:undefined,
+          onDragOver:isOwner?e=>{e.preventDefault();setDragOv(p.id)}:undefined,onDrop:isOwner?()=>{reorder(drag,p.id);setDrag(null);setDragOv(null)}:undefined,
+          onClick:()=>{setProj(p.id);setTab("data");setPage("proj")},
+          style:{background:C.card,border:`1.5px solid ${dragOv===p.id?A:C.bdr}`,borderRadius:14,padding:"14px 16px",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:12,width:"100%",opacity:drag===p.id?.4:1,transition:"border-color .15s,opacity .15s"}},
+          isOwner&&r("div",{style:{display:"flex",flexDirection:"column",gap:2.5,opacity:.4,flexShrink:0}},[0,1,2].map(i=>r("div",{key:i,style:{width:12,height:1.5,background:C.muted,borderRadius:1}}))),
+          r("div",{style:{width:10,height:10,borderRadius:3,background:p.color,flexShrink:0}}),
+          r("div",{style:{flex:1,minWidth:0}},r("div",{style:{fontWeight:600,fontSize:15,marginBottom:2}},p.name),p.date&&r("div",{style:{fontSize:12,color:C.muted}},p.date)),
+          isOwner&&r("span",{style:{fontSize:11,fontWeight:600,padding:"2px 8px",borderRadius:20,background:p.published?"#E6F4EC":C.surf,color:p.published?"#2E7D4F":C.muted,border:`1px solid ${p.published?"#B6DECA":C.bdr}`,flexShrink:0,whiteSpace:"nowrap"}},p.published?"上架":"下架"),
+          r("span",{style:{fontSize:16,color:C.bdr}},"›")))),
+        isOwner&&r("div",{style:{marginTop:14}},r(PBtn,{ch:"＋ 新增專案",onClick:()=>{setModal("newProj");setForm({color:A})},full:true}))
+      )
+    )
+  }
+
+  function ProjPage(){
+    const p=gp();if(!p)return null;
+    const ds=dates(p.id);
+    function v(iid,date){const x=D.records.find(x=>x.projectId===p.id&&x.itemId===iid&&x.date===date);return x?x.value:null}
+    function dSum(date){return p.items.reduce((s,i)=>{const x=v(i.id,date);return s+(x??0)},0)}
+    function iSum(iid){return ds.reduce((s,d)=>{const x=v(iid,d);return s+(x??0)},0)}
+    const grand=p.items.reduce((s,i)=>s+iSum(i.id),0);
+    const fd=dSearch?ds.filter(d=>d===parseDate(dSearch)):ds;
+    const fg=p.items.reduce((s,i)=>s+fd.reduce((ss,d)=>{const x=v(i.id,d);return ss+(x??0)},0),0);
+    const[dashV,setDashV]=useState("date");
+    const TH={padding:"10px 12px",textAlign:"right",fontWeight:600,color:C.mid,fontSize:12,background:C.surf,borderBottom:`1px solid ${C.bdr}`,whiteSpace:"nowrap"};
+    const TD={padding:"9px 12px",textAlign:"right",fontSize:13,borderTop:`1px solid #F0F2F8`};
+
+    function Cell({iid,date}){
+      const val=v(iid,date);const isE=editCell?.iid===iid&&editCell?.date===date;
+      if(isE)return r("input",{type:"number",min:0,value:editVal,autoFocus:true,style:{width:70,textAlign:"right",fontSize:13,padding:"3px 6px",borderRadius:6,border:`1.5px solid ${p.color}`},onChange:e=>setEditVal(e.target.value),onBlur:()=>commitCell(p.id),onKeyDown:e=>{if(e.key==="Enter")commitCell(p.id);if(e.key==="Escape"){setEditCell(null);setEditVal("")}}});
+      return r("span",{onClick:()=>{setEditCell({iid,date});setEditVal(val!=null?String(val):"")},title:"點擊編輯",style:{color:val!=null?C.txt:C.bdr,cursor:"pointer",padding:"2px 6px",borderRadius:5,display:"inline-block"},onMouseEnter:e=>e.currentTarget.style.background=AL,onMouseLeave:e=>e.currentTarget.style.background="transparent"},val!=null?val.toLocaleString():"—")
+    }
+
+    function EntryView(){
+      const[sel,setSel]=useState(today);const[lv,setLv]=useState({});const[done,setDone]=useState(false);
+      const any=p.items.some(i=>lv[i.id]!==undefined&&lv[i.id]!=="");
+      const dtot=p.items.reduce((s,i)=>{const x=lv[i.id]!==undefined?parseInt(lv[i.id],10):(gr(p.id,i.id,sel)?.value??0);return s+(isNaN(x)?0:x)},0);
+      return r("div",{style:{padding:"16px 0"}},
+        r(Card,{style:{marginBottom:12,display:"flex",alignItems:"center",gap:12},ch:r(Fragment,null,r("div",{style:{flex:1}},r(Label,{t:"登記日期"}),r("input",{type:"date",value:sel,onChange:e=>{setSel(e.target.value);setLv({});setDone(false)},style:{border:"none",padding:0,fontSize:15,fontWeight:600,width:"auto",background:"none",outline:"none",boxShadow:"none"}})),r("div",{style:{textAlign:"right"}},r("div",{style:{fontSize:11,color:C.muted,marginBottom:2}},"本日小計"),r("div",{style:{fontSize:22,fontWeight:700,color:p.color,lineHeight:1}},dtot.toLocaleString())))}),
+        done&&r("div",{style:{background:C.okbg,border:"1px solid #b2d8b2",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between"}},r("div",{style:{display:"flex",alignItems:"center",gap:8}},r("span",{style:{fontSize:18}},"✅"),r("div",null,r("div",{style:{fontWeight:600,color:C.ok,fontSize:14}},"數據已送出"),r("div",{style:{fontSize:12,color:C.ok,opacity:.8}},"感謝回報！"))),r("button",{onClick:()=>{setLv({});setDone(false)},style:{background:C.ok,color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:13,fontWeight:600,cursor:"pointer"}},"再填一次")),
+        p.items.length===0?r(Card,{ch:r("p",{style:{color:C.muted,textAlign:"center",padding:"20px 0"}},"此活動尚無登記項目")}):
+        r(Fragment,null,r("div",{style:{display:"flex",flexDirection:"column",gap:8,marginBottom:12}},p.items.map((item,idx)=>{
+          const ex=gr(p.id,item.id,sel);
+          return r(Card,{key:item.id,style:{display:"flex",alignItems:"center",gap:12,opacity:done?.65:1},ch:r(Fragment,null,r("div",{style:{width:8,height:8,borderRadius:2,background:p.color,flexShrink:0}}),r("div",{style:{flex:1}},r("div",{style:{fontWeight:500,fontSize:15}},item.name),ex&&!done&&r("div",{style:{fontSize:11,color:C.muted,marginTop:2}},`已有：${ex.value}（可覆蓋）`)),r("input",{type:"number",min:0,inputMode:"numeric",placeholder:ex?String(ex.value):"0",value:lv[item.id]??"",disabled:done,autoFocus:idx===0,onChange:e=>setLv(x=>({...x,[item.id]:e.target.value})),style:{width:90,textAlign:"right",fontSize:22,fontWeight:700,color:p.color,border:"none",borderBottom:`2.5px solid ${p.color}55`,borderRadius:0,padding:"4px 2px",background:"none",outline:"none",boxShadow:"none"}}))});
+        })),!done&&r(Fragment,null,r(PBtn,{ch:"送出回報",onClick:()=>{const entries=p.items.filter(i=>lv[i.id]!==undefined&&lv[i.id]!=="").map(i=>({iid:i.id,val:lv[i.id]}));if(!entries.length)return;batchSave(p.id,entries,sel);setDone(true);notify("回報成功！")},disabled:!any,color:p.color,full:true}),!any&&r("p",{style:{textAlign:"center",fontSize:12,color:C.muted,marginTop:6}},"請至少填入一項數值")))
+      )
+    }
+
+    return r("div",{style:{minHeight:"100vh"}},
+      topbar(()=>setPage("home"),p.name,r("div",{style:{display:"flex",gap:6,alignItems:"center"}},r("span",{style:{fontSize:11,fontWeight:600,padding:"2px 8px",borderRadius:20,background:p.published?"#E6F4EC":C.surf,color:p.published?"#2E7D4F":C.muted,border:`1px solid ${p.published?"#B6DECA":C.bdr}`}},p.published?"上架中":"已下架"),isOwner&&r(GBtn,{ch:"登出",onClick:logout,sm:true}))),
+      isOwner&&r("div",{style:{background:C.card,borderBottom:`1px solid ${C.bdr}`,display:"flex",padding:"0 16px"}},[["data","📊 數據"],["entry","✏️ 回報"],["manage","⚙️ 管理"]].map(([vv,l])=>r("button",{key:vv,onClick:()=>setTab(vv),style:{padding:"11px 16px",border:"none",background:"transparent",fontWeight:tab===vv?600:400,fontSize:14,color:tab===vv?p.color:C.muted,borderBottom:tab===vv?`2.5px solid ${p.color}`:"2.5px solid transparent",borderRadius:0,cursor:"pointer"}},l))),
+      r("div",{style:{maxWidth:900,margin:"0 auto",padding:"20px 16px 48px"}},
+        (!isOwner||tab==="entry")&&r(EntryView),
+        isOwner&&tab==="data"&&r(Fragment,null,
+          p.items.length>0&&r("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:10,marginBottom:16}},p.items.map(item=>r(Card,{key:item.id,style:{padding:"12px 14px"},ch:r(Fragment,null,r("div",{style:{display:"flex",alignItems:"center",gap:6,marginBottom:6}},r("div",{style:{width:7,height:7,borderRadius:2,background:p.color}}),r("div",{style:{fontSize:12,fontWeight:500,color:C.mid,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},item.name)),r("div",{style:{fontSize:24,fontWeight:700,color:p.color}},iSum(item.id).toLocaleString()))}))),
+          r("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:dSearchOpen?0:10,flexWrap:"wrap",gap:8}},
+            r("div",{style:{display:"flex",background:C.surf,borderRadius:10,padding:3}},[["date","按日期"],["item","按項目"]].map(([vv,l])=>r("button",{key:vv,onClick:()=>setDashV(vv),style:{padding:"6px 14px",borderRadius:8,border:"none",fontWeight:dashV===vv?600:400,fontSize:13,background:dashV===vv?C.card:"transparent",color:dashV===vv?C.txt:C.muted,cursor:"pointer"}},l))),
+            r("div",{style:{display:"flex",gap:6}},r("button",{onClick:()=>{setDSearchOpen(o=>!o);if(dSearchOpen)setDSearch("")},style:{width:34,height:34,borderRadius:9,border:`1.5px solid ${dSearchOpen||dSearch?A:C.bdr}`,background:dSearchOpen||dSearch?AL:"transparent",color:dSearchOpen||dSearch?A:C.muted,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer"}},"🔍"),r("button",{onClick:()=>exportCSV(p),style:{background:A,color:"#fff",fontWeight:600,fontSize:13,padding:"7px 14px",borderRadius:9,border:"none",cursor:"pointer"}},"⬇ CSV"))
+          ),
+          dSearchOpen&&r("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:10,padding:"10px 14px",background:AL,borderRadius:10,border:`1px solid ${C.bdr}`}},r("span",{style:{color:A}},"🔍"),r("input",{type:"text",value:dSearch,autoFocus:true,placeholder:"YY/MM/DD",onChange:e=>setDSearch(e.target.value),style:{flex:1,maxWidth:150,fontSize:14,fontWeight:500,padding:"6px 10px"}}),dSearch&&r("button",{onClick:()=>setDSearch(""),style:{background:"none",border:"none",color:A,fontSize:13,fontWeight:600,cursor:"pointer"}},"清除"),dSearch&&r("span",{style:{fontSize:12,color:C.muted}},ds.filter(d=>d===parseDate(dSearch)).length?"找到":"查無資料")),
+          r("p",{style:{fontSize:12,color:C.muted,marginBottom:8}},"點擊數字可直接編輯"),
+          r("div",{style:{overflowX:"auto",borderRadius:12,border:`1px solid ${C.bdr}`,background:C.card}},
+            dSearch&&fd.length===0?r("div",{style:{padding:24,textAlign:"center",color:C.muted}},`找不到 ${dSearch} 的資料`):
+            dashV==="date"?r("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:13}},r("thead",null,r("tr",null,r("th",{style:{...TH,textAlign:"left"}},"日期"),...p.items.map(i=>r("th",{key:i.id,style:TH},i.name)),r("th",{style:{...TH,color:p.color}},"合計"))),r("tbody",null,...fd.map(d=>r("tr",{key:d},r("td",{style:{...TD,textAlign:"left",fontWeight:500}},fmt(d)),...p.items.map(i=>r("td",{key:i.id,style:TD},r(Cell,{iid:i.id,date:d}))),r("td",{style:{...TD,fontWeight:700,color:p.color}},dSum(d).toLocaleString())))),r("tfoot",null,r("tr",{style:{borderTop:`2px solid ${C.bdr}`,background:C.surf}},r("td",{style:{padding:"10px 12px",fontWeight:700,fontSize:13}},"總計"),...p.items.map(i=>r("td",{key:i.id,style:{...TD,borderTop:`2px solid ${C.bdr}`,fontWeight:600}},fd.reduce((s,d)=>{const x=v(i.id,d);return s+(x??0)},0).toLocaleString())),r("td",{style:{...TD,borderTop:`2px solid ${C.bdr}`,fontWeight:700,color:p.color}},fg.toLocaleString())))):
+            r("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:13}},r("thead",null,r("tr",null,r("th",{style:{...TH,textAlign:"left"}},"項目"),...fd.map(d=>r("th",{key:d,style:TH},fmt(d))),r("th",{style:{...TH,color:p.color}},"合計"))),r("tbody",null,...p.items.map(item=>r("tr",{key:item.id},r("td",{style:{...TD,textAlign:"left",fontWeight:500}},item.name),...fd.map(d=>r("td",{key:d,style:TD},r(Cell,{iid:item.id,date:d}))),r("td",{style:{...TD,fontWeight:700,color:p.color}},fd.reduce((s,d)=>{const x=v(item.id,d);return s+(x??0)},0).toLocaleString())))),r("tfoot",null,r("tr",{style:{borderTop:`2px solid ${C.bdr}`,background:C.surf}},r("td",{style:{padding:"10px 12px",fontWeight:700,fontSize:13}},"合計"),...fd.map(d=>r("td",{key:d,style:{...TD,borderTop:`2px solid ${C.bdr}`,fontWeight:600}},dSum(d).toLocaleString())),r("td",{style:{...TD,borderTop:`2px solid ${C.bdr}`,fontWeight:700,color:p.color}},fg.toLocaleString()))))
+          )
+        ),
+        isOwner&&tab==="manage"&&r("div",{style:{maxWidth:520}},
+          r("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}},r("div",{style:{fontWeight:600,fontSize:15}},"登記項目"),r(PBtn,{ch:"＋ 新增",onClick:()=>{setModal("newItem");setForm({})},sm:true})),
+          p.items.length===0?r(Card,{ch:r("p",{style:{color:C.muted,textAlign:"center",padding:"20px 0"}},"尚無項目")}):
+          r(Card,{style:{padding:0,overflow:"hidden"},ch:p.items.map((item,idx)=>r("div",{key:item.id,style:{display:"flex",alignItems:"center",gap:10,padding:"12px 16px",borderTop:idx>0?`1px solid ${C.surf}`:"none"}},r("div",{style:{width:8,height:8,borderRadius:2,background:p.color,flexShrink:0}}),r("span",{style:{flex:1,fontWeight:500,fontSize:14}},item.name),r("span",{style:{fontSize:12,color:C.muted,marginRight:6}},`累計 ${iSum(item.id)}`),r(GBtn,{ch:"編輯",onClick:()=>{setModal("editItem");setForm({itemId:item.id,name:item.name})},sm:true}),r(GBtn,{ch:"刪除",onClick:()=>delItem(item.id),sm:true,red:true})))}),
+          r("div",{style:{marginTop:20,paddingTop:20,borderTop:`1px solid ${C.surf}`}},
+            r("div",{style:{fontWeight:600,fontSize:13,color:C.mid,marginBottom:10}},"專案設定"),
+            r("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",background:p.published?"#F0FAF4":C.surf,border:`1px solid ${p.published?"#B6DECA":C.bdr}`,borderRadius:10,marginBottom:10}},r("div",null,r("div",{style:{fontWeight:500,fontSize:14,color:p.published?"#2E7D4F":C.mid}},p.published?"● 上架中":"○ 已下架"),r("div",{style:{fontSize:12,color:C.muted,marginTop:2}},p.published?"檢視者可見":"僅擁有者可見")),r("button",{onClick:()=>togglePub(p.id),style:{padding:"6px 14px",borderRadius:8,border:"none",fontWeight:600,fontSize:13,cursor:"pointer",background:p.published?"#FBF0F0":"#E6F4EC",color:p.published?"#A83838":"#2E7D4F"}},p.published?"下架":"上架")),
+            r("div",{style:{display:"flex",gap:8}},r(GBtn,{ch:"編輯資訊",onClick:()=>{setModal("editProj");setForm({name:p.name,date:p.date,desc:p.desc||"",color:p.color})}}),r(GBtn,{ch:"刪除專案",onClick:()=>delProj(p.id),red:true}))
+          )
         )
       )
-    ),
-    toast&&e("div",{style:{position:"fixed",bottom:28,left:"50%",transform:"translateX(-50%)",background:C.accent,color:"#fff",padding:"11px 24px",borderRadius:14,fontSize:13,fontWeight:700,zIndex:300,whiteSpace:"nowrap",boxShadow:"0 8px 28px rgba(0,0,0,.15)",pointerEvents:"none",animation:"fadeIn .2s ease"}},toast)
-  );
+    )
+  }
+
+  return r(Fragment,null,
+    page==="home"&&r(Home),
+    page==="proj"&&r(ProjPage),
+    modal&&r("div",{onClick:e=>e.target===e.currentTarget&&cm(),style:{position:"fixed",inset:0,background:"rgba(20,20,30,.3)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:50}},r("div",{style:{background:C.card,borderRadius:"18px 18px 0 0",padding:"24px 20px 36px",width:"100%",maxWidth:480}},r(ModalContent))),
+    confirm&&r("div",{style:{position:"fixed",inset:0,background:"rgba(20,20,30,.35)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:60,padding:20}},r("div",{style:{background:C.card,borderRadius:16,padding:"24px 20px",maxWidth:340,width:"100%"}},r("div",{style:{fontWeight:600,fontSize:15,marginBottom:8}},"確認操作"),r("div",{style:{fontSize:14,color:C.mid,marginBottom:20,lineHeight:1.6}},confirm.msg),r("div",{style:{display:"flex",gap:8}},r(GBtn,{ch:"取消",onClick:()=>setConfirm(null),style:{flex:1}}),r("button",{onClick:()=>{confirm.ok();setConfirm(null)},style:{flex:1,background:C.err,color:"#fff",fontWeight:600,padding:"9px",borderRadius:10,border:"none",cursor:"pointer",fontSize:14}},"確定刪除")))),
+    toast&&r("div",{style:{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",background:"#2a2a3a",color:"#fff",padding:"10px 20px",borderRadius:12,fontSize:13,fontWeight:500,zIndex:70,whiteSpace:"nowrap",pointerEvents:"none"}},toast)
+  )
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(e(App));
+ReactDOM.createRoot(document.getElementById("app")).render(r(App))
 </script>
 </body>
 </html>
