@@ -23,11 +23,20 @@ button:active{transform:scale(.96)}
 </head>
 <body>
 <div id="root"></div>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://cdn.jsdelivr.net/npm/react@18.3.1/+esm",
+    "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/+esm",
+    "react-dom/client": "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/+esm"
+  }
+}
+</script>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import{getDatabase,ref,set,onValue,remove}from"https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-import{useState,useRef,useEffect,useCallback,createElement as h,Fragment}from"https://esm.sh/react@18.3.1";
-import{createRoot}from"https://esm.sh/react-dom@18.3.1/client";
+import{useState,useRef,useEffect,useCallback,createElement as h,Fragment}from"https://cdn.jsdelivr.net/npm/react@18.3.1/+esm";
+import{createRoot}from"https://cdn.jsdelivr.net/npm/react-dom@18.3.1/+esm";
 
 const firebaseConfig={
   apiKey:"AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ",
