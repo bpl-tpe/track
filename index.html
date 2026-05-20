@@ -1,592 +1,499 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>活動人次追蹤系統</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg-base:#f0f4f8;--bg-surface:#ffffff;--bg-surface2:#e8eef5;
-  --accent:#3b7dd8;--accent-light:#6fa3e8;--accent-pale:#ddeaf8;--accent-dark:#2560b0;
-  --text-primary:#1a2a3a;--text-secondary:#4a6080;--text-muted:#8aa0b8;
-  --border:#c8d8e8;--border-light:#dde8f2;
-  --shadow-sm:0 1px 4px rgba(59,125,216,.08);--shadow-md:0 4px 16px rgba(59,125,216,.12);--shadow-lg:0 8px 32px rgba(59,125,216,.15);
-  --radius:14px;--radius-sm:8px;--radius-lg:20px;
-  --success:#2eac82;--warning:#e08a2a;--danger:#d04040;
+  --bg:#f7f8fa;
+  --surface:#ffffff;
+  --surface2:#f0f4f8;
+  --surface3:#e8eef5;
+  --accent:#2563eb;
+  --accent-h:#1d4ed8;
+  --accent-pale:#eff6ff;
+  --text:#0f172a;
+  --text2:#475569;
+  --text3:#94a3b8;
+  --border:#e2e8f0;
+  --border2:#cbd5e1;
+  --success:#059669;
+  --danger:#dc2626;
+  --warn:#d97706;
+  --r:10px;--r-sm:6px;--r-lg:14px;
+  --sh-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh-md:0 4px 12px rgba(0,0,0,.08);
+  --sh-lg:0 8px 30px rgba(0,0,0,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:"Noto Sans TC","DM Sans",sans-serif;background:var(--bg-base);color:var(--text-primary);min-height:100vh;font-size:14px;}
+body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased;}
 
-/* TOPBAR */
-.topbar{background:var(--bg-surface);border-bottom:1px solid var(--border-light);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm);}
-.topbar-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;color:var(--accent);}
-.topbar-brand .logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--accent-light));border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:15px;}
-.topbar-right{display:flex;align-items:center;gap:12px;}
-.sync-indicator{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);padding:4px 10px;background:var(--bg-surface2);border-radius:20px;border:1px solid var(--border-light);}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text-muted);transition:all .3s;}
-.sync-dot.synced{background:var(--success);box-shadow:0 0 6px rgba(46,172,130,.5);}
-.sync-dot.syncing{background:var(--warning);animation:pulse 1s infinite;}
-.sync-dot.error{background:var(--danger);}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.role-badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;border:1.5px solid var(--accent);color:var(--accent);background:var(--accent-pale);}
-.role-badge:hover{background:var(--accent);color:white;}
+/* ── TOPBAR ── */
+.topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:200;box-shadow:var(--sh-sm);}
+.brand{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;color:var(--text);}
+.brand-icon{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.sync-pill{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s;}
+.sdot.synced{background:var(--success);}
+.sdot.syncing{background:var(--warn);animation:blink 1s infinite;}
+.sdot.error{background:var(--danger);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.role-btn{font-size:12px;font-weight:500;padding:5px 13px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s;font-family:inherit;}
+.role-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
 
-/* VIEWS */
+/* ── VIEWS ── */
 .view{display:none;}
 .view.active{display:block;}
 
-/* LAYOUT */
-.main-layout{max-width:1100px;margin:0 auto;padding:28px 24px;}
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
-.page-title{font-size:20px;font-weight:700;letter-spacing:-.3px;}
-.page-sub{font-size:13px;color:var(--text-secondary);margin-top:2px;}
+/* ── LAYOUT ── */
+.wrap{max-width:960px;margin:0 auto;padding:28px 20px;}
+.wrap-sm{max-width:480px;margin:0 auto;padding:28px 20px;}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.ph-title{font-size:18px;font-weight:700;letter-spacing:-.3px;}
+.ph-sub{font-size:13px;color:var(--text2);margin-top:2px;}
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;font-family:inherit;}
-.btn-primary{background:var(--accent);color:white;}
-.btn-primary:hover{background:var(--accent-dark);box-shadow:0 4px 12px rgba(59,125,216,.3);}
-.btn-secondary{background:var(--bg-surface);color:var(--text-primary);border:1.5px solid var(--border);}
-.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:inherit;line-height:1.4;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-h);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);}
+.btn-danger{background:#fef2f2;color:var(--danger);border:1px solid #fecaca;}
+.btn-danger:hover{background:var(--danger);color:#fff;}
 .btn-sm{padding:5px 10px;font-size:12px;}
-.btn-lg{padding:12px 24px;font-size:15px;border-radius:var(--radius);}
-.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:13px;cursor:pointer;padding:6px 10px;border-radius:var(--radius-sm);margin-bottom:20px;transition:all .2s;background:none;border:none;font-family:inherit;}
-.back-btn:hover{color:var(--accent);background:var(--accent-pale);}
+.btn-lg{padding:10px 20px;font-size:14px;}
+.btn-full{width:100%;justify-content:center;}
+.back-btn{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--text2);cursor:pointer;padding:5px 8px;border-radius:var(--r-sm);border:none;background:none;font-family:inherit;margin-bottom:18px;transition:all .15s;}
+.back-btn:hover{background:var(--surface2);color:var(--text);}
 
-/* PROJECT CARDS */
-.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
-.project-card{background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
-.project-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-light));opacity:0;transition:opacity .2s;}
-.project-card:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-2px);}
-.project-card:hover::before{opacity:1;}
-.project-card.dragging{opacity:.5;border:2px dashed var(--accent);}
-.project-card.drag-over{border-color:var(--accent-light);background:var(--accent-pale);}
-.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
-.card-title{font-size:15px;font-weight:700;line-height:1.3;}
-.status-badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;margin-left:8px;}
-.status-active{background:rgba(46,172,130,.12);color:var(--success);}
-.status-ended{background:var(--bg-surface2);color:var(--text-muted);}
-.card-date{font-size:12px;color:var(--text-muted);margin-bottom:10px;}
-.card-stats{display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light);}
-.stat-item{text-align:center;}
-.stat-num{font-size:20px;font-weight:700;color:var(--accent);}
-.stat-label{font-size:11px;color:var(--text-muted);}
+/* ── CARDS ── */
+.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.pcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .2s;position:relative;}
+.pcard:hover{border-color:var(--accent);box-shadow:var(--sh-md);transform:translateY(-1px);}
+.pcard.dragging{opacity:.4;border-style:dashed;}
+.pcard.drag-over{border-color:var(--accent);background:var(--accent-pale);}
+.pcard-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px;}
+.pcard-title{font-size:14px;font-weight:600;line-height:1.4;}
+.badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;}
+.badge-on{background:#d1fae5;color:#065f46;}
+.badge-off{background:var(--surface2);color:var(--text3);}
+.pcard-date{font-size:12px;color:var(--text3);margin-bottom:8px;}
+.pcard-fields{font-size:12px;color:var(--text3);margin-bottom:12px;}
+.pcard-stats{display:flex;gap:14px;padding-top:12px;border-top:1px solid var(--border);}
+.stat{text-align:center;}
+.stat-n{font-size:18px;font-weight:700;color:var(--accent);}
+.stat-l{font-size:11px;color:var(--text3);margin-top:1px;}
 
-/* SUMMARY */
-.summary-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px;}
-.summary-card{background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;}
-.summary-card.total{background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-color:transparent;color:white;}
-.summary-card.total .s-label{color:rgba(255,255,255,.8);}
-.s-num{font-size:28px;font-weight:700;color:var(--accent);line-height:1.1;}
-.s-label{font-size:12px;color:var(--text-secondary);margin-top:4px;}
-.summary-card.total .s-num{color:white;}
+/* ── SUMMARY ── */
+.summary-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:22px;}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;}
+.scard-n{font-size:26px;font-weight:700;color:var(--accent);line-height:1;}
+.scard-l{font-size:12px;color:var(--text2);margin-top:5px;}
 
-/* TABLE */
-.table-wrap{background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:auto;margin-bottom:24px;}
-table{width:100%;border-collapse:collapse;min-width:500px;}
-th{background:var(--bg-surface2);padding:10px 14px;text-align:left;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1.5px solid var(--border);white-space:nowrap;}
-td{padding:10px 14px;border-bottom:1px solid var(--border-light);font-size:13px;}
+/* ── TABLE ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:auto;margin-bottom:22px;}
+table{width:100%;border-collapse:collapse;min-width:400px;}
+th{background:var(--surface2);padding:9px 14px;text-align:center;font-size:12px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;}
+th:first-child{text-align:left;}
+td{padding:9px 14px;border-bottom:1px solid var(--border);font-size:13px;text-align:center;}
+td:first-child{text-align:left;}
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:var(--bg-surface2);}
-.total-row td{background:var(--accent-pale);font-weight:700;color:var(--accent-dark);border-top:2px solid var(--border);}
+tr:hover td{background:var(--surface2);}
+.total-row td{background:var(--accent-pale);font-weight:700;color:var(--accent-h);border-top:2px solid var(--border2);}
 .total-row:hover td{background:var(--accent-pale);}
-td.date-cell{font-weight:600;color:var(--text-secondary);white-space:nowrap;}
-td.num-cell{text-align:right;}
-td.num-cell.highlight{color:var(--accent);font-weight:600;}
+.date-cell{font-weight:500;color:var(--text2);white-space:nowrap;}
 
-/* SETTINGS */
-.settings-section{background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;}
-.settings-section h4{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
-.toggle-wrap{display:flex;align-items:center;gap:12px;}
-.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
-.toggle input{opacity:0;width:0;height:0;}
-.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:24px;cursor:pointer;transition:.3s;}
-.toggle-slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.15);}
-input:checked+.toggle-slider{background:var(--accent);}
-input:checked+.toggle-slider:before{transform:translateX(20px);}
-.toggle-label{font-size:14px;font-weight:500;}
+/* ── ASSISTANT FORM ── */
+.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-top:14px;}
+.entry-card h3{font-size:15px;font-weight:700;margin-bottom:3px;}
+.entry-meta{font-size:13px;color:var(--text2);margin-bottom:20px;}
+.entry-fields{display:flex;flex-direction:column;gap:12px;margin-bottom:22px;}
+.efield-row{display:flex;align-items:center;gap:12px;}
+.efield-label{flex:1;font-size:14px;font-weight:500;}
+.efield-input{width:100px;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:20px;font-weight:700;text-align:center;font-family:inherit;color:var(--accent);outline:none;transition:border-color .15s;}
+.efield-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.efield-input:disabled{background:var(--surface2);color:var(--text2);border-color:var(--border);}
+.done-banner{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--r-sm);padding:12px 16px;font-size:13px;color:#166534;display:flex;align-items:center;gap:8px;margin-bottom:14px;}
 
-/* ASSISTANT */
-.assistant-wrap{max-width:480px;margin:0 auto;padding:28px 24px;}
-.project-select-list{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
-.project-select-item{background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;}
-.project-select-item:hover{border-color:var(--accent);box-shadow:var(--shadow-sm);}
-.p-name{font-weight:600;font-size:14px;}
-.p-date{font-size:12px;color:var(--text-muted);margin-top:2px;}
-.entry-form{background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:16px;}
-.entry-form h3{font-size:15px;font-weight:700;margin-bottom:4px;}
-.entry-date{font-size:13px;color:var(--text-secondary);margin-bottom:18px;}
-.entry-fields{display:flex;flex-direction:column;gap:14px;margin-bottom:20px;}
-.entry-field-row{display:flex;align-items:center;gap:12px;}
-.entry-field-label{flex:1;font-size:14px;font-weight:500;}
-.entry-field-input{width:110px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:18px;font-weight:700;text-align:center;font-family:inherit;color:var(--accent-dark);outline:none;transition:border-color .2s;}
-.entry-field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,125,216,.12);}
+/* ── PROJECT SELECT ── */
+.psel-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.psel-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between;}
+.psel-item:hover{border-color:var(--accent);box-shadow:var(--sh-sm);}
+.psel-name{font-weight:600;font-size:14px;}
+.psel-date{font-size:12px;color:var(--text3);margin-top:2px;}
 
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,40,60,.4);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;padding:20px;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--bg-surface);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:500px;box-shadow:var(--shadow-lg);animation:modalIn .2s ease;max-height:90vh;overflow-y:auto;}
-@keyframes modalIn{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-title{font-size:17px;font-weight:700;margin-bottom:6px;}
-.modal-sub{font-size:13px;color:var(--text-secondary);margin-bottom:20px;}
-.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
-.form-group{margin-bottom:16px;}
-.form-label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
-.form-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;color:var(--text-primary);background:var(--bg-surface);transition:border-color .2s;outline:none;}
-.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,125,216,.12);}
-.field-list{display:flex;flex-direction:column;gap:8px;}
-.field-item{display:flex;gap:8px;align-items:center;}
-.field-item input{flex:1;}
-.remove-field-btn{width:28px;height:28px;border:none;border-radius:6px;background:#fff0f0;color:var(--danger);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.remove-field-btn:hover{background:var(--danger);color:white;}
-.add-field-btn{display:inline-flex;align-items:center;gap:5px;color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;background:none;border:none;font-family:inherit;padding:4px 0;margin-top:4px;}
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(3px);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r-lg);padding:26px;width:100%;max-width:480px;box-shadow:var(--sh-lg);max-height:90vh;overflow-y:auto;animation:mIn .18s ease;}
+@keyframes mIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:18px;}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);}
+.modal-foot-space{justify-content:space-between;}
+
+/* ── FORM ── */
+.fg{margin-bottom:14px;}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.fi{width:100%;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s;}
+.fi:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+.field-list{display:flex;flex-direction:column;gap:7px;}
+.field-item{display:flex;gap:7px;align-items:center;}
+.field-item .fi{flex:1;}
+.rm-btn{width:26px;height:26px;border:none;border-radius:5px;background:#fef2f2;color:var(--danger);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.rm-btn:hover{background:var(--danger);color:#fff;}
+.add-field-btn{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;background:none;border:none;font-family:inherit;padding:4px 0;margin-top:4px;}
 .add-field-btn:hover{text-decoration:underline;}
-.confirm-list{list-style:none;font-size:13px;color:var(--text-secondary);}
-.confirm-list li{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-light);}
-.confirm-list li:last-child{border-bottom:none;}
-.confirm-list .cv{font-weight:700;color:var(--text-primary);}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--border);}
+.toggle-label{font-size:14px;font-weight:500;}
+.toggle-desc{font-size:12px;color:var(--text3);margin-top:1px;}
+.tog{position:relative;width:40px;height:22px;flex-shrink:0;}
+.tog input{opacity:0;width:0;height:0;}
+.tog-sl{position:absolute;inset:0;background:var(--border2);border-radius:22px;cursor:pointer;transition:.25s;}
+.tog-sl:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+input:checked+.tog-sl{background:var(--accent);}
+input:checked+.tog-sl:before{transform:translateX(18px);}
 
-/* TOAST */
-.toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
-.toast{background:var(--text-primary);color:white;padding:12px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);animation:toastIn .3s ease;min-width:200px;}
-.toast.success{background:var(--success);}
-.toast.error{background:var(--danger);}
-@keyframes toastIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+/* ── DIVIDER ── */
+.section-divider{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:18px 0 10px;}
 
-/* EMPTY */
-.empty-state{text-align:center;padding:48px 24px;color:var(--text-muted);}
-.empty-state .empty-icon{font-size:40px;margin-bottom:12px;}
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:7px;}
+.toast{background:var(--text);color:#fff;padding:11px 16px;border-radius:var(--r-sm);font-size:13px;box-shadow:var(--sh-lg);animation:tIn .25s ease;min-width:180px;}
+.toast.ok{background:var(--success);}
+.toast.err{background:var(--danger);}
+@keyframes tIn{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
 
-::-webkit-scrollbar{width:6px;height:6px;}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-::-webkit-scrollbar-thumb:hover{background:var(--accent-light);}
+/* ── EMPTY ── */
+.empty{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-ico{font-size:36px;margin-bottom:10px;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 
 @media(max-width:600px){
-  .main-layout{padding:16px;}
+  .wrap,.wrap-sm{padding:16px;}
   .project-grid{grid-template-columns:1fr;}
   .summary-row{grid-template-columns:repeat(2,1fr);}
-  .topbar{padding:0 14px;}
 }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-brand">
-    <div class="logo-icon">&#128202;</div>
+  <div class="brand">
+    <div class="brand-icon">&#128202;</div>
     活動人次追蹤系統
   </div>
   <div class="topbar-right">
-    <div class="sync-indicator" id="syncIndicator">
-      <div class="sync-dot" id="syncDot"></div>
+    <div class="sync-pill">
+      <div class="sdot" id="syncDot"></div>
       <span id="syncText">連線中...</span>
     </div>
-    <button class="role-badge" id="switchRoleBtn" onclick="window.switchRole()">切換至編輯者</button>
+    <button class="role-btn" id="switchRoleBtn" onclick="window.switchRole()">切換至編輯者</button>
   </div>
 </div>
 
-<!-- VIEW: 協助者 -->
+<!-- 協助者 -->
 <div class="view active" id="viewAssistant">
-  <div class="assistant-wrap">
-    <div id="assistantProjectList">
-      <div class="page-header">
+  <div class="wrap-sm">
+    <div id="assistantList">
+      <div class="ph">
         <div>
-          <div class="page-title">選擇活動專案</div>
-          <div class="page-sub">請選擇您要填報的活動</div>
+          <div class="ph-title">選擇活動專案</div>
+          <div class="ph-sub">請選擇您要填報的活動</div>
         </div>
       </div>
-      <div id="assistantProjectListInner" class="project-select-list"></div>
+      <div id="assistantListInner" class="psel-list"></div>
     </div>
-    <div id="assistantEntryForm" style="display:none">
-      <button class="back-btn" onclick="backToProjectList()">&#8592; 返回選擇專案</button>
-      <div class="entry-form">
-        <h3 id="entryProjectName"></h3>
-        <div class="entry-date" id="entryTodayDate"></div>
+    <div id="assistantForm" style="display:none">
+      <button class="back-btn" onclick="backToList()">&#8592; 返回選擇專案</button>
+      <div class="entry-card">
+        <h3 id="entryName"></h3>
+        <div class="entry-meta" id="entryMeta"></div>
         <div id="entryFields" class="entry-fields"></div>
-        <button class="btn btn-primary btn-lg" id="submitBtn" onclick="handleSubmit()" style="width:100%">預覽確認</button>
+        <div id="doneBanner" class="done-banner" style="display:none">
+          &#10003; 今日數據已送出，欄位顯示已填報數字
+        </div>
+        <button class="btn btn-primary btn-full btn-lg" id="submitBtn" onclick="handleSubmit()">送出</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- VIEW: 編輯者專案列表 -->
+<!-- 編輯者：專案列表 -->
 <div class="view" id="viewEditor">
-  <div class="main-layout">
-    <div class="page-header">
+  <div class="wrap">
+    <div class="ph">
       <div>
-        <div class="page-title">專案總覽</div>
-        <div class="page-sub">拖曳卡片可調整順序</div>
+        <div class="ph-title">專案總覽</div>
+        <div class="ph-sub">拖曳卡片可調整順序</div>
       </div>
       <button class="btn btn-primary" onclick="openNewProjectModal()">&#65291; 新增專案</button>
     </div>
-    <div class="project-grid" id="editorProjectGrid"></div>
+    <div class="project-grid" id="editorGrid"></div>
   </div>
 </div>
 
-<!-- VIEW: 專案詳情 -->
-<div class="view" id="viewProjectDetail">
-  <div class="main-layout">
-    <button class="back-btn" onclick="backToEditorList()">&#8592; 返回專案列表</button>
-    <div class="page-header">
+<!-- 編輯者：專案詳情 -->
+<div class="view" id="viewDetail">
+  <div class="wrap">
+    <button class="back-btn" onclick="backToEditor()">&#8592; 返回專案列表</button>
+    <div class="ph">
       <div>
-        <div class="page-title" id="detailProjectName"></div>
-        <div class="page-sub" id="detailProjectDates"></div>
+        <div class="ph-title" id="detailName"></div>
+        <div class="ph-sub" id="detailDates"></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-secondary btn-sm" onclick="openEditProjectModal()">&#9881; 編輯設定</button>
-        <button class="btn btn-secondary btn-sm" onclick="openManualEntryModal()">&#65291; 手動新增數據</button>
+        <button class="btn btn-ghost btn-sm" onclick="openEditModal()">&#9881; 編輯設定</button>
+        <button class="btn btn-ghost btn-sm" onclick="openManualModal()">&#65291; 手動新增數據</button>
       </div>
     </div>
     <div id="summaryRow" class="summary-row"></div>
     <div class="table-wrap">
-      <table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table>
-    </div>
-    <div class="settings-section">
-      <h4>專案狀態</h4>
-      <div class="toggle-wrap">
-        <label class="toggle">
-          <input type="checkbox" id="statusToggle" onchange="toggleProjectStatus()">
-          <span class="toggle-slider"></span>
-        </label>
-        <span class="toggle-label" id="statusLabel">進行中</span>
-      </div>
+      <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
     </div>
   </div>
 </div>
 
 <!-- MODAL: 新增/編輯專案 -->
-<div class="modal-overlay" id="projectModal">
+<div class="overlay" id="projectModal">
   <div class="modal">
     <div class="modal-title" id="projectModalTitle">新增專案</div>
-    <div class="modal-sub">設定活動基本資訊與登記項目</div>
-    <div class="form-group">
-      <label class="form-label">活動名稱</label>
-      <input class="form-input" id="fieldName" placeholder="例：2026 夏日藝術展" />
+    <div class="modal-sub">設定活動資訊與登記項目</div>
+    <div class="fg">
+      <label class="fl">活動名稱</label>
+      <input class="fi" id="fieldName" placeholder="例：2026 夏日藝術展">
     </div>
-    <div class="form-group">
-      <label class="form-label">開始日期</label>
-      <input class="form-input" type="date" id="fieldStart" />
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg">
+        <label class="fl">開始日期</label>
+        <input class="fi" type="date" id="fieldStart">
+      </div>
+      <div class="fg">
+        <label class="fl">結束日期</label>
+        <input class="fi" type="date" id="fieldEnd">
+      </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">結束日期</label>
-      <input class="form-input" type="date" id="fieldEnd" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">登記項目</label>
+    <div class="fg">
+      <label class="fl">登記項目</label>
       <div class="field-list" id="fieldList"></div>
       <button class="add-field-btn" onclick="addFieldItem()">&#65291; 新增項目</button>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('projectModal')">取消</button>
-      <button class="btn btn-primary" onclick="saveProject()">儲存</button>
+    <div class="section-divider">專案狀態</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">進行中</div>
+        <div class="toggle-desc">開啟後協助者可看到此專案</div>
+      </div>
+      <label class="tog">
+        <input type="checkbox" id="statusToggle" checked>
+        <span class="tog-sl"></span>
+      </label>
+    </div>
+    <div class="modal-foot modal-foot-space">
+      <button class="btn btn-danger btn-sm" id="deleteBtn" onclick="deleteProject()" style="display:none">刪除專案</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="closeModal('projectModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveProject()">儲存</button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- MODAL: 手動新增數據 -->
-<div class="modal-overlay" id="manualModal">
+<div class="overlay" id="manualModal">
   <div class="modal">
     <div class="modal-title">手動新增數據</div>
-    <div class="modal-sub" id="manualModalSub"></div>
-    <div class="form-group">
-      <label class="form-label">日期</label>
-      <input class="form-input" type="date" id="manualDate" />
+    <div class="modal-sub" id="manualSub"></div>
+    <div class="fg">
+      <label class="fl">日期</label>
+      <input class="fi" type="date" id="manualDate">
     </div>
     <div id="manualFields"></div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('manualModal')">取消</button>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('manualModal')">取消</button>
       <button class="btn btn-primary" onclick="saveManualEntry()">儲存</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: 確認送出 -->
-<div class="modal-overlay" id="confirmModal">
-  <div class="modal">
-    <div class="modal-title">確認送出</div>
-    <div class="modal-sub" id="confirmModalSub"></div>
-    <ul class="confirm-list" id="confirmModalList" style="background:var(--bg-surface2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;"></ul>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('confirmModal')">返回修改</button>
-      <button class="btn btn-primary" onclick="doSubmitEntry()">確認送出</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast-container" id="toastContainer"></div>
+<div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-// ==========================================================
-// STATE
-// ==========================================================
 var projects = {};
 var projectOrder = [];
 var currentRole = 'assistant';
 var currentProjectId = null;
 var editingProjectId = null;
-var pendingEntryData = null;
 var dragSrcEl = null;
 
-// ==========================================================
-// UI UTILITIES
-// ==========================================================
+/* ── UI UTILS ── */
 function showView(id) {
-  document.querySelectorAll('.view').forEach(function(v) {
-    v.classList.remove('active');
-  });
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
 }
-
 function setSyncStatus(s, t) {
-  document.getElementById('syncDot').className = 'sync-dot ' + s;
+  document.getElementById('syncDot').className = 'sdot ' + s;
   document.getElementById('syncText').textContent = t;
 }
-
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-window.openModal  = openModal;
+window.openModal = openModal;
 window.closeModal = closeModal;
-
 function todayStr() {
   var d = new Date();
-  return d.getFullYear() + '-' +
-    String(d.getMonth() + 1).padStart(2, '0') + '-' +
-    String(d.getDate()).padStart(2, '0');
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
-
-function esc(s) {
-  return String(s || '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-function showToast(msg, type) {
-  var c = document.getElementById('toastContainer');
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg, type) {
+  var w = document.getElementById('toastWrap');
   var t = document.createElement('div');
-  t.className = 'toast ' + (type || 'success');
+  t.className = 'toast' + (type === 'err' ? ' err' : type === 'ok' ? ' ok' : '');
   t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(function() { t.remove(); }, 3200);
+  w.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 3000);
 }
-window.showToast = showToast;
 
-// Close modal on backdrop click
-document.querySelectorAll('.modal-overlay').forEach(function(o) {
-  o.addEventListener('click', function(e) {
-    if (e.target === o) o.classList.remove('open');
-  });
+document.querySelectorAll('.overlay').forEach(function(o){
+  o.addEventListener('click', function(e){ if(e.target===o) o.classList.remove('open'); });
 });
 
-// ==========================================================
-// ROLE SWITCH
-// ==========================================================
+/* ── ROLE ── */
 function switchRole() {
-  var next = currentRole === 'assistant' ? 'editor' : 'assistant';
-  currentRole = next;
+  currentRole = currentRole === 'assistant' ? 'editor' : 'assistant';
   document.getElementById('switchRoleBtn').textContent =
-    next === 'assistant' ? '切換至編輯者' : '切換至協助者';
-  if (next === 'assistant') {
-    showView('viewAssistant');
-    renderAssistantProjects();
-  } else {
-    showView('viewEditor');
-    renderEditorProjects();
-  }
+    currentRole === 'assistant' ? '切換至編輯者' : '切換至協助者';
+  if (currentRole === 'assistant') { showView('viewAssistant'); renderAssistantProjects(); }
+  else { showView('viewEditor'); renderEditorProjects(); }
 }
 window.switchRole = switchRole;
 
-// ==========================================================
-// RENDER
-// ==========================================================
+/* ── RENDER ── */
 function renderAssistantProjects() {
-  var container = document.getElementById('assistantProjectListInner');
-  var active = projectOrder.filter(function(k) {
-    return projects[k] && projects[k].status === 'active';
-  });
+  var el = document.getElementById('assistantListInner');
+  var active = projectOrder.filter(function(k){ return projects[k] && projects[k].status === 'active'; });
   if (!active.length) {
-    container.innerHTML =
-      '<div class="empty-state"><div class="empty-icon">&#128237;</div>' +
-      '<p>目前沒有進行中的活動</p></div>';
+    el.innerHTML = '<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';
     return;
   }
-  container.innerHTML = active.map(function(k) {
+  el.innerHTML = active.map(function(k){
     var p = projects[k];
-    return '<div class="project-select-item" onclick="selectProject(\''+k+'\')">'+
-      '<div><div class="p-name">' + esc(p.name) + '</div>' +
-      '<div class="p-date">' + p.startDate + ' ～ ' + p.endDate + '</div></div>' +
-      '<span style="color:var(--accent);font-size:18px">&#8250;</span></div>';
+    return '<div class="psel-item" onclick="selectProject(\'' + k + '\')">' +
+      '<div><div class="psel-name">'+esc(p.name)+'</div>'+
+      '<div class="psel-date">'+p.startDate+' ～ '+p.endDate+'</div></div>'+
+      '<span style="color:var(--accent);font-size:16px">&#8250;</span></div>';
   }).join('');
 }
 
 function renderEditorProjects() {
-  var grid = document.getElementById('editorProjectGrid');
+  var el = document.getElementById('editorGrid');
   if (!projectOrder.length) {
-    grid.innerHTML =
-      '<div class="empty-state" style="grid-column:1/-1">' +
-      '<div class="empty-icon">&#128193;</div>' +
-      '<p>尚無專案，點擊「新增專案」開始</p></div>';
+    el.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-ico">&#128193;</div><p>尚無專案，點擊「新增專案」開始</p></div>';
     return;
   }
-  grid.innerHTML = projectOrder.filter(function(k) {
-    return !!projects[k];
-  }).map(function(k) {
+  el.innerHTML = projectOrder.filter(function(k){ return !!projects[k]; }).map(function(k){
     var p = projects[k];
     var total = 0;
-    Object.values(p.entries || {}).forEach(function(e) {
-      Object.values(e).forEach(function(v) { total += (parseInt(v) || 0); });
-    });
-    var isActive = p.status === 'active';
-    return '<div class="project-card" draggable="true" data-id="' + k + '"' +
-      ' ondragstart="onDragStart(event)"' +
-      ' ondragover="onDragOver(event)"' +
-      ' ondrop="onDrop(event)"' +
-      ' ondragleave="onDragLeave(event)"' +
-      ' ondragend="onDragEnd(event)"' +
-      ' onclick="openProjectDetail(\''+k+'\')">'+
-      '<div class="card-header">' +
-      '<div class="card-title">' + esc(p.name) + '</div>' +
-      '<span class="status-badge ' + (isActive ? 'status-active' : 'status-ended') + '">' +
-      (isActive ? '進行中' : '已結束') + '</span></div>' +
-      '<div class="card-date">&#128197; ' + p.startDate + ' ～ ' + p.endDate + '</div>' +
-      '<div style="font-size:12px;color:var(--text-muted)">登記項目：' +
-      ((p.fields || []).join('、') || '—') + '</div>' +
-      '<div class="card-stats">' +
-      '<div class="stat-item"><div class="stat-num">' +
-      Object.keys(p.entries || {}).length +
-      '</div><div class="stat-label">填報天數</div></div>' +
-      '<div class="stat-item"><div class="stat-num">' + total.toLocaleString() +
-      '</div><div class="stat-label">累計總人次</div></div>' +
+    Object.values(p.entries||{}).forEach(function(e){ Object.values(e).forEach(function(v){ total+=(parseInt(v)||0); }); });
+    var on = p.status === 'active';
+    return '<div class="pcard" draggable="true" data-id="'+k+'"'+
+      ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
+      ' onclick="openDetail(\'' + k + '\')">' +
+      '<div class="pcard-head">'+
+      '<div class="pcard-title">'+esc(p.name)+'</div>'+
+      '<span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
+      '<div class="pcard-date">'+p.startDate+' ～ '+p.endDate+'</div>'+
+      '<div class="pcard-fields">'+((p.fields||[]).join(' · ')||'—')+'</div>'+
+      '<div class="pcard-stats">'+
+      '<div class="stat"><div class="stat-n">'+Object.keys(p.entries||{}).length+'</div><div class="stat-l">填報天數</div></div>'+
+      '<div class="stat"><div class="stat-n">'+total.toLocaleString()+'</div><div class="stat-l">累計人次</div></div>'+
       '</div></div>';
   }).join('');
 }
 
-function renderProjectDetail(id) {
-  var p = projects[id];
-  if (!p) return;
-  document.getElementById('detailProjectName').textContent = p.name;
-  document.getElementById('detailProjectDates').textContent =
-    p.startDate + ' ～ ' + p.endDate;
-  var toggle = document.getElementById('statusToggle');
-  toggle.checked = p.status === 'active';
-  document.getElementById('statusLabel').textContent =
-    p.status === 'active' ? '進行中' : '已結束';
-
-  var fields = p.fields || [];
-  var entries = p.entries || {};
-
-  // Summary
-  var fieldTotals = fields.map(function(_, fi) {
-    var t = 0;
-    Object.values(entries).forEach(function(e) { t += parseInt(e['f' + fi] || 0); });
-    return t;
+function renderDetail(id) {
+  var p = projects[id]; if (!p) return;
+  document.getElementById('detailName').textContent = p.name;
+  document.getElementById('detailDates').textContent = p.startDate + ' ～ ' + p.endDate;
+  var fields = p.fields||[], entries = p.entries||{};
+  /* summary — 只顯示各項目總和，無「累計總人次」 */
+  var ft = fields.map(function(_,fi){
+    var t=0; Object.values(entries).forEach(function(e){ t+=parseInt(e['f'+fi]||0); }); return t;
   });
-  var grandTotal = fieldTotals.reduce(function(a, b) { return a + b; }, 0);
-  document.getElementById('summaryRow').innerHTML =
-    '<div class="summary-card total"><div class="s-num">' +
-    grandTotal.toLocaleString() + '</div><div class="s-label">累計總人次</div></div>' +
-    fields.map(function(f, i) {
-      return '<div class="summary-card"><div class="s-num">' +
-        fieldTotals[i].toLocaleString() +
-        '</div><div class="s-label">' + esc(f) + '</div></div>';
-    }).join('');
-
-  // Table
+  document.getElementById('summaryRow').innerHTML = fields.map(function(f,i){
+    return '<div class="scard"><div class="scard-n">'+ft[i].toLocaleString()+'</div><div class="scard-l">'+esc(f)+'</div></div>';
+  }).join('');
+  /* table — all cells centered */
   var dates = Object.keys(entries).sort();
-  var thead = document.getElementById('tableHead');
-  var tbody = document.getElementById('tableBody');
+  var th = document.getElementById('tHead'), tb = document.getElementById('tBody');
   if (!dates.length) {
-    thead.innerHTML = '';
-    tbody.innerHTML =
-      '<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text-muted)">尚無數據</td></tr>';
-    return;
+    th.innerHTML=''; tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>'; return;
   }
-  thead.innerHTML = '<tr><th>日期</th>' +
-    fields.map(function(f) { return '<th>' + esc(f) + '</th>'; }).join('') +
-    '<th style="text-align:right">當日合計</th></tr>';
-  var colTotals = fields.map(function() { return 0; });
-  var grandSum = 0;
-  tbody.innerHTML = dates.map(function(d) {
-    var e = entries[d];
-    var rv = fields.map(function(_, i) { return parseInt(e['f' + i] || 0); });
-    var rs = rv.reduce(function(a, b) { return a + b; }, 0);
-    rv.forEach(function(v, i) { colTotals[i] += v; });
-    grandSum += rs;
-    return '<tr><td class="date-cell">' + d + '</td>' +
-      rv.map(function(v) {
-        return '<td class="num-cell">' + v.toLocaleString() + '</td>';
-      }).join('') +
-      '<td class="num-cell highlight">' + rs.toLocaleString() + '</td></tr>';
-  }).join('') +
-  '<tr class="total-row"><td class="date-cell">合計</td>' +
-  colTotals.map(function(v) {
-    return '<td class="num-cell">' + v.toLocaleString() + '</td>';
-  }).join('') +
-  '<td class="num-cell">' + grandSum.toLocaleString() + '</td></tr>';
+  th.innerHTML='<tr><th>日期</th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'<th>當日合計</th></tr>';
+  var ct=fields.map(function(){return 0;}), gs=0;
+  tb.innerHTML=dates.map(function(d){
+    var e=entries[d]||{};
+    var rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
+    var rs=rv.reduce(function(a,b){return a+b;},0);
+    rv.forEach(function(v,i){ct[i]+=v;}); gs+=rs;
+    return '<tr><td class="date-cell">'+d+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td style="font-weight:600;color:var(--accent)">'+rs.toLocaleString()+'</td></tr>';
+  }).join('')+
+  '<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td>'+gs.toLocaleString()+'</td></tr>';
 }
 
-function refreshCurrentView() {
-  if (currentRole === 'assistant') renderAssistantProjects();
-  else if (currentRole === 'editor') {
-    if (currentProjectId &&
-        document.getElementById('viewProjectDetail').classList.contains('active')) {
-      renderProjectDetail(currentProjectId);
-    } else {
-      renderEditorProjects();
-    }
-  }
+function refreshView() {
+  if (currentRole==='assistant') renderAssistantProjects();
+  else if (currentProjectId && document.getElementById('viewDetail').classList.contains('active')) renderDetail(currentProjectId);
+  else if (currentRole==='editor') renderEditorProjects();
 }
 
-// ==========================================================
-// ASSISTANT
-// ==========================================================
+/* ── ASSISTANT ── */
 window.selectProject = function(id) {
   currentProjectId = id;
   var p = projects[id];
-  document.getElementById('assistantProjectList').style.display = 'none';
-  document.getElementById('assistantEntryForm').style.display = 'block';
-  document.getElementById('entryProjectName').textContent = p.name;
-  document.getElementById('entryTodayDate').textContent = '填報日期：' + todayStr();
-  document.getElementById('entryFields').innerHTML =
-    (p.fields || []).map(function(f, i) {
-      return '<div class="entry-field-row">' +
-        '<div class="entry-field-label">' + esc(f) + '</div>' +
-        '<input class="entry-field-input" type="number" min="0" id="ef_' + i +
-        '" placeholder="0" /></div>';
-    }).join('');
+  document.getElementById('assistantList').style.display = 'none';
+  document.getElementById('assistantForm').style.display = 'block';
+  document.getElementById('entryName').textContent = p.name;
+  document.getElementById('entryMeta').textContent = '填報日期：' + todayStr();
+  document.getElementById('doneBanner').style.display = 'none';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('entryFields').innerHTML = (p.fields||[]).map(function(f,i){
+    return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
+      '<input class="efield-input" type="number" min="0" id="ef_'+i+'" placeholder="0"></div>';
+  }).join('');
 };
 
-window.backToProjectList = function() {
-  document.getElementById('assistantProjectList').style.display = 'block';
-  document.getElementById('assistantEntryForm').style.display = 'none';
+window.backToList = function() {
+  document.getElementById('assistantList').style.display = 'block';
+  document.getElementById('assistantForm').style.display = 'none';
 };
 
 window.handleSubmit = function() {
+  /* 直接送出，不用預覽 */
   var p = projects[currentProjectId];
-  var today = todayStr();
-  var values = (p.fields || []).map(function(f, i) {
-    return { label: f, value: parseInt(document.getElementById('ef_' + i).value) || 0 };
+  var values = (p.fields||[]).map(function(f,i){
+    return { label:f, value:parseInt(document.getElementById('ef_'+i).value)||0 };
   });
-  document.getElementById('confirmModalSub').textContent = p.name + '｜' + today;
-  document.getElementById('confirmModalList').innerHTML = values.map(function(v) {
-    return '<li><span>' + esc(v.label) + '</span><span class="cv">' + v.value + '</span></li>';
-  }).join('');
-  pendingEntryData = { projectId: currentProjectId, date: today, values: values };
-  openModal('confirmModal');
+  if (window._dbSubmit) {
+    window._dbSubmit(currentProjectId, todayStr(), values);
+  } else {
+    toast('資料庫尚未就緒，請稍後', 'err');
+  }
 };
 
-// ==========================================================
-// EDITOR
-// ==========================================================
-window.openProjectDetail = function(id) {
+/* ── EDITOR ── */
+window.openDetail = function(id) {
   currentProjectId = id;
-  showView('viewProjectDetail');
-  renderProjectDetail(id);
+  showView('viewDetail');
+  renderDetail(id);
 };
-
-window.backToEditorList = function() {
+window.backToEditor = function() {
   currentProjectId = null;
   showView('viewEditor');
   renderEditorProjects();
@@ -599,215 +506,160 @@ window.openNewProjectModal = function() {
   document.getElementById('fieldStart').value = '';
   document.getElementById('fieldEnd').value = '';
   document.getElementById('fieldList').innerHTML = '';
+  document.getElementById('statusToggle').checked = true;
+  document.getElementById('deleteBtn').style.display = 'none';
   addFieldItem('一般入場');
   openModal('projectModal');
 };
 
-window.openEditProjectModal = function() {
+window.openEditModal = function() {
   if (!currentProjectId) return;
   editingProjectId = currentProjectId;
   var p = projects[currentProjectId];
-  document.getElementById('projectModalTitle').textContent = '編輯專案';
+  document.getElementById('projectModalTitle').textContent = '編輯設定';
   document.getElementById('fieldName').value = p.name;
   document.getElementById('fieldStart').value = p.startDate;
   document.getElementById('fieldEnd').value = p.endDate;
-  document.getElementById('fieldList').innerHTML = '';
-  (p.fields || []).forEach(function(f) { addFieldItem(f); });
+  document.getElementById('statusToggle').checked = p.status === 'active';
+  document.getElementById('deleteBtn').style.display = 'inline-flex';
+  var fl = document.getElementById('fieldList'); fl.innerHTML = '';
+  (p.fields||[]).forEach(function(f){ addFieldItem(f); });
   openModal('projectModal');
 };
 
 function addFieldItem(val) {
   var fl = document.getElementById('fieldList');
-  var div = document.createElement('div');
-  div.className = 'field-item';
-  div.innerHTML =
-    '<input class="form-input" placeholder="例：一般入場" value="' + esc(val || '') + '" />' +
-    '<button class="remove-field-btn" onclick="this.parentElement.remove()">&#215;</button>';
+  var div = document.createElement('div'); div.className = 'field-item';
+  div.innerHTML = '<input class="fi" placeholder="例：一般入場" value="'+esc(val||'')+'">'+
+    '<button class="rm-btn" onclick="this.parentElement.remove()">&#215;</button>';
   fl.appendChild(div);
 }
 window.addFieldItem = addFieldItem;
 
-window.openManualEntryModal = function() {
+window.openManualModal = function() {
   var p = projects[currentProjectId];
-  document.getElementById('manualModalSub').textContent = p.name;
+  document.getElementById('manualSub').textContent = p.name;
   document.getElementById('manualDate').value = todayStr();
-  document.getElementById('manualFields').innerHTML =
-    (p.fields || []).map(function(f, i) {
-      return '<div class="form-group"><label class="form-label">' + esc(f) + '</label>' +
-        '<input class="form-input" type="number" min="0" id="mf_' + i +
-        '" placeholder="0" /></div>';
-    }).join('');
+  document.getElementById('manualFields').innerHTML = (p.fields||[]).map(function(f,i){
+    return '<div class="fg"><label class="fl">'+esc(f)+'</label>'+
+      '<input class="fi" type="number" min="0" id="mf_'+i+'" placeholder="0"></div>';
+  }).join('');
   openModal('manualModal');
 };
 
-// ==========================================================
-// DRAG & DROP
-// ==========================================================
-window.onDragStart = function(e) {
-  dragSrcEl = e.currentTarget;
-  dragSrcEl.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', dragSrcEl.dataset.id);
-};
-window.onDragOver = function(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-};
-window.onDragLeave = function(e) { e.currentTarget.classList.remove('drag-over'); };
-window.onDragEnd   = function(e) { e.currentTarget.classList.remove('dragging'); };
-// onDrop is defined after Firebase is ready (needs update())
+/* ── DRAG & DROP ── */
+window.onDS = function(e){ dragSrcEl=e.currentTarget; dragSrcEl.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragSrcEl.dataset.id); };
+window.onDO = function(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); };
+window.onDL = function(e){ e.currentTarget.classList.remove('drag-over'); };
+window.onDE = function(e){ e.currentTarget.classList.remove('dragging'); };
+window.onDP = function(e){ e.preventDefault(); }; /* overwritten after Firebase ready */
 
-// ==========================================================
-// FIREBASE — all DB writes defined inside IIFE
-// ==========================================================
-(async function() {
+/* ── FIREBASE ── */
+(async function(){
   try {
     var fbApp = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     var fbDb  = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
-
-    var initializeApp = fbApp.initializeApp;
-    var getApps       = fbApp.getApps;
-    var getDatabase   = fbDb.getDatabase;
-    var ref    = fbDb.ref;
-    var set    = fbDb.set;
-    var update = fbDb.update;
-    var onValue= fbDb.onValue;
-
-    // Try to connect - Firebase Realtime DB URL varies by region
-    var dbURL = 'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/';
-    var app = getApps().length
-      ? getApps()[0]
-      : initializeApp({ databaseURL: dbURL });
+    var initializeApp=fbApp.initializeApp, getApps=fbApp.getApps;
+    var getDatabase=fbDb.getDatabase, ref=fbDb.ref, set=fbDb.set, update=fbDb.update, remove=fbDb.remove, onValue=fbDb.onValue;
+    var app = getApps().length ? getApps()[0] : initializeApp({databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/'});
     var db = getDatabase(app);
 
-    // Live listener
-    setSyncStatus('syncing', '連線中...');
-    onValue(ref(db, 'tracker'), function(snap) {
-      var data = snap.val() || {};
-      projects = data.projects || {};
-      projectOrder = data.projectOrder || Object.keys(projects);
-      Object.keys(projects).forEach(function(k) {
-        if (projectOrder.indexOf(k) < 0) projectOrder.push(k);
-      });
-      projectOrder = projectOrder.filter(function(k) { return !!projects[k]; });
-      setSyncStatus('synced', '已同步');
-      refreshCurrentView();
-    }, function(err) {
-      setSyncStatus('error', '連線失敗');
-      showToast('Firebase 連線失敗：' + err.message, 'error');
-    });
+    setSyncStatus('syncing','連線中...');
+    onValue(ref(db,'tracker'), function(snap){
+      var d = snap.val()||{};
+      projects = d.projects||{};
+      projectOrder = d.projectOrder||Object.keys(projects);
+      Object.keys(projects).forEach(function(k){ if(projectOrder.indexOf(k)<0) projectOrder.push(k); });
+      projectOrder = projectOrder.filter(function(k){ return !!projects[k]; });
+      setSyncStatus('synced','已同步');
+      refreshView();
+    }, function(err){ setSyncStatus('error','連線失敗'); toast('連線失敗：'+err.message,'err'); });
 
-    // Seed test data if DB is empty
+    /* Seed if empty */
     try {
-      var snap0 = await new Promise(function(res) {
-        var unsub = onValue(ref(db, 'tracker/projects'), function(s) { unsub(); res(s); });
-      });
-      if (!snap0.val()) {
-        await update(ref(db, 'tracker/projects/p_citynorth2026'), {
-          name: '2026城西夏樂慶',
-          startDate: '2026-05-16',
-          endDate: '2026-05-31',
-          fields: ['服務台人次'],
-          status: 'active'
-        });
-        await update(ref(db, 'tracker'), { projectOrder: ['p_citynorth2026'] });
+      var s0 = await new Promise(function(res){ var u=onValue(ref(db,'tracker/projects'),function(s){u();res(s);}); });
+      if (!s0.val()) {
+        await update(ref(db,'tracker/projects/p_citynorth2026'),{name:'2026城西夏樂慶',startDate:'2026-05-16',endDate:'2026-05-31',fields:['服務台人次'],status:'active'});
+        await update(ref(db,'tracker'),{projectOrder:['p_citynorth2026']});
       }
-    } catch(e) { console.warn('Seed skipped:', e.message); }
+    } catch(e){ console.warn('seed skip',e.message); }
 
-    // --- DB Write Functions ---
-
-    window.saveProject = async function() {
-      var name   = document.getElementById('fieldName').value.trim();
-      var start  = document.getElementById('fieldStart').value;
-      var end    = document.getElementById('fieldEnd').value;
-      var fields = Array.from(
-        document.querySelectorAll('#fieldList .field-item input')
-      ).map(function(i) { return i.value.trim(); }).filter(Boolean);
-      if (!name || !start || !end) {
-        showToast('請填寫活動名稱與日期', 'error'); return;
-      }
-      if (!fields.length) {
-        showToast('請至少新增一個登記項目', 'error'); return;
-      }
-      var id = editingProjectId || 'p_' + Date.now();
-      var existing = editingProjectId ? (projects[editingProjectId] || {}) : {};
-      setSyncStatus('syncing', '儲存中...');
+    /* DB writes */
+    window._dbSubmit = async function(pid, date, values) {
+      var obj={}; values.forEach(function(v,i){ obj['f'+i]=v.value; });
       try {
-        await update(ref(db, 'tracker/projects/' + id), {
-          name: name, startDate: start, endDate: end,
-          fields: fields, status: existing.status || 'active'
+        await set(ref(db,'tracker/projects/'+pid+'/entries/'+date), obj);
+        /* 送出後：disable inputs & show filled values */
+        values.forEach(function(v,i){
+          var el = document.getElementById('ef_'+i);
+          if (el) { el.value = v.value; el.disabled = true; }
         });
-        if (!editingProjectId) {
-          await update(ref(db, 'tracker'), {
-            projectOrder: projectOrder.concat([id])
-          });
-        }
-        closeModal('projectModal');
-        showToast('✅ 專案已儲存');
-      } catch(err) {
-        showToast('儲存失敗：' + err.message, 'error');
-        setSyncStatus('error', '儲存失敗');
-      }
+        document.getElementById('doneBanner').style.display = 'flex';
+        document.getElementById('submitBtn').disabled = true;
+        toast('✅ 數據已送出！','ok');
+      } catch(e){ toast('送出失敗：'+e.message,'err'); }
     };
 
-    window.doSubmitEntry = async function() {
-      var d = pendingEntryData;
-      var obj = {};
-      d.values.forEach(function(v, i) { obj['f' + i] = v.value; });
-      setSyncStatus('syncing', '儲存中...');
+    window.saveProject = async function() {
+      var name  = document.getElementById('fieldName').value.trim();
+      var start = document.getElementById('fieldStart').value;
+      var end   = document.getElementById('fieldEnd').value;
+      var fields= Array.from(document.querySelectorAll('#fieldList .field-item .fi')).map(function(i){return i.value.trim();}).filter(Boolean);
+      var status= document.getElementById('statusToggle').checked ? 'active' : 'ended';
+      if (!name||!start||!end){ toast('請填寫活動名稱與日期','err'); return; }
+      if (!fields.length){ toast('請至少新增一個登記項目','err'); return; }
+      var id = editingProjectId||'p_'+Date.now();
+      setSyncStatus('syncing','儲存中...');
       try {
-        await set(ref(db, 'tracker/projects/' + d.projectId + '/entries/' + d.date), obj);
-        closeModal('confirmModal');
-        showToast('✅ 數據已送出！', 'success');
-        window.backToProjectList();
-      } catch(e) { showToast('送出失敗：' + e.message, 'error'); }
+        await update(ref(db,'tracker/projects/'+id),{name:name,startDate:start,endDate:end,fields:fields,status:status});
+        if (!editingProjectId) await update(ref(db,'tracker'),{projectOrder:projectOrder.concat([id])});
+        closeModal('projectModal');
+        toast('✅ 已儲存','ok');
+      } catch(e){ toast('儲存失敗：'+e.message,'err'); setSyncStatus('error','儲存失敗'); }
+    };
+
+    window.deleteProject = async function() {
+      if (!editingProjectId) return;
+      var p = projects[editingProjectId];
+      if (!confirm('確定要刪除「'+(p?p.name:editingProjectId)+'」？此操作無法復原。')) return;
+      try {
+        await remove(ref(db,'tracker/projects/'+editingProjectId));
+        var newOrder = projectOrder.filter(function(k){ return k !== editingProjectId; });
+        await update(ref(db,'tracker'),{projectOrder:newOrder});
+        closeModal('projectModal');
+        /* if we're in detail view, go back */
+        if (currentProjectId === editingProjectId) { currentProjectId=null; showView('viewEditor'); }
+        toast('專案已刪除');
+      } catch(e){ toast('刪除失敗：'+e.message,'err'); }
     };
 
     window.saveManualEntry = async function() {
       var date = document.getElementById('manualDate').value;
-      if (!date) { showToast('請選擇日期', 'error'); return; }
-      var p = projects[currentProjectId];
-      var obj = {};
-      (p.fields || []).forEach(function(_, i) {
-        obj['f' + i] = parseInt(document.getElementById('mf_' + i).value) || 0;
-      });
-      setSyncStatus('syncing', '儲存中...');
+      if (!date){ toast('請選擇日期','err'); return; }
+      var p=projects[currentProjectId], obj={};
+      (p.fields||[]).forEach(function(_,i){ obj['f'+i]=parseInt(document.getElementById('mf_'+i).value)||0; });
       try {
-        await set(ref(db, 'tracker/projects/' + currentProjectId + '/entries/' + date), obj);
+        await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date), obj);
         closeModal('manualModal');
-        showToast('✅ 數據已儲存');
-      } catch(e) { showToast('儲存失敗：' + e.message, 'error'); }
+        toast('✅ 數據已儲存','ok');
+      } catch(e){ toast('儲存失敗：'+e.message,'err'); }
     };
 
-    window.toggleProjectStatus = async function() {
-      var st = document.getElementById('statusToggle').checked;
-      document.getElementById('statusLabel').textContent = st ? '進行中' : '已結束';
-      try {
-        await update(ref(db, 'tracker/projects/' + currentProjectId), {
-          status: st ? 'active' : 'ended'
-        });
-        showToast(st ? '專案已設為進行中' : '專案已設為已結束');
-      } catch(e) { showToast('更新失敗：' + e.message, 'error'); }
-    };
-
-    window.onDrop = function(e) {
+    window.onDP = function(e) {
       e.preventDefault();
-      var target = e.currentTarget;
-      target.classList.remove('drag-over');
-      if (!dragSrcEl || dragSrcEl === target) return;
-      var si = projectOrder.indexOf(dragSrcEl.dataset.id);
-      var ti = projectOrder.indexOf(target.dataset.id);
-      if (si < 0 || ti < 0) return;
-      projectOrder.splice(si, 1);
-      projectOrder.splice(ti, 0, dragSrcEl.dataset.id);
-      update(ref(db, 'tracker'), { projectOrder: projectOrder.slice() });
+      var tgt=e.currentTarget; tgt.classList.remove('drag-over');
+      if (!dragSrcEl||dragSrcEl===tgt) return;
+      var si=projectOrder.indexOf(dragSrcEl.dataset.id), ti=projectOrder.indexOf(tgt.dataset.id);
+      if (si<0||ti<0) return;
+      projectOrder.splice(si,1); projectOrder.splice(ti,0,dragSrcEl.dataset.id);
+      update(ref(db,'tracker'),{projectOrder:projectOrder.slice()});
     };
 
-    console.log('Firebase ready ✓');
-  } catch(err) {
-    console.error('Firebase init failed:', err);
-    setSyncStatus('error', '初始化失敗');
-    showToast('初始化失敗：' + err.message, 'error');
+    console.log('Firebase ready');
+  } catch(err){
+    console.error('Firebase error:',err);
+    setSyncStatus('error','連線失敗');
+    toast('初始化失敗：'+err.message,'err');
   }
 })();
 </script>
