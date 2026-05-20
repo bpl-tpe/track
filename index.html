@@ -414,7 +414,7 @@ function renderAssistantProjects() {
   }
   container.innerHTML = active.map(function(k) {
     var p = projects[k];
-    return '<div class="project-select-item" onclick="selectProject('' + k + '')">' +
+    return '<div class="project-select-item" onclick="selectProject(\''+k+'\')">'+
       '<div><div class="p-name">' + esc(p.name) + '</div>' +
       '<div class="p-date">' + p.startDate + ' ～ ' + p.endDate + '</div></div>' +
       '<span style="color:var(--accent);font-size:18px">&#8250;</span></div>';
@@ -445,7 +445,7 @@ function renderEditorProjects() {
       ' ondrop="onDrop(event)"' +
       ' ondragleave="onDragLeave(event)"' +
       ' ondragend="onDragEnd(event)"' +
-      ' onclick="openProjectDetail('' + k + '')">' +
+      ' onclick="openProjectDetail(\''+k+'\')">'+
       '<div class="card-header">' +
       '<div class="card-title">' + esc(p.name) + '</div>' +
       '<span class="status-badge ' + (isActive ? 'status-active' : 'status-ended') + '">' +
