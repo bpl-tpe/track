@@ -1,465 +1,1218 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>TrackIt · 活動人次登記</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活動人次追蹤系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',system-ui,sans-serif;background:#F6F9FA;color:#1E2030;min-height:100vh}
-input,select{font-family:inherit;font-size:14px;border:1.5px solid #D8DEEC;border-radius:10px;padding:9px 12px;outline:none;background:#fff;color:#1E2030;width:100%;transition:border-color .15s,box-shadow .15s}
-input:focus,select:focus{border-color:#9B8EC7;box-shadow:0 0 0 3px rgba(155,142,199,.15)}
-input[type=number]{-moz-appearance:textfield}
-input[type=number]::-webkit-inner-spin-button{opacity:.3}
-button{font-family:inherit;cursor:pointer;border:none;transition:all .12s;border-radius:10px}
-button:active{transform:scale(.97)}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  :root {
+    --bg-base: #f0f4f8;
+    --bg-surface: #ffffff;
+    --bg-surface2: #e8eef5;
+    --bg-surface3: #dde6f0;
+    --accent: #3b7dd8;
+    --accent-light: #6fa3e8;
+    --accent-pale: #ddeaf8;
+    --accent-dark: #2560b0;
+    --text-primary: #1a2a3a;
+    --text-secondary: #4a6080;
+    --text-muted: #8aa0b8;
+    --border: #c8d8e8;
+    --border-light: #dde8f2;
+    --shadow-sm: 0 1px 4px rgba(59,125,216,0.08);
+    --shadow-md: 0 4px 16px rgba(59,125,216,0.12);
+    --shadow-lg: 0 8px 32px rgba(59,125,216,0.15);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --radius-lg: 20px;
+    --success: #2eac82;
+    --warning: #e08a2a;
+    --danger: #d04040;
+    --status-active: #2eac82;
+    --status-ended: #8aa0b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans TC', 'DM Sans', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent);
+    letter-spacing: -0.3px;
+  }
+  .topbar-brand .logo-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 15px;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sync-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 4px 10px;
+    background: var(--bg-surface2);
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+  }
+  .sync-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: all 0.3s;
+  }
+  .sync-dot.synced { background: var(--success); box-shadow: 0 0 6px rgba(46,172,130,0.5); }
+  .sync-dot.syncing { background: var(--warning); animation: pulse 1s infinite; }
+  .sync-dot.error { background: var(--danger); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .role-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    background: var(--accent-pale);
+  }
+  .role-badge:hover { background: var(--accent); color: white; }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── ROLE SELECT ── */
+  #roleSelect {
+    min-height: calc(100vh - 56px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+  .role-select-wrap {
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+  }
+  .role-select-wrap h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .role-select-wrap p {
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    font-size: 15px;
+  }
+  .role-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .role-card {
+    background: var(--bg-surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px 20px;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+  }
+  .role-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+  }
+  .role-card .role-icon {
+    font-size: 36px;
+    margin-bottom: 14px;
+    display: block;
+  }
+  .role-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .role-card p { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* ── MAIN LAYOUT ── */
+  .main-layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 24px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .page-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--accent-dark); box-shadow: 0 4px 12px rgba(59,125,216,0.3); }
+  .btn-secondary {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 1.5px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: #fff0f0; color: var(--danger); border: 1.5px solid #f0c0c0; }
+  .btn-danger:hover { background: var(--danger); color: white; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-lg { padding: 12px 24px; font-size: 15px; border-radius: var(--radius); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── PROJECT CARDS ── */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .project-card {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .project-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .project-card:hover::before { opacity: 1; }
+  .project-card.dragging { opacity: 0.5; border: 2px dashed var(--accent); }
+  .project-card.drag-over { border-color: var(--accent-light); background: var(--accent-pale); }
+
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .card-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .status-badge {
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .status-active { background: rgba(46,172,130,0.12); color: var(--status-active); }
+  .status-ended { background: var(--bg-surface2); color: var(--status-ended); }
+
+  .card-date { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+  .card-stats { display: flex; gap: 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light); }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 20px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--text-muted); }
+
+  .drag-handle {
+    cursor: grab;
+    color: var(--text-muted);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .drag-handle:hover { color: var(--accent); background: var(--accent-pale); }
+
+  /* ── DETAIL VIEW ── */
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+    transition: all 0.2s;
+    background: none;
+    border: none;
+    font-family: inherit;
+  }
+  .back-btn:hover { color: var(--accent); background: var(--accent-pale); }
+
+  /* ── SUMMARY CARDS ── */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .summary-card {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+  }
+  .summary-card.total {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border-color: transparent;
+    color: white;
+  }
+  .summary-card.total .s-label { color: rgba(255,255,255,0.8); }
+  .summary-card.total .s-num { color: white; }
+  .s-num { font-size: 28px; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .s-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: auto;
+    margin-bottom: 24px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px;
+  }
+  th {
+    background: var(--bg-surface2);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1.5px solid var(--border);
+    white-space: nowrap;
+  }
+  th.date-col { color: var(--text-primary); font-size: 13px; }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg-surface2); }
+  .total-row td {
+    background: var(--accent-pale);
+    font-weight: 700;
+    color: var(--accent-dark);
+    border-top: 2px solid var(--border);
+  }
+  .total-row:hover td { background: var(--accent-pale); }
+  td.date-cell { font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+  td.num-cell { text-align: right; font-variant-numeric: tabular-nums; }
+  td.num-cell.highlight { color: var(--accent); font-weight: 600; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 40, 60, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: var(--shadow-lg);
+    animation: modalIn 0.2s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  @keyframes modalIn { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ── FORM ── */
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,125,216,0.12); }
+  .field-list { display: flex; flex-direction: column; gap: 8px; }
+  .field-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .field-item input { flex: 1; }
+  .remove-field-btn {
+    width: 28px; height: 28px;
+    border: none; border-radius: 6px;
+    background: #fff0f0;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .remove-field-btn:hover { background: var(--danger); color: white; }
+  .add-field-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+    padding: 4px 0;
+    margin-top: 4px;
+  }
+  .add-field-btn:hover { text-decoration: underline; }
+
+  /* ── ASSISTANT VIEW ── */
+  .assistant-wrap { max-width: 480px; margin: 0 auto; padding: 28px 24px; }
+  .project-select-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .project-select-item {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .project-select-item:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+  .project-select-item .p-name { font-weight: 600; font-size: 14px; }
+  .project-select-item .p-date { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .entry-form {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 16px;
+  }
+  .entry-form h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .entry-form .entry-date { font-size: 13px; color: var(--text-secondary); margin-bottom: 18px; }
+  .entry-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+  .entry-field-row { display: flex; align-items: center; gap: 12px; }
+  .entry-field-label { flex: 1; font-size: 14px; font-weight: 500; }
+  .entry-field-input {
+    width: 110px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    font-family: inherit;
+    color: var(--accent-dark);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .entry-field-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,125,216,0.12); }
+
+  .confirm-box {
+    background: var(--accent-pale);
+    border: 1.5px solid var(--accent-light);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .confirm-box.show { display: block; }
+  .confirm-box h4 { font-size: 14px; font-weight: 700; color: var(--accent-dark); margin-bottom: 8px; }
+  .confirm-list { list-style: none; font-size: 13px; color: var(--text-secondary); }
+  .confirm-list li { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border-light); }
+  .confirm-list li:last-child { border-bottom: none; }
+  .confirm-list .cv { font-weight: 700; color: var(--text-primary); }
+
+  /* ── TOAST ── */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    background: var(--text-primary);
+    color: white;
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    animation: toastIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  @keyframes toastIn { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
+
+  /* ── PROJECT SETTINGS ── */
+  .settings-section {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .settings-section h4 { font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .toggle-wrap { display: flex; align-items: center; gap: 12px; }
+  .toggle {
+    position: relative;
+    width: 44px; height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .toggle-slider:before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+  input:checked + .toggle-slider { background: var(--accent); }
+  input:checked + .toggle-slider:before { transform: translateX(20px); }
+  .toggle-label { font-size: 14px; font-weight: 500; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+  }
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── CHIPS / TABS ── */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-surface2);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+    margin-bottom: 20px;
+    width: fit-content;
+  }
+  .tab-item {
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+  }
+  .tab-item.active { background: var(--bg-surface); color: var(--accent); box-shadow: var(--shadow-sm); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent-light); }
+
+  @media (max-width: 600px) {
+    .main-layout { padding: 16px; }
+    .project-grid { grid-template-columns: 1fr; }
+    .role-cards { grid-template-columns: 1fr; }
+    .summary-row { grid-template-columns: repeat(2, 1fr); }
+    .topbar { padding: 0 14px; }
+  }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"/>
 </head>
 <body>
-<div id="app"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="logo-icon">📊</div>
+    活動人次追蹤系統
+  </div>
+  <div class="topbar-right">
+    <div class="sync-indicator" id="syncIndicator">
+      <div class="sync-dot" id="syncDot"></div>
+      <span id="syncText">未連線</span>
+    </div>
+    <button class="role-badge" id="switchRoleBtn" onclick="showRoleSelect()" style="display:none">切換角色</button>
+  </div>
+</div>
+
+<!-- VIEWS -->
+
+<!-- 1. Role Select -->
+<div class="view active" id="viewRoleSelect" style="display:flex;min-height:calc(100vh - 56px);align-items:center;justify-content:center;padding:40px 24px;">
+  <div class="role-select-wrap">
+    <h1>歡迎使用 👋</h1>
+    <p>請選擇您的角色以繼續</p>
+    <div class="role-cards">
+      <div class="role-card" onclick="enterRole('assistant')">
+        <span class="role-icon">✏️</span>
+        <h3>協助者</h3>
+        <p>選擇活動專案，填寫並送出當日人次數字</p>
+      </div>
+      <div class="role-card" onclick="enterRole('editor')">
+        <span class="role-icon">📋</span>
+        <h3>編輯者</h3>
+        <p>管理專案、查看統計表格、建立與設定活動</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Assistant View -->
+<div class="view" id="viewAssistant">
+  <div class="assistant-wrap">
+    <button class="back-btn" onclick="showRoleSelect()">← 返回角色選擇</button>
+    <div id="assistantProjectList">
+      <div class="page-header">
+        <div>
+          <div class="page-title">選擇活動專案</div>
+          <div class="page-sub">請選擇您要填報的活動</div>
+        </div>
+      </div>
+      <div id="assistantProjectListInner" class="project-select-list"></div>
+    </div>
+    <div id="assistantEntryForm" style="display:none">
+      <button class="back-btn" onclick="backToProjectList()">← 返回選擇專案</button>
+      <div class="entry-form">
+        <h3 id="entryProjectName">活動名稱</h3>
+        <div class="entry-date" id="entryTodayDate"></div>
+        <div id="entryFields" class="entry-fields"></div>
+        <div class="confirm-box" id="confirmBox">
+          <h4>確認送出以下資料？</h4>
+          <ul class="confirm-list" id="confirmList"></ul>
+        </div>
+        <div style="display:flex;gap:10px;flex-direction:column">
+          <button class="btn btn-primary btn-lg" id="submitBtn" onclick="handleSubmit()" style="width:100%">預覽確認</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Editor – Project List -->
+<div class="view" id="viewEditor">
+  <div class="main-layout">
+    <button class="back-btn" onclick="showRoleSelect()">← 返回角色選擇</button>
+    <div class="page-header">
+      <div>
+        <div class="page-title">專案總覽</div>
+        <div class="page-sub">拖曳卡片可調整順序</div>
+      </div>
+      <button class="btn btn-primary" onclick="openNewProjectModal()">＋ 新增專案</button>
+    </div>
+    <div class="project-grid" id="editorProjectGrid"></div>
+  </div>
+</div>
+
+<!-- 4. Editor – Project Detail -->
+<div class="view" id="viewProjectDetail">
+  <div class="main-layout">
+    <button class="back-btn" onclick="backToEditorList()">← 返回專案列表</button>
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="detailProjectName">專案詳情</div>
+        <div class="page-sub" id="detailProjectDates"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" onclick="openEditProjectModal()">⚙ 編輯設定</button>
+        <button class="btn btn-secondary btn-sm" onclick="openManualEntryModal()">＋ 手動新增數據</button>
+      </div>
+    </div>
+    <!-- Summary -->
+    <div id="summaryRow" class="summary-row"></div>
+    <!-- Table -->
+    <div class="table-wrap">
+      <table id="dataTable">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <!-- Settings -->
+    <div class="settings-section">
+      <h4>專案狀態</h4>
+      <div class="toggle-wrap">
+        <label class="toggle">
+          <input type="checkbox" id="statusToggle" onchange="toggleProjectStatus()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label" id="statusLabel">進行中</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODALS ── -->
+<!-- New/Edit Project Modal -->
+<div class="modal-overlay" id="projectModal">
+  <div class="modal">
+    <div class="modal-title" id="projectModalTitle">新增專案</div>
+    <div class="modal-sub">設定活動基本資訊與登記項目</div>
+    <div class="form-group">
+      <label class="form-label">活動名稱</label>
+      <input class="form-input" id="fieldName" placeholder="例：2025 夏日藝術展" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">開始日期</label>
+      <input class="form-input" type="date" id="fieldStart" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">結束日期</label>
+      <input class="form-input" type="date" id="fieldEnd" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">登記項目</label>
+      <div class="field-list" id="fieldList"></div>
+      <button class="add-field-btn" onclick="addFieldItem()">＋ 新增項目</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('projectModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveProject()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manual Entry Modal -->
+<div class="modal-overlay" id="manualModal">
+  <div class="modal">
+    <div class="modal-title">手動新增數據</div>
+    <div class="modal-sub" id="manualModalSub">為特定日期新增或覆寫數據</div>
+    <div class="form-group">
+      <label class="form-label">日期</label>
+      <input class="form-input" type="date" id="manualDate" />
+    </div>
+    <div id="manualFields"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('manualModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveManualEntry()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Entry -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-title">確認送出</div>
+    <div class="modal-sub" id="confirmModalSub"></div>
+    <ul class="confirm-list" id="confirmModalList" style="background:var(--bg-surface2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;"></ul>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('confirmModal')">返回修改</button>
+      <button class="btn btn-primary" onclick="doSubmitEntry()">確認送出</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Firebase + App Script -->
 <script>
-firebase.initializeApp({
-  apiKey:"AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ",
-  authDomain:"project-1794474641398451810.firebaseapp.com",
-  databaseURL:"https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"project-1794474641398451810",
-  storageBucket:"project-1794474641398451810.firebasestorage.app",
-  messagingSenderId:"660717432614",
-  appId:"1:660717432614:web:5067d9a791339b6c275be7"
+// Use dynamic import so Firebase loads as a module but all window.* functions
+// are registered synchronously before any user interaction.
+let _set, _ref, _update, _onValue, _db;
+
+(async () => {
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+  const { getDatabase, ref, set, onValue, update } =
+    await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+
+  const firebaseConfig = {
+    databaseURL: "https://project-1794474641398451810-default-rtdb.firebaseio.com/"
+  };
+  const app = initializeApp(firebaseConfig);
+  _db = getDatabase(app);
+  _ref = ref; _set = set; _update = update; _onValue = onValue;
+  startListening();
+})();
+
+
+
+// ── State ──
+let projects = {};
+let projectOrder = [];
+let currentRole = null;
+let currentProjectId = null;
+let editingProjectId = null;
+let pendingEntryData = null;
+let dragSrcEl = null;
+
+// ── Sync UI ──
+function setSyncStatus(status, text) {
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncText');
+  dot.className = 'sync-dot ' + status;
+  label.textContent = text;
+}
+
+// ── Listen to Firebase ──
+function startListening() {
+  setSyncStatus('syncing', '連線中...');
+  const dbRef = _ref(_db, 'tracker');
+  _onValue(dbRef, (snapshot) => {
+    const data = snapshot.val() || {};
+    projects = data.projects || {};
+    projectOrder = data.projectOrder || Object.keys(projects);
+    // Ensure all keys present in order
+    Object.keys(projects).forEach(k => { if (!projectOrder.includes(k)) projectOrder.push(k); });
+    projectOrder = projectOrder.filter(k => projects[k]);
+    setSyncStatus('synced', '已同步');
+    refreshCurrentView();
+  }, (err) => {
+    setSyncStatus('error', '連線失敗');
+    showToast('Firebase 連線失敗：' + err.message, 'error');
+  });
+}
+
+function refreshCurrentView() {
+  if (currentRole === 'assistant') renderAssistantProjects();
+  if (currentRole === 'editor') renderEditorProjects();
+  if (currentProjectId && document.getElementById('viewProjectDetail').classList.contains('active')) renderProjectDetail(currentProjectId);
+}
+
+// ── Role ──
+window.enterRole = function(role) {
+  currentRole = role;
+  document.getElementById('switchRoleBtn').style.display = 'inline-flex';
+  if (role === 'assistant') { showView('viewAssistant'); renderAssistantProjects(); }
+  else { showView('viewEditor'); renderEditorProjects(); }
+};
+
+window.showRoleSelect = function() {
+  currentRole = null;
+  document.getElementById('switchRoleBtn').style.display = 'none';
+  showView('viewRoleSelect');
+};
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.style.display = '';
+}
+
+// ── ASSISTANT ──
+function renderAssistantProjects() {
+  const container = document.getElementById('assistantProjectListInner');
+  const active = projectOrder.filter(k => projects[k] && projects[k].status === 'active');
+  if (active.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>目前沒有進行中的活動</p></div>';
+    return;
+  }
+  container.innerHTML = active.map(k => {
+    const p = projects[k];
+    return `<div class="project-select-item" onclick="selectAssistantProject('${k}')">
+      <div>
+        <div class="p-name">${esc(p.name)}</div>
+        <div class="p-date">${p.startDate} ～ ${p.endDate}</div>
+      </div>
+      <span style="color:var(--accent);font-size:18px">›</span>
+    </div>`;
+  }).join('');
+}
+
+window.selectAssistantProject = function(id) {
+  currentProjectId = id;
+  const p = projects[id];
+  document.getElementById('assistantProjectList').style.display = 'none';
+  document.getElementById('assistantEntryForm').style.display = 'block';
+  document.getElementById('entryProjectName').textContent = p.name;
+  const today = todayStr();
+  document.getElementById('entryTodayDate').textContent = '填報日期：' + today;
+  const fields = document.getElementById('entryFields');
+  fields.innerHTML = (p.fields || []).map((f, i) => `
+    <div class="entry-field-row">
+      <div class="entry-field-label">${esc(f)}</div>
+      <input class="entry-field-input" type="number" min="0" id="ef_${i}" placeholder="0" />
+    </div>
+  `).join('');
+  document.getElementById('confirmBox').classList.remove('show');
+  document.getElementById('submitBtn').textContent = '預覽確認';
+  document.getElementById('submitBtn').onclick = handleSubmit;
+};
+
+window.backToProjectList = function() {
+  document.getElementById('assistantProjectList').style.display = 'block';
+  document.getElementById('assistantEntryForm').style.display = 'none';
+};
+
+window.handleSubmit = function() {
+  const p = projects[currentProjectId];
+  const today = todayStr();
+  const values = (p.fields || []).map((f, i) => {
+    const v = parseInt(document.getElementById('ef_' + i).value) || 0;
+    return { label: f, value: v };
+  });
+
+  // Show confirm modal
+  document.getElementById('confirmModalSub').textContent = p.name + '｜' + today;
+  const list = document.getElementById('confirmModalList');
+  list.innerHTML = values.map(v => `<li><span>${esc(v.label)}</span><span class="cv">${v.value}</span></li>`).join('');
+  pendingEntryData = { projectId: currentProjectId, date: today, values };
+  openModal('confirmModal');
+};
+
+window.doSubmitEntry = async function() {
+  const { projectId, date, values } = pendingEntryData;
+  const entryObj = {};
+  values.forEach((v, i) => { entryObj['f' + i] = v.value; });
+  setSyncStatus('syncing', '儲存中...');
+  try {
+    await _set(_ref(_db, `tracker/projects/${projectId}/entries/${date}`), entryObj);
+    closeModal('confirmModal');
+    showToast('✅ 數據已送出！', 'success');
+    backToProjectList();
+  } catch (e) {
+    showToast('送出失敗：' + e.message, 'error');
+  }
+};
+
+// ── EDITOR LIST ──
+function renderEditorProjects() {
+  const grid = document.getElementById('editorProjectGrid');
+  if (projectOrder.length === 0) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📁</div><p>尚無專案，點擊「新增專案」開始</p></div>';
+    return;
+  }
+  grid.innerHTML = projectOrder.filter(k => projects[k]).map(k => {
+    const p = projects[k];
+    const totalEntries = Object.keys(p.entries || {}).length;
+    const total = calcTotal(p);
+    const isActive = p.status === 'active';
+    return `<div class="project-card" draggable="true" data-id="${k}"
+      ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dropCard(event)" ondragleave="dragLeave(event)" ondragend="dragEnd(event)"
+      onclick="openProjectDetail('${k}')">
+      <div class="card-header">
+        <div class="card-title">${esc(p.name)}</div>
+        <span class="status-badge ${isActive ? 'status-active' : 'status-ended'}">${isActive ? '進行中' : '已結束'}</span>
+      </div>
+      <div class="card-date">📅 ${p.startDate} ～ ${p.endDate}</div>
+      <div style="font-size:12px;color:var(--text-muted)">登記項目：${(p.fields||[]).join('、') || '—'}</div>
+      <div class="card-stats">
+        <div class="stat-item"><div class="stat-num">${totalEntries}</div><div class="stat-label">填報天數</div></div>
+        <div class="stat-item"><div class="stat-num">${total.toLocaleString()}</div><div class="stat-label">累計總人次</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function calcTotal(p) {
+  let t = 0;
+  Object.values(p.entries || {}).forEach(e => Object.values(e).forEach(v => t += (parseInt(v) || 0)));
+  return t;
+}
+
+// ── DRAG & DROP ──
+window.dragStart = function(e) {
+  dragSrcEl = e.currentTarget;
+  dragSrcEl.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragSrcEl.dataset.id);
+};
+window.dragOver = function(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+};
+window.dragLeave = function(e) { e.currentTarget.classList.remove('drag-over'); };
+window.dragEnd = function(e) { e.currentTarget.classList.remove('dragging'); };
+window.dropCard = function(e) {
+  e.preventDefault();
+  const target = e.currentTarget;
+  target.classList.remove('drag-over');
+  if (!dragSrcEl || dragSrcEl === target) return;
+  const srcId = dragSrcEl.dataset.id;
+  const tgtId = target.dataset.id;
+  const si = projectOrder.indexOf(srcId);
+  const ti = projectOrder.indexOf(tgtId);
+  if (si < 0 || ti < 0) return;
+  projectOrder.splice(si, 1);
+  projectOrder.splice(ti, 0, srcId);
+  update(_ref(_db, 'tracker'), { projectOrder });
+};
+
+// ── PROJECT DETAIL ──
+window.openProjectDetail = function(id) {
+  currentProjectId = id;
+  showView('viewProjectDetail');
+  renderProjectDetail(id);
+};
+
+window.backToEditorList = function() {
+  currentProjectId = null;
+  showView('viewEditor');
+};
+
+function renderProjectDetail(id) {
+  const p = projects[id];
+  if (!p) return;
+  document.getElementById('detailProjectName').textContent = p.name;
+  document.getElementById('detailProjectDates').textContent = p.startDate + ' ～ ' + p.endDate;
+
+  // Status toggle
+  const st = document.getElementById('statusToggle');
+  st.checked = p.status === 'active';
+  document.getElementById('statusLabel').textContent = p.status === 'active' ? '進行中' : '已結束';
+
+  const fields = p.fields || [];
+  const entries = p.entries || {};
+
+  // Summary
+  const fieldTotals = fields.map((_, fi) => {
+    let t = 0;
+    Object.values(entries).forEach(e => t += parseInt(e['f' + fi] || 0));
+    return t;
+  });
+  const grandTotal = fieldTotals.reduce((a, b) => a + b, 0);
+  const summaryRow = document.getElementById('summaryRow');
+  summaryRow.innerHTML = `<div class="summary-card total"><div class="s-num">${grandTotal.toLocaleString()}</div><div class="s-label">累計總人次</div></div>` +
+    fields.map((f, i) => `<div class="summary-card"><div class="s-num">${fieldTotals[i].toLocaleString()}</div><div class="s-label">${esc(f)}</div></div>`).join('');
+
+  // Table
+  const dates = Object.keys(entries).sort();
+  const thead = document.getElementById('tableHead');
+  const tbody = document.getElementById('tableBody');
+  if (dates.length === 0) {
+    thead.innerHTML = '';
+    tbody.innerHTML = '<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text-muted)">尚無數據</td></tr>';
+    return;
+  }
+  thead.innerHTML = '<tr><th class="date-col">日期</th>' + fields.map(f => `<th>${esc(f)}</th>`).join('') + '<th style="text-align:right">當日合計</th></tr>';
+  
+  const colTotals = fields.map(() => 0);
+  let grandSum = 0;
+  tbody.innerHTML = dates.map(d => {
+    const e = entries[d];
+    const rowVals = fields.map((_, i) => parseInt(e['f' + i] || 0));
+    const rowSum = rowVals.reduce((a, b) => a + b, 0);
+    rowVals.forEach((v, i) => colTotals[i] += v);
+    grandSum += rowSum;
+    return `<tr><td class="date-cell">${d}</td>${rowVals.map(v => `<td class="num-cell">${v.toLocaleString()}</td>`).join('')}<td class="num-cell highlight">${rowSum.toLocaleString()}</td></tr>`;
+  }).join('') +
+  `<tr class="total-row"><td class="date-cell">合計</td>${colTotals.map(v => `<td class="num-cell">${v.toLocaleString()}</td>`).join('')}<td class="num-cell">${grandSum.toLocaleString()}</td></tr>`;
+}
+
+window.toggleProjectStatus = async function() {
+  const st = document.getElementById('statusToggle').checked;
+  document.getElementById('statusLabel').textContent = st ? '進行中' : '已結束';
+  await _update(_ref(_db, `tracker/projects/${currentProjectId}`), { status: st ? 'active' : 'ended' });
+  showToast(st ? '專案已設為進行中' : '專案已設為已結束');
+};
+
+// ── NEW/EDIT PROJECT ──
+window.openNewProjectModal = function() {
+  editingProjectId = null;
+  document.getElementById('projectModalTitle').textContent = '新增專案';
+  document.getElementById('fieldName').value = '';
+  document.getElementById('fieldStart').value = '';
+  document.getElementById('fieldEnd').value = '';
+  document.getElementById('fieldList').innerHTML = '';
+  addFieldItem('一般入場');
+  openModal('projectModal');
+};
+
+window.openEditProjectModal = function() {
+  if (!currentProjectId) return;
+  editingProjectId = currentProjectId;
+  const p = projects[currentProjectId];
+  document.getElementById('projectModalTitle').textContent = '編輯專案';
+  document.getElementById('fieldName').value = p.name;
+  document.getElementById('fieldStart').value = p.startDate;
+  document.getElementById('fieldEnd').value = p.endDate;
+  const fl = document.getElementById('fieldList');
+  fl.innerHTML = '';
+  (p.fields || []).forEach(f => addFieldItem(f));
+  openModal('projectModal');
+};
+
+window.addFieldItem = function(val = '') {
+  const fl = document.getElementById('fieldList');
+  const div = document.createElement('div');
+  div.className = 'field-item';
+  div.innerHTML = `<input class="form-input" placeholder="例：一般入場" value="${esc(val)}" />
+    <button class="remove-field-btn" onclick="this.parentElement.remove()">×</button>`;
+  fl.appendChild(div);
+};
+
+window.saveProject = async function() {
+  const name = document.getElementById('fieldName').value.trim();
+  const start = document.getElementById('fieldStart').value;
+  const end = document.getElementById('fieldEnd').value;
+  const fields = [...document.querySelectorAll('#fieldList .field-item input')].map(i => i.value.trim()).filter(Boolean);
+  if (!name || !start || !end) { showToast('請填寫活動名稱與日期', 'error'); return; }
+  if (fields.length === 0) { showToast('請至少新增一個登記項目', 'error'); return; }
+
+  const id = editingProjectId || 'p_' + Date.now();
+  const existing = editingProjectId ? projects[editingProjectId] : {};
+  const projectData = {
+    name, startDate: start, endDate: end, fields,
+    status: existing.status || 'active',
+    entries: existing.entries || {}
+  };
+
+  setSyncStatus('syncing', '儲存中...');
+  await _set(_ref(_db, `tracker/projects/${id}`), projectData);
+  if (!editingProjectId) {
+    const newOrder = [...projectOrder, id];
+    await _update(_ref(_db, 'tracker'), { projectOrder: newOrder });
+  }
+  closeModal('projectModal');
+  showToast('✅ 專案已儲存');
+};
+
+// ── MANUAL ENTRY ──
+window.openManualEntryModal = function() {
+  const p = projects[currentProjectId];
+  document.getElementById('manualModalSub').textContent = p.name;
+  document.getElementById('manualDate').value = todayStr();
+  const mf = document.getElementById('manualFields');
+  mf.innerHTML = (p.fields || []).map((f, i) => `
+    <div class="form-group">
+      <label class="form-label">${esc(f)}</label>
+      <input class="form-input" type="number" min="0" id="mf_${i}" placeholder="0" />
+    </div>
+  `).join('');
+  openModal('manualModal');
+};
+
+window.saveManualEntry = async function() {
+  const date = document.getElementById('manualDate').value;
+  if (!date) { showToast('請選擇日期', 'error'); return; }
+  const p = projects[currentProjectId];
+  const obj = {};
+  (p.fields || []).forEach((_, i) => { obj['f' + i] = parseInt(document.getElementById('mf_' + i).value) || 0; });
+  setSyncStatus('syncing', '儲存中...');
+  await _set(_ref(_db, `tracker/projects/${currentProjectId}/entries/${date}`), obj);
+  closeModal('manualModal');
+  showToast('✅ 數據已儲存');
+};
+
+// ── UTILS ──
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
+window.openModal = openModal;
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+window.showToast = function(msg, type = 'success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+};
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
 });
-const fdb=firebase.database();
-const {createElement:r,useState,useEffect,useRef,Fragment}=React;
 
-// ── constants ──────────────────────────────────────────────────────────────
-const AC="#9B8EC7",AL="#F0EDF9";
-const C={bg:"#F6F9FA",card:"#fff",surf:"#EEF0F8",bdr:"#D8DEEC",txt:"#1E2030",mid:"#4A5068",muted:"#8A90A8",ok:"#3D8A6A",okbg:"#E8F4EE",err:"#A83838"};
-const PAL=["#5B8DD9","#4EAA80","#D4A843","#D05858","#E0784A","#9B8EC7","#4EA8C0","#7ABD5E"];
-
-// ── helpers ────────────────────────────────────────────────────────────────
-function uid(){return Math.random().toString(36).slice(2,9)}
-function today(){return new Date().toISOString().slice(0,10)}
-function fmt(iso){if(!iso)return"";const[y,m,d]=iso.split("-");return`${y.slice(2)}/${m}/${d}`}
-function parseDate(s){if(!s)return"";const c=s.trim();if(/^\d{4}-\d{2}-\d{2}$/.test(c))return c;const m=c.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);return m?`20${m[1]}-${m[2]}-${m[3]}`:c}
-
-// ── shared components (defined outside any component) ──────────────────────
-function PBtn({ch,onClick,color,full,disabled,sm,style:s}){
-  return r("button",{onClick,disabled,style:{background:disabled?"#bbb":(color||AC),color:"#fff",fontWeight:600,padding:sm?"7px 14px":"11px 20px",fontSize:sm?13:14,borderRadius:10,width:full?"100%":undefined,opacity:disabled?.5:1,cursor:disabled?"default":"pointer",...s}},ch)
-}
-function GBtn({ch,onClick,red,sm,style:s}){
-  return r("button",{onClick,style:{background:"transparent",border:`1.5px solid ${red?"#F0C4C4":C.bdr}`,color:red?C.err:C.mid,fontWeight:500,padding:sm?"6px 12px":"9px 16px",fontSize:sm?12:14,borderRadius:10,...s}},ch)
-}
-function Card({ch,style:s}){return r("div",{style:{background:C.card,borderRadius:14,border:`1px solid ${C.bdr}`,padding:"16px 18px",...s}},ch)}
-function Lbl({t}){return r("label",{style:{fontSize:12,color:C.mid,fontWeight:500,display:"block",marginBottom:5}},t)}
-function Topbar({back,title,right}){
-  return r("div",{style:{background:"rgba(246,249,250,.97)",borderBottom:`1px solid ${C.bdr}`,padding:"0 16px",height:52,display:"flex",alignItems:"center",gap:10,position:"sticky",top:0,zIndex:10}},
-    back?r("button",{onClick:back,style:{background:"none",border:"none",fontSize:22,color:C.muted,cursor:"pointer",lineHeight:1,padding:"0 6px 0 0"}},"\u2039")
-        :r("svg",{width:24,height:24,viewBox:"0 0 32 32",style:{borderRadius:6,flexShrink:0}},
-            r("rect",{width:32,height:32,rx:7,fill:AC}),
-            r("rect",{x:7,y:8,width:11,height:3,rx:1.5,fill:"white",opacity:.9}),
-            r("rect",{x:7,y:14,width:18,height:3,rx:1.5,fill:"white"}),
-            r("rect",{x:7,y:20,width:14,height:3,rx:1.5,fill:"white",opacity:.7})),
-    r("span",{style:{flex:1,fontWeight:600,fontSize:back?15:17}},title||"TrackIt"),
-    right
-  )
-}
-
-// ── EntryView — top-level component ───────────────────────────────────────
-function EntryView({p,D,batchSave,gr,notify}){
-  const[sel,setSel]=useState(today);
-  const[lv,setLv]=useState({});
-  const[done,setDone]=useState(false);
-  const any=p.items.some(i=>lv[i.id]!==undefined&&lv[i.id]!=="");
-  const dtot=p.items.reduce((s,i)=>{const x=lv[i.id]!==undefined?parseInt(lv[i.id],10):(gr(p.id,i.id,sel)?.value??0);return s+(isNaN(x)?0:x)},0);
-  function changeDate(d){setSel(d);setLv({});setDone(false)}
-  function submit(){
-    const entries=p.items.filter(i=>lv[i.id]!==undefined&&lv[i.id]!=="").map(i=>({iid:i.id,val:lv[i.id]}));
-    if(!entries.length)return;
-    batchSave(p.id,entries,sel);setDone(true);notify("回報成功！");
-  }
-  return r("div",{style:{padding:"16px 0"}},
-    r(Card,{style:{marginBottom:12,display:"flex",alignItems:"center",gap:12},ch:r(Fragment,null,
-      r("div",{style:{flex:1}},r(Lbl,{t:"登記日期"}),r("input",{type:"date",value:sel,onChange:e=>changeDate(e.target.value),style:{border:"none",padding:0,fontSize:15,fontWeight:600,width:"auto",background:"none",outline:"none",boxShadow:"none"}})),
-      r("div",{style:{textAlign:"right"}},r("div",{style:{fontSize:11,color:C.muted,marginBottom:2}},"本日小計"),r("div",{style:{fontSize:22,fontWeight:700,color:p.color,lineHeight:1}},dtot.toLocaleString()))
-    )}),
-    done&&r("div",{style:{background:C.okbg,border:"1px solid #b2d8b2",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between"}},
-      r("div",{style:{display:"flex",alignItems:"center",gap:8}},r("span",{style:{fontSize:18}},"✅"),r("div",null,r("div",{style:{fontWeight:600,color:C.ok,fontSize:14}},"數據已送出"),r("div",{style:{fontSize:12,color:C.ok,opacity:.8}},"感謝回報！"))),
-      r("button",{onClick:()=>{setLv({});setDone(false)},style:{background:C.ok,color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:13,fontWeight:600,cursor:"pointer"}},"再填一次")
-    ),
-    p.items.length===0
-      ?r(Card,{ch:r("p",{style:{color:C.muted,textAlign:"center",padding:"20px 0"}},"此活動尚無登記項目")})
-      :r(Fragment,null,
-        r("div",{style:{display:"flex",flexDirection:"column",gap:8,marginBottom:12}},
-          p.items.map((item,idx)=>{
-            const ex=gr(p.id,item.id,sel);
-            return r(Card,{key:item.id,style:{display:"flex",alignItems:"center",gap:12,opacity:done?.65:1},ch:r(Fragment,null,
-              r("div",{style:{width:8,height:8,borderRadius:2,background:p.color,flexShrink:0}}),
-              r("div",{style:{flex:1}},
-                r("div",{style:{fontWeight:500,fontSize:15}},item.name),
-                ex&&!done&&r("div",{style:{fontSize:11,color:C.muted,marginTop:2}},`已有：${ex.value}（可覆蓋）`)
-              ),
-              r("input",{type:"number",min:0,inputMode:"numeric",placeholder:ex?String(ex.value):"0",value:lv[item.id]??"",disabled:done,autoFocus:idx===0,
-                onChange:e=>setLv(x=>({...x,[item.id]:e.target.value})),
-                style:{width:90,textAlign:"right",fontSize:22,fontWeight:700,color:p.color,border:"none",borderBottom:`2.5px solid ${p.color}55`,borderRadius:0,padding:"4px 2px",background:"none",outline:"none",boxShadow:"none"}})
-            )});
-          })
-        ),
-        !done&&r(Fragment,null,
-          r(PBtn,{ch:"送出回報",onClick:submit,disabled:!any,color:p.color,full:true}),
-          !any&&r("p",{style:{textAlign:"center",fontSize:12,color:C.muted,marginTop:6}},"請至少填入一項數值")
-        )
-      )
-  )
-}
-
-// ── ProjPage — top-level component ────────────────────────────────────────
-function ProjPage({D,proj,isOwner,tab,setTab,setPage,setModal,setForm,setEditCell,editCell,setEditVal,editVal,dSearch,setDSearch,dSearchOpen,setDSearchOpen,sd,batchSave,gr,notify,togglePub,delProj,delItem,commitCell,exportCSV}){
-  const[dashV,setDashV]=useState("date");
-  const p=D.projects.find(q=>q.id===proj);
-  if(!p)return null;
-
-  const ds=[...new Set(D.records.filter(x=>x.projectId===p.id).map(x=>x.date))].sort();
-  function v(iid,date){const x=D.records.find(x=>x.projectId===p.id&&x.itemId===iid&&x.date===date);return x?x.value:null}
-  function dSum(date){return p.items.reduce((s,i)=>{const x=v(i.id,date);return s+(x??0)},0)}
-  function iSum(iid){return ds.reduce((s,d)=>{const x=v(iid,d);return s+(x??0)},0)}
-  const grand=p.items.reduce((s,i)=>s+iSum(i.id),0);
-  const fd=dSearch?ds.filter(d=>d===parseDate(dSearch)):ds;
-  const fg=p.items.reduce((s,i)=>s+fd.reduce((ss,d)=>{const x=v(i.id,d);return ss+(x??0)},0),0);
-  const TH={padding:"10px 12px",textAlign:"right",fontWeight:600,color:C.mid,fontSize:12,background:C.surf,borderBottom:`1px solid ${C.bdr}`,whiteSpace:"nowrap"};
-  const TD={padding:"9px 12px",textAlign:"right",fontSize:13,borderTop:`1px solid #F0F2F8`};
-
-  function Cell({iid,date}){
-    const val=v(iid,date);
-    const isE=editCell?.iid===iid&&editCell?.date===date;
-    if(isE)return r("input",{type:"number",min:0,value:editVal,autoFocus:true,
-      style:{width:70,textAlign:"right",fontSize:13,padding:"3px 6px",borderRadius:6,border:`1.5px solid ${p.color}`},
-      onChange:e=>setEditVal(e.target.value),
-      onBlur:()=>commitCell(p.id),
-      onKeyDown:e=>{if(e.key==="Enter")commitCell(p.id);if(e.key==="Escape"){setEditCell(null);setEditVal("")}}
-    });
-    return r("span",{
-      onClick:()=>{setEditCell({iid,date});setEditVal(val!=null?String(val):"")},
-      title:"點擊編輯",
-      style:{color:val!=null?C.txt:C.bdr,cursor:"pointer",padding:"2px 6px",borderRadius:5,display:"inline-block"},
-      onMouseEnter:e=>e.currentTarget.style.background=AL,
-      onMouseLeave:e=>e.currentTarget.style.background="transparent"
-    },val!=null?val.toLocaleString():"—")
-  }
-
-  return r("div",{style:{minHeight:"100vh"}},
-    r(Topbar,{
-      back:()=>setPage("home"),
-      title:p.name,
-      right:r("div",{style:{display:"flex",gap:6,alignItems:"center"}},
-        r("span",{style:{fontSize:11,fontWeight:600,padding:"2px 8px",borderRadius:20,background:p.published?"#E6F4EC":C.surf,color:p.published?"#2E7D4F":C.muted,border:`1px solid ${p.published?"#B6DECA":C.bdr}`}},p.published?"上架中":"已下架"),
-        isOwner&&r(GBtn,{ch:"登出",onClick:()=>{},sm:true,style:{display:"none"}}),
-        isOwner&&r("span",{style:{fontSize:11,fontWeight:600,padding:"2px 8px",borderRadius:20,background:AL,color:AC}},"擁有者")
-      )
-    }),
-    isOwner&&r("div",{style:{background:C.card,borderBottom:`1px solid ${C.bdr}`,display:"flex",padding:"0 16px"}},
-      [["data","📊 數據"],["entry","✏️ 回報"],["manage","⚙️ 管理"]].map(([tv,l])=>r("button",{key:tv,onClick:()=>setTab(tv),
-        style:{padding:"11px 16px",border:"none",background:"transparent",fontWeight:tab===tv?600:400,fontSize:14,color:tab===tv?p.color:C.muted,borderBottom:tab===tv?`2.5px solid ${p.color}`:"2.5px solid transparent",borderRadius:0,cursor:"pointer"}
-      },l))
-    ),
-    r("div",{style:{maxWidth:900,margin:"0 auto",padding:"20px 16px 48px"}},
-      (!isOwner||tab==="entry")&&r(EntryView,{p,D,batchSave,gr,notify}),
-      isOwner&&tab==="data"&&r(Fragment,null,
-        p.items.length>0&&r("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:10,marginBottom:16}},
-          p.items.map(item=>r(Card,{key:item.id,style:{padding:"12px 14px"},ch:r(Fragment,null,
-            r("div",{style:{display:"flex",alignItems:"center",gap:6,marginBottom:6}},r("div",{style:{width:7,height:7,borderRadius:2,background:p.color}}),r("div",{style:{fontSize:12,fontWeight:500,color:C.mid,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},item.name)),
-            r("div",{style:{fontSize:24,fontWeight:700,color:p.color}},iSum(item.id).toLocaleString())
-          )}))
-        ),
-        r("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:dSearchOpen?0:10,flexWrap:"wrap",gap:8}},
-          r("div",{style:{display:"flex",background:C.surf,borderRadius:10,padding:3}},
-            [["date","按日期"],["item","按項目"]].map(([tv,l])=>r("button",{key:tv,onClick:()=>setDashV(tv),style:{padding:"6px 14px",borderRadius:8,border:"none",fontWeight:dashV===tv?600:400,fontSize:13,background:dashV===tv?C.card:"transparent",color:dashV===tv?C.txt:C.muted,cursor:"pointer"}},l))
-          ),
-          r("div",{style:{display:"flex",gap:6}},
-            r("button",{onClick:()=>{setDSearchOpen(o=>!o);if(dSearchOpen)setDSearch("")},style:{width:34,height:34,borderRadius:9,border:`1.5px solid ${dSearchOpen||dSearch?AC:C.bdr}`,background:dSearchOpen||dSearch?AL:"transparent",color:dSearchOpen||dSearch?AC:C.muted,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer"}},"🔍"),
-            r("button",{onClick:()=>exportCSV(p),style:{background:AC,color:"#fff",fontWeight:600,fontSize:13,padding:"7px 14px",borderRadius:9,border:"none",cursor:"pointer"}},"⬇ CSV")
-          )
-        ),
-        dSearchOpen&&r("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:10,padding:"10px 14px",background:AL,borderRadius:10,border:`1px solid ${C.bdr}`}},
-          r("span",{style:{color:AC}},"🔍"),
-          r("input",{type:"text",value:dSearch,autoFocus:true,placeholder:"YY/MM/DD",onChange:e=>setDSearch(e.target.value),style:{flex:1,maxWidth:150,fontSize:14,fontWeight:500,padding:"6px 10px"}}),
-          dSearch&&r("button",{onClick:()=>setDSearch(""),style:{background:"none",border:"none",color:AC,fontSize:13,fontWeight:600,cursor:"pointer"}},"清除"),
-          dSearch&&r("span",{style:{fontSize:12,color:C.muted}},ds.filter(d=>d===parseDate(dSearch)).length?"找到":"查無資料")
-        ),
-        r("p",{style:{fontSize:12,color:C.muted,marginBottom:8}},"點擊數字可直接編輯"),
-        r("div",{style:{overflowX:"auto",borderRadius:12,border:`1px solid ${C.bdr}`,background:C.card}},
-          dSearch&&fd.length===0
-            ?r("div",{style:{padding:24,textAlign:"center",color:C.muted}},`找不到 ${dSearch} 的資料`)
-            :dashV==="date"
-              ?r("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:13}},
-                  r("thead",null,r("tr",null,r("th",{style:{...TH,textAlign:"left"}},"日期"),...p.items.map(i=>r("th",{key:i.id,style:TH},i.name)),r("th",{style:{...TH,color:p.color}},"合計"))),
-                  r("tbody",null,...fd.map(d=>r("tr",{key:d},r("td",{style:{...TD,textAlign:"left",fontWeight:500}},fmt(d)),...p.items.map(i=>r("td",{key:i.id,style:TD},r(Cell,{iid:i.id,date:d}))),r("td",{style:{...TD,fontWeight:700,color:p.color}},dSum(d).toLocaleString())))),
-                  r("tfoot",null,r("tr",{style:{borderTop:`2px solid ${C.bdr}`,background:C.surf}},r("td",{style:{padding:"10px 12px",fontWeight:700,fontSize:13}},"總計"),...p.items.map(i=>r("td",{key:i.id,style:{...TD,borderTop:`2px solid ${C.bdr}`,fontWeight:600}},fd.reduce((s,d)=>{const x=v(i.id,d);return s+(x??0)},0).toLocaleString())),r("td",{style:{...TD,borderTop:`2px solid ${C.bdr}`,fontWeight:700,color:p.color}},fg.toLocaleString())))
-                )
-              :r("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:13}},
-                  r("thead",null,r("tr",null,r("th",{style:{...TH,textAlign:"left"}},"項目"),...fd.map(d=>r("th",{key:d,style:TH},fmt(d))),r("th",{style:{...TH,color:p.color}},"合計"))),
-                  r("tbody",null,...p.items.map(item=>r("tr",{key:item.id},r("td",{style:{...TD,textAlign:"left",fontWeight:500}},item.name),...fd.map(d=>r("td",{key:d,style:TD},r(Cell,{iid:item.id,date:d}))),r("td",{style:{...TD,fontWeight:700,color:p.color}},fd.reduce((s,d)=>{const x=v(item.id,d);return s+(x??0)},0).toLocaleString())))),
-                  r("tfoot",null,r("tr",{style:{borderTop:`2px solid ${C.bdr}`,background:C.surf}},r("td",{style:{padding:"10px 12px",fontWeight:700,fontSize:13}},"合計"),...fd.map(d=>r("td",{key:d,style:{...TD,borderTop:`2px solid ${C.bdr}`,fontWeight:600}},dSum(d).toLocaleString())),r("td",{style:{...TD,borderTop:`2px solid ${C.bdr}`,fontWeight:700,color:p.color}},fg.toLocaleString())))
-                )
-        )
-      ),
-      isOwner&&tab==="manage"&&r("div",{style:{maxWidth:520}},
-        r("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}},
-          r("div",{style:{fontWeight:600,fontSize:15}},"登記項目"),
-          r(PBtn,{ch:"＋ 新增",onClick:()=>{setModal("newItem");setForm({})},sm:true})
-        ),
-        p.items.length===0
-          ?r(Card,{ch:r("p",{style:{color:C.muted,textAlign:"center",padding:"20px 0"}},"尚無項目")})
-          :r(Card,{style:{padding:0,overflow:"hidden"},ch:p.items.map((item,idx)=>r("div",{key:item.id,style:{display:"flex",alignItems:"center",gap:10,padding:"12px 16px",borderTop:idx>0?`1px solid ${C.surf}`:"none"}},
-              r("div",{style:{width:8,height:8,borderRadius:2,background:p.color,flexShrink:0}}),
-              r("span",{style:{flex:1,fontWeight:500,fontSize:14}},item.name),
-              r("span",{style:{fontSize:12,color:C.muted,marginRight:6}},`累計 ${iSum(item.id)}`),
-              r(GBtn,{ch:"編輯",onClick:()=>{setModal("editItem");setForm({itemId:item.id,name:item.name})},sm:true}),
-              r(GBtn,{ch:"刪除",onClick:()=>delItem(item.id),sm:true,red:true})
-            ))
-          }),
-        r("div",{style:{marginTop:20,paddingTop:20,borderTop:`1px solid ${C.surf}`}},
-          r("div",{style:{fontWeight:600,fontSize:13,color:C.mid,marginBottom:10}},"專案設定"),
-          r("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",background:p.published?"#F0FAF4":C.surf,border:`1px solid ${p.published?"#B6DECA":C.bdr}`,borderRadius:10,marginBottom:10}},
-            r("div",null,
-              r("div",{style:{fontWeight:500,fontSize:14,color:p.published?"#2E7D4F":C.mid}},p.published?"● 上架中":"○ 已下架"),
-              r("div",{style:{fontSize:12,color:C.muted,marginTop:2}},p.published?"檢視者可見":"僅擁有者可見")
-            ),
-            r("button",{onClick:()=>togglePub(p.id),style:{padding:"6px 14px",borderRadius:8,border:"none",fontWeight:600,fontSize:13,cursor:"pointer",background:p.published?"#FBF0F0":"#E6F4EC",color:p.published?"#A83838":"#2E7D4F"}},p.published?"下架":"上架")
-          ),
-          r("div",{style:{display:"flex",gap:8}},
-            r(GBtn,{ch:"編輯資訊",onClick:()=>{setModal("editProj");setForm({name:p.name,date:p.date,desc:p.desc||"",color:p.color})}}),
-            r(GBtn,{ch:"刪除專案",onClick:()=>delProj(p.id),red:true})
-          )
-        )
-      )
-    )
-  )
-}
-
-// ── App ────────────────────────────────────────────────────────────────────
-function App(){
-  const[D,setD]=useState({pin:"1234",projects:[],records:[]});
-  const[loading,setLoading]=useState(true);
-  const[role,setRole]=useState(null);
-  const[page,setPage]=useState("home");
-  const[proj,setProj]=useState(null);
-  const[tab,setTab]=useState("data");
-  const[modal,setModal]=useState(null);
-  const[form,setForm]=useState({});
-  const[pin,setPin]=useState("");
-  const[pinErr,setPinErr]=useState("");
-  const[fErr,setFErr]=useState("");
-  const[toast,setToast]=useState(null);
-  const[editCell,setEditCell]=useState(null);
-  const[editVal,setEditVal]=useState("");
-  const[confirm,setConfirm]=useState(null);
-  const[dSearch,setDSearch]=useState("");
-  const[dSearchOpen,setDSearchOpen]=useState(false);
-  const[drag,setDrag]=useState(null);
-  const[dragOv,setDragOv]=useState(null);
-  const toastT=useRef(null);
-
-  useEffect(()=>{
-    const ref=fdb.ref("trackit");
-    ref.on("value",snap=>{
-      const raw=snap.val()||{};
-      setD({
-        pin:raw.pin||"1234",
-        projects:raw.projects?Object.values(raw.projects).sort((a,b)=>(a.so??0)-(b.so??0)):[],
-        records:raw.records?Object.values(raw.records):[],
-      });
-      setLoading(false);
-    });
-    return()=>ref.off();
-  },[]);
-
-  function sd(d){
-    setD(d);
-    const pm={};d.projects.forEach((p,i)=>{pm[p.id]={...p,so:i}});
-    fdb.ref("trackit/projects").set(pm).catch(console.error);
-    const rm={};d.records.forEach(x=>{rm[x.id]=x});
-    fdb.ref("trackit/records").set(Object.keys(rm).length?rm:null).catch(console.error);
-  }
-  function sr(rec){fdb.ref("trackit/records/"+rec.id).set(rec).catch(console.error)}
-  function notify(m){clearTimeout(toastT.current);setToast(m);toastT.current=setTimeout(()=>setToast(null),2000)}
-  function gr(pid,iid,date){return D.records.find(x=>x.projectId===pid&&x.itemId===iid&&x.date===date)}
-  function login(){if(pin===D.pin){setRole("owner");setPin("");setPinErr("");setModal(null)}else setPinErr("密碼錯誤")}
-  function logout(){setRole(null);setPage("home");setProj(null)}
-  function cm(){setModal(null);setForm({});setPinErr("");setFErr("")}
-
-  function saveRec(pid,iid,date,raw,base){
-    const src=base||D;const v=parseInt(raw,10);if(isNaN(v)||v<0)return src;
-    const ex=src.records.find(x=>x.projectId===pid&&x.itemId===iid&&x.date===date);
-    const rec=ex?{...ex,value:v}:{id:uid(),projectId:pid,itemId:iid,date,value:v};
-    sr(rec);
-    return{...src,records:ex?src.records.map(x=>x.id===ex.id?rec:x):[...src.records,rec]};
-  }
-  function batchSave(pid,entries,date){let d=D;entries.forEach(({iid,val})=>{d=saveRec(pid,iid,date,val,d)});setD(d)}
-  function commitCell(pid){
-    if(!editCell)return;
-    const d=saveRec(pid,editCell.iid,editCell.date,editVal);
-    sd(d);setEditCell(null);setEditVal("");notify("已更新");
-  }
-  function togglePub(id){sd({...D,projects:D.projects.map(p=>p.id===id?{...p,published:!p.published}:p)})}
-  function reorder(from,to){
-    if(from===to)return;const ps=[...D.projects];
-    const fi=ps.findIndex(p=>p.id===from),ti=ps.findIndex(p=>p.id===to);
-    ps.splice(ti,0,ps.splice(fi,1)[0]);sd({...D,projects:ps});
-  }
-  function delProj(id){setConfirm({msg:"確定刪除此專案？",ok:()=>{
-    fdb.ref("trackit/projects/"+id).remove().catch(console.error);
-    const rem=D.records.filter(x=>x.projectId!==id);const rm={};rem.forEach(x=>{rm[x.id]=x});
-    fdb.ref("trackit/records").set(Object.keys(rm).length?rm:null).catch(console.error);
-    setD(d=>({...d,projects:d.projects.filter(p=>p.id!==id),records:rem}));
-    setPage("home");notify("已刪除");
-  }})}
-  function delItem(iid){setConfirm({msg:"確定刪除此項目？",ok:()=>{
-    sd({...D,projects:D.projects.map(p=>p.id!==proj?p:{...p,items:p.items.filter(i=>i.id!==iid)}),records:D.records.filter(x=>!(x.projectId===proj&&x.itemId===iid))});
-    notify("已刪除");
-  }})}
-  function exportCSV(p){
-    const ds=[...new Set(D.records.filter(x=>x.projectId===p.id).map(x=>x.date))].sort();
-    const rows=[["日期",...p.items.map(i=>i.name),"合計"].join(","),
-      ...ds.map(d=>{const vs=p.items.map(i=>{const x=D.records.find(x=>x.projectId===p.id&&x.itemId===i.id&&x.date===d);return x?x.value:""});return[d,...vs,vs.reduce((s,v)=>s+(Number(v)||0),0)].join(",")}),
-      ["總計",...p.items.map(i=>D.records.filter(x=>x.projectId===p.id&&x.itemId===i.id).reduce((s,x)=>s+x.value,0)),D.records.filter(x=>x.projectId===p.id).reduce((s,x)=>s+x.value,0)].join(",")
-    ];
-    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+rows.join("\n")],{type:"text/csv"}));a.download=p.name+".csv";a.click();
-  }
-
-  function submit(){
-    if(modal==="newProj"||modal==="editProj"){
-      if(!form.name?.trim()){setFErr("請填寫專案名稱");return}
-      if(!form.date?.trim()){setFErr("請填寫活動日期");return}
-      if(!/^\d{2}\/\d{2}\/\d{2}/.test(form.date)){setFErr("格式：YY/MM/DD");return}
-      if(modal==="newProj"){sd({...D,projects:[...D.projects,{id:uid(),name:form.name.trim(),date:form.date.trim(),desc:form.desc?.trim()||"",color:form.color||AC,published:false,items:[]}]});notify("專案已建立")}
-      else{sd({...D,projects:D.projects.map(q=>q.id===proj?{...q,name:form.name.trim(),date:form.date.trim(),desc:form.desc?.trim()||"",color:form.color||q.color}:q)});notify("已更新")}
-    }else if(modal==="newItem"||modal==="editItem"){
-      if(!form.name?.trim()){setFErr("請填寫項目名稱");return}
-      if(modal==="newItem"){sd({...D,projects:D.projects.map(q=>q.id===proj?{...q,items:[...q.items,{id:uid(),name:form.name.trim()}]}:q)});notify("已新增")}
-      else{sd({...D,projects:D.projects.map(q=>q.id!==proj?q:{...q,items:q.items.map(i=>i.id===form.itemId?{...i,name:form.name.trim()}:i)})});notify("已更新")}
-    }else if(modal==="changePin"){
-      if(!form.cur){setFErr("請輸入目前密碼");return}
-      if(form.cur!==D.pin){setFErr("目前密碼錯誤");return}
-      if(!form.newP||form.newP.length<4){setFErr("新密碼至少 4 碼");return}
-      if(form.newP!==form.conf){setFErr("兩次不一致");return}
-      fdb.ref("trackit/pin").set(form.newP).catch(console.error);
-      setD(d=>({...d,pin:form.newP}));notify("密碼已更新");
-    }
-    cm();
-  }
-
-  const isOwner=role==="owner";
-
-  if(loading)return r("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12,background:C.bg}},
-    r("svg",{width:36,height:36,viewBox:"0 0 32 32"},r("rect",{width:32,height:32,rx:7,fill:AC}),r("rect",{x:7,y:8,width:11,height:3,rx:1.5,fill:"white",opacity:.9}),r("rect",{x:7,y:14,width:18,height:3,rx:1.5,fill:"white"}),r("rect",{x:7,y:20,width:14,height:3,rx:1.5,fill:"white",opacity:.7})),
-    r("div",{style:{color:C.muted,fontSize:14}},"載入中...")
-  );
-
-  function ModalContent(){
-    if(modal==="login")return r(Fragment,null,
-      r("div",{style:{fontSize:16,fontWeight:600,marginBottom:18}},"擁有者登入"),
-      r(Lbl,{t:"密碼"}),
-      r("input",{type:"password",placeholder:"請輸入密碼",value:pin,autoFocus:true,onChange:e=>{setPin(e.target.value);setPinErr("")},onKeyDown:e=>e.key==="Enter"&&login()}),
-      pinErr&&r("p",{style:{color:C.err,fontSize:12,marginTop:4}},pinErr),
-      r("div",{style:{marginTop:16}},r(PBtn,{ch:"登入",onClick:login,full:true}))
-    );
-    if(modal==="newProj"||modal==="editProj")return r(Fragment,null,
-      r("div",{style:{fontSize:16,fontWeight:600,marginBottom:18}},modal==="newProj"?"新增專案":"編輯專案"),
-      r("div",{style:{display:"flex",flexDirection:"column",gap:12}},
-        r("div",null,r(Lbl,{t:"專案名稱 *"}),r("input",{autoFocus:true,value:form.name||"",onChange:e=>{setForm(f=>({...f,name:e.target.value}));setFErr("")},placeholder:"例：2025 社區博覽會"})),
-        r("div",null,r(Lbl,{t:"活動日期 * (YY/MM/DD)"}),r("input",{value:form.date||"",onChange:e=>{setForm(f=>({...f,date:e.target.value}));setFErr("")},placeholder:"25/05/01"})),
-        r("div",null,r(Lbl,{t:"說明（選填）"}),r("input",{value:form.desc||"",onChange:e=>setForm(f=>({...f,desc:e.target.value})),placeholder:"備註"})),
-        r("div",null,r(Lbl,{t:"顏色"}),r("div",{style:{display:"flex",gap:8,flexWrap:"wrap"}},PAL.map(c=>r("div",{key:c,onClick:()=>setForm(f=>({...f,color:c})),style:{width:30,height:30,borderRadius:8,background:c,cursor:"pointer",outline:form.color===c?`3px solid #1E2030`:"3px solid transparent",outlineOffset:2}})))),
-        fErr&&r("p",{style:{color:C.err,fontSize:12}},fErr),
-        r("div",{style:{display:"flex",gap:8,marginTop:4}},r(GBtn,{ch:"取消",onClick:cm,style:{flex:1}}),r(PBtn,{ch:"確認",onClick:submit,style:{flex:2}}))
-      )
-    );
-    if(modal==="newItem"||modal==="editItem")return r(Fragment,null,
-      r("div",{style:{fontSize:16,fontWeight:600,marginBottom:18}},modal==="newItem"?"新增項目":"編輯項目"),
-      r("div",null,r(Lbl,{t:"項目名稱 *"}),r("input",{autoFocus:true,value:form.name||"",onChange:e=>{setForm(f=>({...f,name:e.target.value}));setFErr("")},placeholder:"例：參觀人數",onKeyDown:e=>e.key==="Enter"&&submit()})),
-      fErr&&r("p",{style:{color:C.err,fontSize:12,marginTop:4}},fErr),
-      r("div",{style:{display:"flex",gap:8,marginTop:14}},r(GBtn,{ch:"取消",onClick:cm,style:{flex:1}}),r(PBtn,{ch:"確認",onClick:submit,style:{flex:2}}))
-    );
-    if(modal==="changePin")return r(Fragment,null,
-      r("div",{style:{fontSize:16,fontWeight:600,marginBottom:18}},"修改密碼"),
-      r("div",{style:{display:"flex",flexDirection:"column",gap:12}},
-        r("div",null,r(Lbl,{t:"目前密碼"}),r("input",{type:"password",autoFocus:true,value:form.cur||"",onChange:e=>{setForm(f=>({...f,cur:e.target.value}));setFErr("")}})),
-        r("div",{style:{height:1,background:C.bdr}}),
-        r("div",null,r(Lbl,{t:"新密碼（至少 4 碼）"}),r("input",{type:"password",value:form.newP||"",onChange:e=>{setForm(f=>({...f,newP:e.target.value}));setFErr("")}})),
-        r("div",null,r(Lbl,{t:"確認新密碼"}),r("input",{type:"password",value:form.conf||"",onChange:e=>{setForm(f=>({...f,conf:e.target.value}));setFErr("")}})),
-        fErr&&r("p",{style:{color:C.err,fontSize:12}},fErr),
-        r("div",{style:{display:"flex",gap:8,marginTop:4}},r(GBtn,{ch:"取消",onClick:cm,style:{flex:1}}),r(PBtn,{ch:"確認",onClick:submit,style:{flex:2}}))
-      )
-    );
-    return null;
-  }
-
-  // Home screen
-  function Home(){
-    const vis=isOwner?D.projects:D.projects.filter(p=>p.published);
-    return r("div",{style:{minHeight:"100vh"}},
-      r(Topbar,{right:isOwner
-        ?r("div",{style:{display:"flex",gap:6,alignItems:"center"}},
-            r("span",{style:{fontSize:11,fontWeight:600,padding:"2px 8px",borderRadius:20,background:AL,color:AC}},"擁有者"),
-            r(GBtn,{ch:"密碼",onClick:()=>{setModal("changePin");setForm({})},sm:true}),
-            r(GBtn,{ch:"登出",onClick:logout,sm:true})
-          )
-        :r("button",{onClick:()=>{setModal("login");setPin("");setPinErr("")},style:{background:AL,border:"none",borderRadius:20,padding:"5px 12px",fontSize:13,color:AC,fontWeight:600,cursor:"pointer"}},"登入管理")
-      }),
-      r("div",{style:{padding:"24px 16px 48px",maxWidth:600,margin:"0 auto"}},
-        r("h1",{style:{fontSize:22,fontWeight:600,marginBottom:4}},"選擇活動"),
-        r("p",{style:{color:C.muted,fontSize:13,marginBottom:20}},"點選活動以登記人次"),
-        vis.length===0
-          ?r(Card,{ch:r("div",{style:{textAlign:"center",padding:"32px 0",color:C.muted}},isOwner?"尚無活動，請新增第一個專案":"目前沒有開放中的活動")})
-          :r("div",{style:{display:"flex",flexDirection:"column",gap:10}},vis.map(p=>
-            r("button",{key:p.id,draggable:isOwner,
-              onDragStart:isOwner?()=>setDrag(p.id):undefined,
-              onDragEnd:isOwner?()=>{setDrag(null);setDragOv(null)}:undefined,
-              onDragOver:isOwner?e=>{e.preventDefault();setDragOv(p.id)}:undefined,
-              onDrop:isOwner?()=>{reorder(drag,p.id);setDrag(null);setDragOv(null)}:undefined,
-              onClick:()=>{setProj(p.id);setTab("data");setPage("proj");setDSearch("");setDSearchOpen(false)},
-              style:{background:C.card,border:`1.5px solid ${dragOv===p.id?AC:C.bdr}`,borderRadius:14,padding:"14px 16px",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:12,width:"100%",opacity:drag===p.id?.4:1,transition:"border-color .15s,opacity .15s"}},
-              isOwner&&r("div",{style:{display:"flex",flexDirection:"column",gap:2.5,opacity:.4,flexShrink:0}},[0,1,2].map(i=>r("div",{key:i,style:{width:12,height:1.5,background:C.muted,borderRadius:1}}))),
-              r("div",{style:{width:10,height:10,borderRadius:3,background:p.color,flexShrink:0}}),
-              r("div",{style:{flex:1,minWidth:0}},r("div",{style:{fontWeight:600,fontSize:15,marginBottom:2}},p.name),p.date&&r("div",{style:{fontSize:12,color:C.muted}},p.date)),
-              isOwner&&r("span",{style:{fontSize:11,fontWeight:600,padding:"2px 8px",borderRadius:20,background:p.published?"#E6F4EC":C.surf,color:p.published?"#2E7D4F":C.muted,border:`1px solid ${p.published?"#B6DECA":C.bdr}`,flexShrink:0,whiteSpace:"nowrap"}},p.published?"上架":"下架"),
-              r("span",{style:{fontSize:16,color:C.bdr}},"\u203a")
-            )
-          )),
-        isOwner&&r("div",{style:{marginTop:14}},r(PBtn,{ch:"＋ 新增專案",onClick:()=>{setModal("newProj");setForm({color:AC})},full:true}))
-      )
-    )
-  }
-
-  const projPageProps={D,proj,isOwner,tab,setTab,setPage,setModal,setForm,setEditCell,editCell,setEditVal,editVal,dSearch,setDSearch,dSearchOpen,setDSearchOpen,sd,batchSave,gr,notify,togglePub,delProj,delItem,commitCell,exportCSV};
-
-  return r(Fragment,null,
-    page==="home"&&r(Home),
-    page==="proj"&&r(ProjPage,{key:proj,...projPageProps}),
-    modal&&r("div",{onClick:e=>e.target===e.currentTarget&&cm(),style:{position:"fixed",inset:0,background:"rgba(20,20,30,.3)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:50}},
-      r("div",{style:{background:C.card,borderRadius:"18px 18px 0 0",padding:"24px 20px 36px",width:"100%",maxWidth:480,animation:"slideUp .2s ease"}},r(ModalContent))
-    ),
-    confirm&&r("div",{style:{position:"fixed",inset:0,background:"rgba(20,20,30,.35)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:60,padding:20}},
-      r("div",{style:{background:C.card,borderRadius:16,padding:"24px 20px",maxWidth:340,width:"100%"}},
-        r("div",{style:{fontWeight:600,fontSize:15,marginBottom:8}},"確認操作"),
-        r("div",{style:{fontSize:14,color:C.mid,marginBottom:20,lineHeight:1.6}},confirm.msg),
-        r("div",{style:{display:"flex",gap:8}},
-          r(GBtn,{ch:"取消",onClick:()=>setConfirm(null),style:{flex:1}}),
-          r("button",{onClick:()=>{confirm.ok();setConfirm(null)},style:{flex:1,background:C.err,color:"#fff",fontWeight:600,padding:"9px",borderRadius:10,border:"none",cursor:"pointer",fontSize:14}},"確定刪除")
-        )
-      )
-    ),
-    toast&&r("div",{style:{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",background:"#2a2a3a",color:"#fff",padding:"10px 20px",borderRadius:12,fontSize:13,fontWeight:500,zIndex:70,whiteSpace:"nowrap",pointerEvents:"none"}},toast)
-  )
-}
-
-ReactDOM.createRoot(document.getElementById("app")).render(r(App))
+// ── START ──
+// (startListening is called automatically after Firebase initialises above)
 </script>
 </body>
 </html>
