@@ -11,13 +11,13 @@
 /* ── RESET & BASE ── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
-  --bg:#fafafa;
+  --bg:#f6f6f6;
   --surface:#fff;
   --line:#e8e8e8;
   --line-light:#f0f0f0;
-  --text:#111;
-  --text2:#666;
-  --text3:#aaa;
+  --text:#1a1a1a;
+  --text2:#444;
+  --text3:#888;
   --accent:#2457c5;
   --accent-pale:#f0f4ff;
   --success:#1a8a5a;
@@ -31,7 +31,7 @@ body{
   color:var(--text);
   min-height:100vh;
   font-weight:400;
-  line-height:1.6;
+  line-height:1.7;
   -webkit-font-smoothing:antialiased;
 }
 
@@ -60,12 +60,6 @@ body{
   display:flex;
   align-items:center;
   gap:8px;
-}
-.brand-dot{
-  width:7px;height:7px;
-  border-radius:50%;
-  background:var(--accent);
-  flex-shrink:0;
 }
 .topbar-right{display:flex;align-items:center;gap:14px;}
 .sync-status{
@@ -100,7 +94,7 @@ body{
 /* ── PAGE HEADER ── */
 .ph{margin-bottom:32px;}
 .ph-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;}
-.ph-title{font-size:22px;font-weight:300;letter-spacing:-.5px;color:var(--text);line-height:1.2;}
+.ph-title{font-size:20px;font-weight:500;letter-spacing:-.3px;color:var(--text);line-height:1.2;}
 .ph-sub{font-size:13px;color:var(--text3);margin-top:6px;font-weight:400;}
 .ph-line{height:1px;background:var(--line);margin-top:18px;}
 
@@ -157,36 +151,48 @@ body{
 .add-field-btn:hover{text-decoration:underline;}
 
 /* ── PROJECT CARDS (Editor) ── */
-.project-grid{display:flex;flex-direction:column;gap:0;}
+.project-grid{display:flex;flex-direction:column;gap:12px;}
 .pcard{
   background:var(--surface);
-  border-bottom:1px solid var(--line);
-  padding:20px 0;
+  border:1.5px solid var(--line);
+  padding:20px;
   cursor:pointer;
-  transition:opacity .15s;
-  position:relative;
-  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  transition:border-color .18s, box-shadow .18s;
+  display:flex;align-items:stretch;gap:0;
 }
-.pcard:first-child{border-top:1px solid var(--line);}
-.pcard:hover{opacity:.7;}
-.pcard.dragging{opacity:.3;}
-.pcard.drag-over{background:var(--accent-pale);}
-.pcard-body{flex:1;min-width:0;}
-.pcard-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
-.pcard-title{font-size:15px;font-weight:500;color:var(--text);}
+.pcard:hover{border-color:var(--text3);box-shadow:0 2px 10px rgba(0,0,0,.07);}
+.pcard.dragging{opacity:.35;}
+.pcard.drag-over{border-color:var(--accent);}
+
+/* 左欄 — 名稱＋日期＋badge，佔50% */
+.pcard-left{
+  width:40%;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding-right:16px;
+  border-right:1px solid var(--line);
+}
+.pcard-top{}
+.pcard-title{font-size:17px;font-weight:400;color:var(--text);margin-bottom:5px;line-height:1.4;}
+.pcard-date{font-size:12px;color:var(--text3);}
+.pcard-badge-wrap{margin-top:14px;}
 .badge{
   font-size:10px;font-weight:500;
-  padding:2px 7px;letter-spacing:.04em;
-  border:1px solid;flex-shrink:0;
+  padding:2px 8px;letter-spacing:.04em;
+  border:1px solid;display:inline-block;
 }
 .badge-on{color:var(--success);border-color:var(--success);}
 .badge-off{color:var(--text3);border-color:var(--line);}
-.pcard-date{font-size:12px;color:var(--text3);margin-bottom:12px;}
-.pcard-stats{display:flex;gap:24px;flex-wrap:wrap;}
-.stat-item{display:flex;flex-direction:column;}
-.stat-n{font-size:20px;font-weight:300;color:var(--text);letter-spacing:-.5px;line-height:1.1;}
-.stat-l{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.05em;text-transform:uppercase;}
-.pcard-arrow{color:var(--text3);font-size:16px;padding-top:2px;flex-shrink:0;}
+
+/* 右欄 — 各項目累計，佔50% */
+.pcard-right{
+  width:60%;
+  display:flex;flex-direction:column;gap:12px;
+  padding-left:16px;
+  justify-content:center;
+}
+.stat-item{display:flex;flex-direction:column;gap:6px;}
+.stat-l{font-size:14px;color:var(--text3);letter-spacing:.03em;line-height:1;}
+.stat-n{font-size:22px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1.1;}
 
 /* ── DETAIL SUMMARY ── */
 .summary-row{display:flex;gap:0;border-top:1px solid var(--line);margin-bottom:32px;}
@@ -196,8 +202,8 @@ body{
   text-align:center;
 }
 .scard:last-child{border-right:none;}
-.scard-n{font-size:28px;font-weight:300;color:var(--text);letter-spacing:-1px;line-height:1;}
-.scard-l{font-size:11px;color:var(--text3);margin-top:5px;letter-spacing:.04em;}
+.scard-n{font-size:26px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1;}
+.scard-l{font-size:14px;color:var(--text2);margin-bottom:6px;letter-spacing:.01em;}
 
 /* ── TABLE ── */
 .table-wrap{overflow-x:auto;margin-bottom:40px;border-top:1px solid var(--line);}
@@ -234,12 +240,12 @@ tr:last-child td{border-bottom:none;}
 }
 .psel-item:first-child{border-top:1px solid var(--line);}
 .psel-item:hover{opacity:.6;}
-.psel-name{font-size:15px;font-weight:500;}
+.psel-name{font-size:15px;font-weight:600;}
 .psel-date{font-size:12px;color:var(--text3);margin-top:3px;}
 .psel-arrow{color:var(--text3);font-size:16px;}
 
 .entry-section{margin-top:0;}
-.entry-title{font-size:22px;font-weight:300;letter-spacing:-.5px;margin-bottom:4px;}
+.entry-title{font-size:20px;font-weight:500;letter-spacing:-.3px;margin-bottom:4px;}
 .entry-subtitle{font-size:12px;color:var(--text3);margin-bottom:28px;}
 
 /* Date picker row */
@@ -265,7 +271,7 @@ tr:last-child td{border-bottom:none;}
 .efield-input{
   width:90px;
   background:none;border:none;border-bottom:1px solid var(--line);
-  font-size:22px;font-weight:300;text-align:right;
+  font-size:22px;font-weight:400;text-align:right;
   font-family:inherit;color:var(--text);
   padding:4px 0;outline:none;
   transition:border-color .15s;
@@ -279,13 +285,16 @@ tr:last-child td{border-bottom:none;}
 
 /* Status banner */
 .status-banner{
-  font-size:12px;padding:10px 0;margin-bottom:20px;
-  color:var(--text3);letter-spacing:.02em;
-  border-bottom:1px solid var(--line-light);
-  display:none;
+  font-size:12px;padding:10px 12px;margin-bottom:20px;
+  color:var(--text2);letter-spacing:.02em;
+  display:none;border-radius:2px;
 }
 .status-banner.show{display:block;}
-.status-banner.warn-text{color:var(--warn);}
+.status-banner.warn-text{
+  color:var(--danger);
+  border:1px solid var(--danger);
+  background:rgba(192,57,43,.04);
+}
 
 /* ── MODAL ── */
 .overlay{
@@ -310,7 +319,7 @@ tr:last-child td{border-bottom:none;}
   width:36px;height:3px;background:var(--line);
   border-radius:2px;margin:0 auto 22px;
 }
-.modal-title{font-size:18px;font-weight:300;letter-spacing:-.3px;margin-bottom:4px;}
+.modal-title{font-size:17px;font-weight:500;letter-spacing:-.2px;margin-bottom:4px;}
 .modal-sub{font-size:12px;color:var(--text3);margin-bottom:22px;letter-spacing:.02em;}
 .modal-foot{
   display:flex;gap:10px;justify-content:flex-end;
@@ -384,15 +393,24 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 .empty-ico{font-size:32px;margin-bottom:12px;opacity:.4;}
 .empty p{font-size:13px;letter-spacing:.02em;}
 
-/* ── DETAIL ACTIONS ── */
-.detail-actions{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:0;}
-.action-link{
-  font-size:12px;color:var(--text3);
-  background:none;border:none;cursor:pointer;
-  font-family:inherit;padding:0;letter-spacing:.03em;
-  border-bottom:1px solid transparent;transition:all .15s;
+/* ── TABLE SECTION ── */
+.table-section{margin-bottom:40px;}
+.table-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  margin-bottom:0;
 }
-.action-link:hover{color:var(--text);border-color:var(--text);}
+.table-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
+.table-actions{display:flex;gap:6px;}
+.tbl-btn{
+  font-size:11px;font-weight:500;color:var(--text2);
+  background:none;border:1px solid var(--line);
+  cursor:pointer;font-family:inherit;
+  padding:5px 10px;letter-spacing:.02em;
+  transition:all .15s;
+}
+.tbl-btn:hover{border-color:var(--text);color:var(--text);}
+.table-wrap{overflow-x:auto;}
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:3px;height:3px;}
@@ -402,11 +420,6 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 @media(min-width:600px){
   .overlay{align-items:center;padding:20px;}
   .modal{border-radius:2px;border:1px solid var(--line);border-top:1px solid var(--line);}
-  .project-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
-  .pcard{padding:22px 18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);border-top:none;}
-  .pcard:first-child{border-top:none;}
-  .project-grid .pcard:nth-child(2n){border-right:none;}
-  .summary-row{}
 }
 </style>
 </head>
@@ -415,7 +428,17 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="brand">
-    <div class="brand-dot"></div>
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- base bar -->
+      <rect x="2" y="14" width="4" height="6" fill="var(--accent)" opacity="0.35"/>
+      <!-- mid bar -->
+      <rect x="9" y="9" width="4" height="11" fill="var(--accent)" opacity="0.65"/>
+      <!-- tall bar -->
+      <rect x="16" y="4" width="4" height="16" fill="var(--accent)"/>
+      <!-- trend line -->
+      <polyline points="4,13 11,8 18,3" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="18" cy="3" r="1.5" fill="var(--accent)"/>
+    </svg>
     活動人次追蹤系統
   </div>
   <div class="topbar-right">
@@ -463,7 +486,10 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     <div class="ph">
       <div class="ph-row">
         <div class="ph-title">專案</div>
-        <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('changePwModal')">修改密碼</button>
+          <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增</button>
+        </div>
       </div>
       <div class="ph-line"></div>
     </div>
@@ -480,16 +506,22 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
         <div class="ph-title" id="detailName"></div>
         <div class="ph-sub" id="detailDates"></div>
       </div>
-      <div class="detail-actions" style="margin-top:14px">
-        <button class="action-link" onclick="openEditModal()">編輯設定</button>
-        <button class="action-link" onclick="openManualModal()">編輯數據</button>
-        <button class="action-link" onclick="downloadCSV()">下載 CSV</button>
-      </div>
+
       <div class="ph-line"></div>
     </div>
     <div id="summaryRow" class="summary-row"></div>
-    <div class="table-wrap">
-      <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
+    <div class="table-section">
+      <div class="table-header">
+        <span class="table-label">填報數據</span>
+        <div class="table-actions">
+          <button class="tbl-btn" onclick="openEditModal()">編輯設定</button>
+          <button class="tbl-btn" onclick="openManualModal()">編輯數據</button>
+          <button class="tbl-btn" onclick="downloadCSV()">下載 CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
+      </div>
     </div>
   </div>
 </div>
@@ -502,7 +534,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     <div class="modal-sub">活動資訊與登記項目</div>
     <div class="fg">
       <label class="fl">活動名稱</label>
-      <input class="fi" id="fieldName" placeholder="例：2026 夏日藝術展">
+      <input class="fi" id="fieldName" placeholder="">
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div class="fg">
@@ -558,6 +590,62 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
   </div>
 </div>
 
+<!-- MODAL: 驗證密碼 -->
+<div class="overlay" id="pwModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">編輯者登入</div>
+    <div class="modal-sub">請輸入密碼以進入編輯模式</div>
+    <div class="fg">
+      <label class="fl">密碼</label>
+      <div style="position:relative;display:flex;align-items:center;">
+        <input class="fi" type="password" id="pwInput" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter')verifyPassword()" style="padding-right:36px">
+        <button type="button" onclick="togglePwVis('pwInput',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <div id="pwError" style="font-size:12px;color:var(--danger);margin-top:-8px;margin-bottom:8px;display:none">密碼錯誤，請再試一次</div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('pwModal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="verifyPassword()">確認</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 修改密碼 -->
+<div class="overlay" id="changePwModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">修改密碼</div>
+    <div class="modal-sub">修改後下次切換至編輯者時生效</div>
+    <div class="fg">
+      <label class="fl">目前密碼</label>
+      <div style="position:relative;display:flex;align-items:center;">
+        <input class="fi" type="password" id="cpwCurrent" placeholder="" autocomplete="off" style="padding-right:36px">
+        <button type="button" onclick="togglePwVis('cpwCurrent',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">新密碼</label>
+      <div style="position:relative;display:flex;align-items:center;">
+        <input class="fi" type="password" id="cpwNew" placeholder="" autocomplete="off" style="padding-right:36px">
+        <button type="button" onclick="togglePwVis('cpwNew',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">確認新密碼</label>
+      <div style="position:relative;display:flex;align-items:center;">
+        <input class="fi" type="password" id="cpwConfirm" placeholder="" autocomplete="off" style="padding-right:36px">
+        <button type="button" onclick="togglePwVis('cpwConfirm',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <div id="cpwError" style="font-size:12px;color:var(--danger);margin-top:-8px;margin-bottom:8px;display:none"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('changePwModal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="changePassword()">儲存</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
@@ -599,15 +687,81 @@ document.querySelectorAll('.overlay').forEach(function(o){
   o.addEventListener('click', function(e){ if(e.target===o) o.classList.remove('open'); });
 });
 
-/* ── ROLE ── */
+/* ── PASSWORD ── */
+var DEFAULT_PW = '0000';
+function getPassword() {
+  return localStorage.getItem('editorPw') || DEFAULT_PW;
+}
+
+window.togglePwVis = function(inputId, btn) {
+  var el = document.getElementById(inputId);
+  var eyeOpen = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var eyeOff  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  if (el.type === 'password') {
+    el.type = 'text';
+    btn.innerHTML = eyeOff;
+    btn.style.color = 'var(--text)';
+  } else {
+    el.type = 'password';
+    btn.innerHTML = eyeOpen;
+    btn.style.color = 'var(--text3)';
+  }
+};
+
 function switchRole() {
-  currentRole = currentRole === 'assistant' ? 'editor' : 'assistant';
-  document.getElementById('switchRoleBtn').textContent =
-    currentRole === 'assistant' ? '切換至編輯者' : '切換至協助者';
-  if (currentRole === 'assistant') { showView('viewAssistant'); renderAssistantProjects(); }
-  else { showView('viewEditor'); renderEditorProjects(); }
+  if (currentRole === 'editor') {
+    // 離開編輯者 → 直接切回
+    currentRole = 'assistant';
+    document.getElementById('switchRoleBtn').textContent = '切換至編輯者';
+    showView('viewAssistant');
+    renderAssistantProjects();
+  } else {
+    // 進入編輯者 → 先驗證密碼
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwError').style.display = 'none';
+    openModal('pwModal');
+    setTimeout(function(){ document.getElementById('pwInput').focus(); }, 100);
+  }
 }
 window.switchRole = switchRole;
+
+window.verifyPassword = function() {
+  var input = document.getElementById('pwInput').value;
+  if (input === getPassword()) {
+    closeModal('pwModal');
+    currentRole = 'editor';
+    document.getElementById('switchRoleBtn').textContent = '切換至協助者';
+    showView('viewEditor');
+    renderEditorProjects();
+  } else {
+    document.getElementById('pwError').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+};
+
+window.changePassword = function() {
+  var cur     = document.getElementById('cpwCurrent').value;
+  var newPw   = document.getElementById('cpwNew').value;
+  var confirm = document.getElementById('cpwConfirm').value;
+  var errEl   = document.getElementById('cpwError');
+  errEl.style.display = 'none';
+  if (cur !== getPassword()) {
+    errEl.textContent = '目前密碼錯誤'; errEl.style.display = 'block'; return;
+  }
+  if (!newPw) {
+    errEl.textContent = '新密碼不可為空'; errEl.style.display = 'block'; return;
+  }
+  if (newPw !== confirm) {
+    errEl.textContent = '兩次輸入的新密碼不相符'; errEl.style.display = 'block'; return;
+  }
+  localStorage.setItem('editorPw', newPw);
+  document.getElementById('cpwCurrent').value = '';
+  document.getElementById('cpwNew').value = '';
+  document.getElementById('cpwConfirm').value = '';
+  closeModal('changePwModal');
+  toast('✅ 密碼已更新', 'ok');
+};
 
 /* ── RENDER ── */
 function renderAssistantProjects() {
@@ -644,15 +798,22 @@ function renderEditorProjects() {
     return '<div class="pcard" draggable="true" data-id="'+k+'"'+
       ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
       ' onclick="openDetail(\''+k+'\')">' +
-      '<div class="pcard-head">'+
-      '<div class="pcard-title">'+esc(p.name)+'</div>'+
-      '<span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
-      '<div class="pcard-date">'+p.startDate+' ～ '+p.endDate+'</div>'+
-      '<div class="pcard-stats">'+
+      '<div class="pcard-left">'+
+        '<div class="pcard-top">'+
+          '<div class="pcard-title">'+esc(p.name)+'</div>'+
+          '<div class="pcard-date">'+p.startDate+' ～ '+p.endDate+'</div>'+
+        '</div>'+
+        '<div class="pcard-badge-wrap"><span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
+      '</div>'+
+      '<div class="pcard-right">'+
       (fields.length ? fields.map(function(f,i){
-        return '<div class="stat"><div class="stat-n">'+ft[i].toLocaleString()+'</div><div class="stat-l">'+esc(f)+'</div></div>';
-      }).join('') : '<div class="stat"><div class="stat-n">—</div><div class="stat-l">尚無項目</div></div>')+
-      '</div></div>';
+        return '<div class="stat-item">'+
+          '<div class="stat-l">'+esc(f)+'</div>'+
+          '<div class="stat-n">'+ft[i].toLocaleString()+'</div>'+
+        '</div>';
+      }).join('') : '<div class="stat-item"><div class="stat-n" style="color:var(--text3)">—</div></div>')+
+      '</div>'+
+      '</div>';
   }).join('');
 }
 
@@ -666,7 +827,7 @@ function renderDetail(id) {
     var t=0; Object.values(entries).forEach(function(e){ t+=parseInt(e['f'+fi]||0); }); return t;
   });
   document.getElementById('summaryRow').innerHTML = fields.map(function(f,i){
-    return '<div class="scard"><div class="scard-n">'+ft[i].toLocaleString()+'</div><div class="scard-l">'+esc(f)+'</div></div>';
+    return '<div class="scard"><div class="scard-l">'+esc(f)+'</div><div class="scard-n">'+ft[i].toLocaleString()+'</div></div>';
   }).join('');
   /* table — all cells centered */
   var dates = Object.keys(entries).sort();
@@ -674,16 +835,16 @@ function renderDetail(id) {
   if (!dates.length) {
     th.innerHTML=''; tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>'; return;
   }
-  th.innerHTML='<tr><th>日期</th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'<th>當日合計</th></tr>';
+  th.innerHTML='<tr><th>日期</th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'</tr>';
   var ct=fields.map(function(){return 0;}), gs=0;
   tb.innerHTML=dates.map(function(d){
     var e=entries[d]||{};
     var rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
     var rs=rv.reduce(function(a,b){return a+b;},0);
     rv.forEach(function(v,i){ct[i]+=v;}); gs+=rs;
-    return '<tr><td class="date-cell">'+d+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td style="font-weight:600;color:var(--accent)">'+rs.toLocaleString()+'</td></tr>';
+    return '<tr><td class="date-cell">'+d+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
   }).join('')+
-  '<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td>'+gs.toLocaleString()+'</td></tr>';
+  '<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
 }
 
 function refreshView() {
@@ -797,7 +958,7 @@ window.openEditModal = function() {
 function addFieldItem(val) {
   var fl = document.getElementById('fieldList');
   var div = document.createElement('div'); div.className = 'field-item';
-  div.innerHTML = '<input class="fi" placeholder="例：一般入場" value="'+esc(val||'')+'">'+
+  div.innerHTML = '<input class="fi" placeholder="" value="'+esc(val||'')+'">'+
     '<button class="rm-btn" onclick="this.parentElement.remove()">&#215;</button>';
   fl.appendChild(div);
 }
@@ -910,19 +1071,18 @@ window.onDP = function(e){ e.preventDefault(); }; /* overwritten after Firebase 
       var fields = p.fields||[], entries = p.entries||{};
       var dates = Object.keys(entries).sort();
       if (!dates.length) { toast('尚無數據可下載','err'); return; }
-      var header = ['日期'].concat(fields).concat(['當日合計']);
+      var header = ['日期'].concat(fields);
       var rows = dates.map(function(d){
         var e = entries[d]||{};
         var rv = fields.map(function(_,i){ return parseInt(e['f'+i]||0); });
-        var rs = rv.reduce(function(a,b){return a+b;},0);
-        return [d].concat(rv).concat([rs]);
+        return [d].concat(rv);
       });
       // totals row
       var ct = fields.map(function(_,fi){
         return dates.reduce(function(s,d){ return s+parseInt((entries[d]||{})['f'+fi]||0); },0);
       });
       var gs = ct.reduce(function(a,b){return a+b;},0);
-      rows.push(['合計'].concat(ct).concat([gs]));
+      rows.push(['合計'].concat(ct));
       var csv = [header].concat(rows).map(function(r){ return r.join(','); }).join('\n');
       var bom = '\uFEFF'; // UTF-8 BOM for Excel
       var blob = new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
