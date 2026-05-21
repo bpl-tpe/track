@@ -399,20 +399,24 @@ function renderEditorProjects() {
   }
   el.innerHTML = projectOrder.filter(function(k){ return !!projects[k]; }).map(function(k){
     var p = projects[k];
-    var total = 0;
-    Object.values(p.entries||{}).forEach(function(e){ Object.values(e).forEach(function(v){ total+=(parseInt(v)||0); }); });
+    var fields = p.fields||[];
+    var entries = p.entries||{};
+    // per-field totals
+    var ft = fields.map(function(_,fi){
+      var t=0; Object.values(entries).forEach(function(e){ t+=parseInt(e['f'+fi]||0); }); return t;
+    });
     var on = p.status === 'active';
     return '<div class="pcard" draggable="true" data-id="'+k+'"'+
       ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
-      ' onclick="openDetail(\'' + k + '\')">' +
+      ' onclick="openDetail(\''+k+'\')">' +
       '<div class="pcard-head">'+
       '<div class="pcard-title">'+esc(p.name)+'</div>'+
       '<span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
       '<div class="pcard-date">'+p.startDate+' ～ '+p.endDate+'</div>'+
-      '<div class="pcard-fields">'+((p.fields||[]).join(' · ')||'—')+'</div>'+
       '<div class="pcard-stats">'+
-      '<div class="stat"><div class="stat-n">'+Object.keys(p.entries||{}).length+'</div><div class="stat-l">填報天數</div></div>'+
-      '<div class="stat"><div class="stat-n">'+total.toLocaleString()+'</div><div class="stat-l">累計人次</div></div>'+
+      (fields.length ? fields.map(function(f,i){
+        return '<div class="stat"><div class="stat-n">'+ft[i].toLocaleString()+'</div><div class="stat-l">'+esc(f)+'</div></div>';
+      }).join('') : '<div class="stat"><div class="stat-n">—</div><div class="stat-l">尚無項目</div></div>')+
       '</div></div>';
   }).join('');
 }
@@ -435,14 +439,14 @@ function renderDetail(id) {
   if (!dates.length) {
     th.innerHTML=''; tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>'; return;
   }
-  th.innerHTML='<tr><th>日期</th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'<th>當日合計</th></tr>';
+  th.innerHTML='<tr><th>日期 <span style="font-weight:400;color:var(--text3);font-size:11px">（點擊列可編輯）</span></th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'<th>當日合計</th></tr>';
   var ct=fields.map(function(){return 0;}), gs=0;
   tb.innerHTML=dates.map(function(d){
     var e=entries[d]||{};
     var rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
     var rs=rv.reduce(function(a,b){return a+b;},0);
     rv.forEach(function(v,i){ct[i]+=v;}); gs+=rs;
-    return '<tr><td class="date-cell">'+d+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td style="font-weight:600;color:var(--accent)">'+rs.toLocaleString()+'</td></tr>';
+    return '<tr style="cursor:pointer" onclick="openManualModal(\''+d+'\')" title="點擊編輯此日數據"><td class="date-cell">'+d+' &#9998;</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td style="font-weight:600;color:var(--accent)">'+rs.toLocaleString()+'</td></tr>';
   }).join('')+
   '<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td>'+gs.toLocaleString()+'</td></tr>';
 }
@@ -460,9 +464,12 @@ window.selectProject = function(id) {
   document.getElementById('assistantList').style.display = 'none';
   document.getElementById('assistantForm').style.display = 'block';
   document.getElementById('entryName').textContent = p.name;
-  document.getElementById('entryMeta').textContent = '填報日期：' + todayStr();
   document.getElementById('doneBanner').style.display = 'none';
   document.getElementById('submitBtn').disabled = false;
+  // date picker with today as default
+  document.getElementById('entryMeta').innerHTML =
+    '<label style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">填報日期</label>' +
+    '<input type="date" id="entryDate" class="fi" value="'+todayStr()+'" style="max-width:200px">';
   document.getElementById('entryFields').innerHTML = (p.fields||[]).map(function(f,i){
     return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
       '<input class="efield-input" type="number" min="0" id="ef_'+i+'" placeholder="0"></div>';
@@ -475,13 +482,15 @@ window.backToList = function() {
 };
 
 window.handleSubmit = function() {
-  /* 直接送出，不用預覽 */
+  var dateEl = document.getElementById('entryDate');
+  var date = dateEl ? dateEl.value : todayStr();
+  if (!date) { toast('請選擇填報日期', 'err'); return; }
   var p = projects[currentProjectId];
   var values = (p.fields||[]).map(function(f,i){
     return { label:f, value:parseInt(document.getElementById('ef_'+i).value)||0 };
   });
   if (window._dbSubmit) {
-    window._dbSubmit(currentProjectId, todayStr(), values);
+    window._dbSubmit(currentProjectId, date, values);
   } else {
     toast('資料庫尚未就緒，請稍後', 'err');
   }
@@ -536,14 +545,27 @@ function addFieldItem(val) {
 }
 window.addFieldItem = addFieldItem;
 
-window.openManualModal = function() {
+window.openManualModal = function(date) {
   var p = projects[currentProjectId];
   document.getElementById('manualSub').textContent = p.name;
-  document.getElementById('manualDate').value = todayStr();
+  var d = date || todayStr();
+  document.getElementById('manualDate').value = d;
+  // pre-fill with existing data if any
+  var existing = (p.entries && p.entries[d]) || {};
   document.getElementById('manualFields').innerHTML = (p.fields||[]).map(function(f,i){
+    var val = parseInt(existing['f'+i]||0);
     return '<div class="fg"><label class="fl">'+esc(f)+'</label>'+
-      '<input class="fi" type="number" min="0" id="mf_'+i+'" placeholder="0"></div>';
+      '<input class="fi" type="number" min="0" id="mf_'+i+'" value="'+(val||'')+'"></div>';
   }).join('');
+  // when date changes, reload existing values
+  document.getElementById('manualDate').onchange = function() {
+    var nd = this.value;
+    var ex = (p.entries && p.entries[nd]) || {};
+    (p.fields||[]).forEach(function(_,i){
+      var el = document.getElementById('mf_'+i);
+      if (el) el.value = parseInt(ex['f'+i]||0)||'';
+    });
+  };
   openModal('manualModal');
 };
 
@@ -608,11 +630,19 @@ window.onDP = function(e){ e.preventDefault(); }; /* overwritten after Firebase 
       var status= document.getElementById('statusToggle').checked ? 'active' : 'ended';
       if (!name||!start||!end){ toast('請填寫活動名稱與日期','err'); return; }
       if (!fields.length){ toast('請至少新增一個登記項目','err'); return; }
+      var isNew = !editingProjectId;
       var id = editingProjectId||'p_'+Date.now();
       setSyncStatus('syncing','儲存中...');
       try {
         await update(ref(db,'tracker/projects/'+id),{name:name,startDate:start,endDate:end,fields:fields,status:status});
-        if (!editingProjectId) await update(ref(db,'tracker'),{projectOrder:projectOrder.concat([id])});
+        if (isNew) {
+          // Read current order from Firebase first to avoid duplicates
+          var snap = await new Promise(function(res){ var u=onValue(ref(db,'tracker/projectOrder'),function(s){u();res(s);}); });
+          var cur = snap.val()||projectOrder;
+          if (!Array.isArray(cur)) cur = Object.values(cur);
+          if (cur.indexOf(id) < 0) cur = cur.concat([id]);
+          await update(ref(db,'tracker'),{projectOrder:cur});
+        }
         closeModal('projectModal');
         toast('✅ 已儲存','ok');
       } catch(e){ toast('儲存失敗：'+e.message,'err'); setSyncStatus('error','儲存失敗'); }
