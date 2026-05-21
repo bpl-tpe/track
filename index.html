@@ -119,6 +119,7 @@ tr:hover td{background:var(--surface2);}
 .efield-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
 .efield-input:disabled{background:var(--surface2);color:var(--text2);border-color:var(--border);}
 .done-banner{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--r-sm);padding:12px 16px;font-size:13px;color:#166534;display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.done-banner.warn{background:#fffbeb;border-color:#fcd34d;color:#92400e;}
 
 /* ── PROJECT SELECT ── */
 .psel-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
@@ -251,7 +252,8 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" onclick="openEditModal()">&#9881; 編輯設定</button>
-        <button class="btn btn-ghost btn-sm" onclick="openManualModal()">&#65291; 手動新增數據</button>
+        <button class="btn btn-ghost btn-sm" onclick="openManualModal()">&#9998; 編輯數據</button>
+        <button class="btn btn-ghost btn-sm" onclick="downloadCSV()">&#8659; 下載數據</button>
       </div>
     </div>
     <div id="summaryRow" class="summary-row"></div>
@@ -309,7 +311,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 <!-- MODAL: 手動新增數據 -->
 <div class="overlay" id="manualModal">
   <div class="modal">
-    <div class="modal-title">手動新增數據</div>
+    <div class="modal-title">編輯數據</div>
     <div class="modal-sub" id="manualSub"></div>
     <div class="fg">
       <label class="fl">日期</label>
@@ -439,14 +441,14 @@ function renderDetail(id) {
   if (!dates.length) {
     th.innerHTML=''; tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>'; return;
   }
-  th.innerHTML='<tr><th>日期 <span style="font-weight:400;color:var(--text3);font-size:11px">（點擊列可編輯）</span></th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'<th>當日合計</th></tr>';
+  th.innerHTML='<tr><th>日期</th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'<th>當日合計</th></tr>';
   var ct=fields.map(function(){return 0;}), gs=0;
   tb.innerHTML=dates.map(function(d){
     var e=entries[d]||{};
     var rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
     var rs=rv.reduce(function(a,b){return a+b;},0);
     rv.forEach(function(v,i){ct[i]+=v;}); gs+=rs;
-    return '<tr style="cursor:pointer" onclick="openManualModal(\''+d+'\')" title="點擊編輯此日數據"><td class="date-cell">'+d+' &#9998;</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td style="font-weight:600;color:var(--accent)">'+rs.toLocaleString()+'</td></tr>';
+    return '<tr><td class="date-cell">'+d+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td style="font-weight:600;color:var(--accent)">'+rs.toLocaleString()+'</td></tr>';
   }).join('')+
   '<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'<td>'+gs.toLocaleString()+'</td></tr>';
 }
@@ -466,14 +468,35 @@ window.selectProject = function(id) {
   document.getElementById('entryName').textContent = p.name;
   document.getElementById('doneBanner').style.display = 'none';
   document.getElementById('submitBtn').disabled = false;
+
   // date picker with today as default
   document.getElementById('entryMeta').innerHTML =
     '<label style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">填報日期</label>' +
     '<input type="date" id="entryDate" class="fi" value="'+todayStr()+'" style="max-width:200px">';
-  document.getElementById('entryFields').innerHTML = (p.fields||[]).map(function(f,i){
-    return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
-      '<input class="efield-input" type="number" min="0" id="ef_'+i+'" placeholder="0"></div>';
-  }).join('');
+
+  function loadFieldsForDate(d) {
+    var existing = (p.entries && p.entries[d]) || null;
+    document.getElementById('entryFields').innerHTML = (p.fields||[]).map(function(f,i){
+      var v = existing ? parseInt(existing['f'+i]||0) : '';
+      return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
+        '<input class="efield-input" type="number" min="0" id="ef_'+i+'" value="'+(v!==''?v:'')+'" placeholder="0"'+
+        (existing?' style="border-color:var(--warn);background:#fffbeb"':'')+
+        '></div>';
+    }).join('');
+    if (existing) {
+      document.getElementById('doneBanner').style.display = 'flex';
+      document.getElementById('doneBanner').innerHTML = '&#9888; 此日期已有填報數字，可直接修改後重新送出';
+    } else {
+      document.getElementById('doneBanner').style.display = 'none';
+    }
+    document.getElementById('submitBtn').disabled = false;
+  }
+
+  loadFieldsForDate(todayStr());
+
+  document.getElementById('entryDate').onchange = function() {
+    loadFieldsForDate(this.value);
+  };
 };
 
 window.backToList = function() {
@@ -489,6 +512,10 @@ window.handleSubmit = function() {
   var values = (p.fields||[]).map(function(f,i){
     return { label:f, value:parseInt(document.getElementById('ef_'+i).value)||0 };
   });
+  var alreadyFilled = p.entries && p.entries[date];
+  if (alreadyFilled) {
+    if (!confirm('該日期已填報過，確認是否重新填報？')) return;
+  }
   if (window._dbSubmit) {
     window._dbSubmit(currentProjectId, date, values);
   } else {
@@ -582,7 +609,7 @@ window.onDP = function(e){ e.preventDefault(); }; /* overwritten after Firebase 
     var fbApp = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     var fbDb  = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
     var initializeApp=fbApp.initializeApp, getApps=fbApp.getApps;
-    var getDatabase=fbDb.getDatabase, ref=fbDb.ref, set=fbDb.set, update=fbDb.update, remove=fbDb.remove, onValue=fbDb.onValue;
+    var getDatabase=fbDb.getDatabase, ref=fbDb.ref, set=fbDb.set, update=fbDb.update, remove=fbDb.remove, onValue=fbDb.onValue, get=fbDb.get;
     var app = getApps().length ? getApps()[0] : initializeApp({databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/'});
     var db = getDatabase(app);
 
@@ -636,16 +663,45 @@ window.onDP = function(e){ e.preventDefault(); }; /* overwritten after Firebase 
       try {
         await update(ref(db,'tracker/projects/'+id),{name:name,startDate:start,endDate:end,fields:fields,status:status});
         if (isNew) {
-          // Read current order from Firebase first to avoid duplicates
-          var snap = await new Promise(function(res){ var u=onValue(ref(db,'tracker/projectOrder'),function(s){u();res(s);}); });
-          var cur = snap.val()||projectOrder;
-          if (!Array.isArray(cur)) cur = Object.values(cur);
+          var snap = await get(ref(db,'tracker/projectOrder'));
+          var cur = snap.val();
+          if (!cur || !Array.isArray(cur)) cur = projectOrder.slice();
           if (cur.indexOf(id) < 0) cur = cur.concat([id]);
           await update(ref(db,'tracker'),{projectOrder:cur});
         }
         closeModal('projectModal');
         toast('✅ 已儲存','ok');
       } catch(e){ toast('儲存失敗：'+e.message,'err'); setSyncStatus('error','儲存失敗'); }
+    };
+
+    window.downloadCSV = function() {
+      var p = projects[currentProjectId];
+      if (!p) return;
+      var fields = p.fields||[], entries = p.entries||{};
+      var dates = Object.keys(entries).sort();
+      if (!dates.length) { toast('尚無數據可下載','err'); return; }
+      var header = ['日期'].concat(fields).concat(['當日合計']);
+      var rows = dates.map(function(d){
+        var e = entries[d]||{};
+        var rv = fields.map(function(_,i){ return parseInt(e['f'+i]||0); });
+        var rs = rv.reduce(function(a,b){return a+b;},0);
+        return [d].concat(rv).concat([rs]);
+      });
+      // totals row
+      var ct = fields.map(function(_,fi){
+        return dates.reduce(function(s,d){ return s+parseInt((entries[d]||{})['f'+fi]||0); },0);
+      });
+      var gs = ct.reduce(function(a,b){return a+b;},0);
+      rows.push(['合計'].concat(ct).concat([gs]));
+      var csv = [header].concat(rows).map(function(r){ return r.join(','); }).join('\n');
+      var bom = '\uFEFF'; // UTF-8 BOM for Excel
+      var blob = new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = p.name+'_數據.csv';
+      a.click();
+      URL.revokeObjectURL(url);
     };
 
     window.deleteProject = async function() {
