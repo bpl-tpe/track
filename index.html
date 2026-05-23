@@ -1,972 +1,1144 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>消費證明券統計系統</title>
-
-<!-- ════════════════════════════════════════════════
-  ★  Firebase 設定區  ★
-  請依照「設定說明.txt」的步驟，把你的 Firebase 設定
-  貼到下方對應欄位，取代 PASTE_YOUR_... 的文字。
-════════════════════════════════════════════════ -->
-<script>
-const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyDsI5q3Qsqe6RQr-i7cFdPwUJxlBzSxDfA",
-  authDomain:        "bpl260518.firebaseapp.com",
-  databaseURL:       "https://bpl260518-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "bpl260518",
-  storageBucket:     "bpl260518.firebasestorage.app",
-  messagingSenderId: "617674222515",
-  appId:             "1:617674222515:web:512b93941d8de811cb39c6"
-};
-</script>
-<!-- ════════════════════════════════════════════════ -->
-
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>活動人次追蹤系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh}
-.topbar{background:#fff;border-bottom:1px solid #e5e3db;padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.topbar-title{font-size:14px;font-weight:600}
-.topbar-right{display:flex;align-items:center;gap:8px}
-.sync-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:#6b6b67;padding:3px 8px;border-radius:99px;border:1px solid #e5e3db;background:#fafaf8}
-.sync-dot{width:6px;height:6px;border-radius:50%;background:#9ca3af;flex-shrink:0}
-.sync-dot.ok{background:#22c55e}
-.sync-dot.err{background:#ef4444}
-.sync-dot.pulse{animation:pulse 1.2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.container{max-width:780px;margin:0 auto;padding:16px}
-h1{font-size:18px;font-weight:600;margin-bottom:4px}
-.sub{font-size:12px;color:#6b6b67;margin-bottom:16px}
-/* 指標卡 */
-.grid-grand{margin-bottom:10px}
-.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
-@media(max-width:480px){.grid-4{grid-template-columns:repeat(2,1fr)}}
-.metric{background:#fff;border-radius:10px;border:1px solid #e5e3db;padding:12px}
-.metric-label{font-size:10px;color:#6b6b67;margin-bottom:3px}
-.metric-val{font-size:20px;font-weight:600}
-.metric-val.warn{color:#b45309}
-.metric-total{background:#f0ede8;border-radius:10px;border:1px solid #d1d0c8;padding:12px}
-.metric-total .metric-label{color:#6b6b67;font-size:10px;margin-bottom:3px}
-.metric-total .metric-val{color:#1a1a18}
-/* 卡片 */
-.card{background:#fff;border:1px solid #e5e3db;border-radius:12px;padding:16px;margin-bottom:14px}
-/* 頁籤 */
-.tab-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
-.tab{padding:8px 4px;border-radius:8px;font-size:12px;cursor:pointer;border:1px solid #d1d0c8;background:transparent;color:#6b6b67;text-align:center;line-height:1.3}
-.tab.active{background:#1a1a18;color:#fff;border-color:transparent}
-.tab.warn-tab{border-color:#d97706;color:#b45309}
-.tab.warn-tab.active{background:#d97706;color:#fff;border-color:transparent}
-/* 日期列 */
-.date-bar{display:flex;align-items:center;gap:8px;background:#f5f4f0;border-radius:8px;padding:8px 10px;margin-bottom:12px;flex-wrap:wrap}
-.date-bar label{font-size:12px;color:#6b6b67;white-space:nowrap}
-.date-bar input[type=date]{height:34px;padding:0 8px;border:1px solid #d1d0c8;border-radius:8px;font-size:13px;background:#fff;color:#1a1a18;flex:1;min-width:140px}
-.date-hint{font-size:11px;color:#9ca3af;width:100%}
-/* 輸入列 */
-.irow{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-.irow input{flex:1;min-width:0;height:42px;padding:0 10px;border:1px solid #d1d0c8;border-radius:8px;font-size:15px;background:#fff;color:#1a1a18}
-.irow input:focus{outline:none;border-color:#1a1a18}
-/* 按鈕 */
-.btn{height:42px;padding:0 14px;border-radius:8px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-weight:500}
-.btn-p{background:#1a1a18;color:#fff;border:none}
-.btn-o{background:#fff;border:1px solid #d1d0c8;color:#1a1a18}
-.btn-w{background:#d97706;color:#fff;border:none}
-.err-msg{font-size:12px;color:#dc2626;min-height:16px;margin-top:4px}
-.hint{font-size:12px;color:#9ca3af;margin-top:4px}
-/* 編輯鎖 */
-.lock-btn{display:flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:99px;cursor:pointer;font-weight:500;border:1px solid #d1d0c8;background:#fff;color:#6b6b67;white-space:nowrap}
-.lock-btn.unlocked{border-color:#22c55e;color:#16a34a;background:#f0fdf4}
-.lock-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
-.lock-overlay.show{display:flex}
-.lock-modal{background:#fff;border-radius:14px;padding:28px 20px;width:100%;max-width:300px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.18)}
-.lock-modal h2{font-size:16px;font-weight:600;margin-bottom:6px}
-.lock-modal p{font-size:13px;color:#6b6b67;margin-bottom:16px}
-.lock-modal input{width:100%;height:46px;text-align:center;font-size:22px;letter-spacing:8px;border:1px solid #d1d0c8;border-radius:8px;margin-bottom:8px;background:#f5f4f0}
-.lock-modal input:focus{outline:none;border-color:#1a1a18}
-.lock-modal .err{font-size:12px;color:#dc2626;min-height:16px;margin-bottom:8px}
-.lock-modal .btns{display:flex;gap:8px}
-.lock-modal .btns button{flex:1;height:42px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer}
-/* 編輯區塊鎖定控制 */
-body.edit-locked .edit-action{display:none!important}
-body:not(.edit-locked) .lock-notice{display:none!important}
-.lock-notice{display:flex;align-items:center;gap:6px;font-size:12px;color:#9ca3af;background:#f5f4f0;border-radius:8px;padding:8px 12px;margin-bottom:12px}
-/* 統計列表 */
-.stat-hdr{display:grid;grid-template-columns:20px 1fr 40px 40px 40px 36px 80px;gap:6px;padding:4px 6px 8px;border-bottom:1px solid #e5e3db;margin-bottom:2px}
-.stat-hdr span{font-size:10px;color:#9ca3af}
-.stat-row{border-bottom:1px solid #e5e3db}
-.stat-row:last-child{border-bottom:none}
-.stat-main{display:grid;grid-template-columns:20px 1fr 40px 40px 40px 36px 80px;align-items:center;gap:6px;padding:10px 6px;cursor:pointer;user-select:none;border-radius:8px}
-.stat-main:hover{background:#f5f4f0}
-@media(max-width:480px){
-  .stat-hdr,.stat-main{grid-template-columns:16px 1fr 32px 32px 32px 28px 60px;gap:4px;padding:10px 4px}
-  .stat-hdr span{font-size:9px}
+/* ── RESET & BASE ── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#F5F4F4;
+  --surface:#ffffff;
+  --line:#e2e2e2;
+  --line-light:#ebebeb;
+  --text:#212A33;
+  --text2:#3a4450;
+  --text3:#8a95a0;
+  --accent:#526FBD;
+  --accent-pale:#eef1f9;
+  --success:#1a8a5a;
+  --danger:#CB7758;
+  --warn:#CB7758;
 }
-.sname{font-size:12px;line-height:1.4;overflow:hidden}
-.sname-full{display:inline}
-.sname-short{display:none}
-@media(max-width:480px){
-  .sname-full{display:none}
-  .sname-short{display:inline}
+html{font-size:16px;}
+body{
+  font-family:"Noto Sans TC",system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  font-weight:400;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
 }
-.chevron{font-size:11px;color:#9ca3af;transition:transform .2s;display:flex;align-items:center}
-.chevron.open{transform:rotate(90deg)}
-.sname{font-size:12px;word-break:break-all;line-height:1.4}
-.scnt{font-size:13px;font-weight:600;text-align:right}
-.smiss{font-size:12px;font-weight:600;color:#b45309;text-align:right}
-.spct{font-size:11px;color:#6b6b67;text-align:right}
-.salloc{font-size:11px;color:#9ca3af;text-align:right}
-.bar-bg{height:4px;background:#e5e3db;border-radius:99px;overflow:hidden}
-.bar-fill{height:100%;border-radius:99px;background:#1a1a18;transition:width .3s}
-/* 第二層 */
-.stat-detail{display:none;background:#f5f4f0;border-radius:8px;margin:0 4px 8px 22px;padding:10px}
-.stat-detail.open{display:block}
-.detail-sec{margin-bottom:10px}
-.detail-sec:last-child{margin-bottom:0}
-.detail-title{font-size:10px;font-weight:600;color:#6b6b67;margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
-.date-group{margin-bottom:8px}
-.date-group:last-child{margin-bottom:0}
-.date-group-label{font-size:11px;font-weight:500;color:#6b6b67;margin-bottom:4px;display:flex;align-items:center;gap:5px}
-.date-group-label .cnt{color:#9ca3af;font-weight:400}
-.sn-grid{display:flex;flex-wrap:wrap;gap:4px}
-.sn-chip{display:inline-flex;align-items:center;background:#fff;border:1px solid #e5e3db;border-radius:4px;padding:3px 7px;font-family:monospace;font-size:12px;color:#6b6b67}
-.sn-chip .rx{cursor:pointer;color:#9ca3af;font-size:13px;margin-left:4px;line-height:1}
-.sn-chip .rx:hover{color:#dc2626}
-.range-chip{display:inline-block;background:#fff;border:1px solid #e5e3db;border-radius:4px;padding:2px 7px;font-family:monospace;font-size:11px;color:#9ca3af;margin:1px 2px}
-.miss-chip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #f59e0b;border-radius:4px;padding:4px 8px;font-size:11px;color:#92400e;margin:2px}
-.miss-chip .rx{cursor:pointer;color:#d97706;font-size:12px;margin-left:2px}
-.miss-chip .rx:hover{color:#b45309}
-.empty-txt{font-size:12px;color:#9ca3af;font-style:italic}
-/* 遺漏登記表單 - 手機堆疊 */
-.miss-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-@media(max-width:480px){.miss-form-grid{grid-template-columns:1fr}}
-.miss-form-grid select,.miss-form-grid input[type=date]{height:42px;padding:0 10px;border:1px solid #d1d0c8;border-radius:8px;font-size:14px;background:#fff;color:#1a1a18;width:100%}
-.miss-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #e5e3db;font-size:13px;gap:8px}
-.miss-list-item:last-child{border-bottom:none}
-/* 日期下拉列 */
-.date-filter-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.date-filter-row label{font-size:12px;color:#6b6b67;white-space:nowrap}
-.date-filter-row select{flex:1;min-width:0;height:40px;padding:0 10px;border:1px solid #d1d0c8;border-radius:8px;font-size:13px;background:#fff;color:#1a1a18}
-.date-filter-row .total-cnt{font-size:12px;color:#9ca3af;white-space:nowrap}
-/* 遺漏券憑證 badge */
-.proof-chip{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500}
-.proof-receipt{background:#dcfce7;color:#166534}
-.proof-none{background:#fee2e2;color:#991b1b}
-/* 店家管理 */
-.store-select-row{display:flex;gap:8px;margin-bottom:14px}
-.store-select-row select{flex:1;height:42px;padding:0 10px;border:1px solid #d1d0c8;border-radius:8px;font-size:14px;background:#fff;color:#1a1a18;min-width:0}
-.store-panel{background:#f5f4f0;border-radius:10px;padding:14px}
-.store-panel-name{font-size:14px;font-weight:600;margin-bottom:10px}
-.rtag{display:inline-block;background:#fff;border:1px solid #e5e3db;border-radius:4px;padding:2px 8px;font-family:monospace;font-size:12px;color:#6b6b67;margin:2px}
-.add-rrow{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap}
-.add-rrow input{width:80px;height:36px;padding:0 8px;font-size:13px;border:1px solid #d1d0c8;border-radius:8px;background:#fff;color:#1a1a18;font-family:monospace}
-.add-rrow button{height:36px;padding:0 12px;font-size:13px;border-radius:8px;cursor:pointer;border:1px solid #d1d0c8;background:#fff;color:#1a1a18;font-weight:500}
-/* 離線提示 */
-.offline-banner{display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;font-size:13px;color:#92400e;margin-bottom:14px}
-.offline-banner.show{display:block}
-/* 刪除按鈕 */
-.btn-del{height:36px;padding:0 10px;border-radius:8px;font-size:12px;cursor:pointer;border:1px solid #fca5a5;background:#fee2e2;color:#dc2626;font-weight:500;white-space:nowrap}
+
+/* ── VIEWS ── */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:54px;
+  background:var(--surface);
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  position:sticky;
+  top:0;
+  z-index:200;
+}
+.brand{
+  font-size:13px;
+  font-weight:500;
+  color:var(--text);
+  letter-spacing:.02em;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.sync-status{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--text3);
+  letter-spacing:.02em;
+}
+.sdot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--text3);flex-shrink:0;transition:background .4s;
+}
+.sdot.synced{background:var(--success);}
+.sdot.syncing{background:var(--warn);animation:blink 1.2s infinite;}
+.sdot.error{background:var(--danger);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.role-btn{
+  font-size:12px;font-weight:400;
+  color:var(--text2);
+  background:none;border:none;
+  cursor:pointer;font-family:inherit;
+  padding:6px 0;
+  border-bottom:1px solid var(--text2);
+  line-height:1;
+  transition:color .15s, border-color .15s;
+}
+.role-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ── LAYOUT ── */
+.wrap{max-width:680px;margin:0 auto;padding:36px 20px 60px;}
+.wrap-sm{max-width:480px;margin:0 auto;padding:36px 20px 60px;}
+
+/* ── PAGE HEADER ── */
+.ph{margin-bottom:32px;}
+.ph-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;}
+.ph-title{font-size:20px;font-weight:500;letter-spacing:-.3px;color:var(--text);line-height:1.2;}
+.ph-sub{font-size:13px;color:var(--text3);margin-top:6px;font-weight:400;}
+.ph-line{height:1px;background:var(--line);margin-top:18px;}
+
+/* ── BACK BUTTON ── */
+.back-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--text3);
+  background:none;border:none;cursor:pointer;
+  font-family:inherit;padding:0;margin-bottom:28px;
+  letter-spacing:.03em;transition:color .15s;
+}
+.back-btn:hover{color:var(--text);}
+.back-btn::before{content:"←";font-size:14px;}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  font-size:13px;font-weight:400;cursor:pointer;
+  font-family:inherit;line-height:1;
+  transition:all .15s;border:none;
+  padding:11px 22px;
+  letter-spacing:.02em;
+}
+.btn-primary{
+  background:var(--accent);color:#fff;
+}
+.btn-primary:hover{background:#3d5aa8;}
+.btn-primary:active{transform:scale(.98);}
+.btn-outline{
+  background:none;color:var(--text);
+  border:1px solid var(--line);
+}
+.btn-outline:hover{border-color:var(--text);}
+.btn-ghost{
+  background:none;color:var(--text2);
+  border:none;padding:8px 12px;font-size:12px;
+}
+.btn-ghost:hover{color:var(--text);}
+.btn-danger-txt{
+  background:none;color:var(--danger);
+  border:none;font-size:12px;padding:8px 0;cursor:pointer;
+  font-family:inherit;letter-spacing:.02em;
+}
+.btn-danger-txt:hover{text-decoration:underline;}
+.btn-full{width:100%;padding:14px;}
+.btn-sm{padding:7px 14px;font-size:12px;}
+.add-field-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  color:var(--accent);font-size:12px;font-weight:400;
+  cursor:pointer;background:none;border:none;
+  font-family:inherit;padding:6px 0;margin-top:6px;
+  letter-spacing:.02em;
+}
+.add-field-btn:hover{text-decoration:underline;}
+
+/* ── PROJECT CARDS (Editor) ── */
+.project-grid{display:flex;flex-direction:column;gap:12px;}
+.pcard{
+  background:var(--surface);
+  border:1.5px solid var(--line);
+  padding:20px;
+  cursor:pointer;
+  transition:border-color .18s, box-shadow .18s;
+  display:flex;align-items:stretch;gap:0;
+}
+.pcard:hover{border-color:var(--text3);box-shadow:0 2px 10px rgba(0,0,0,.07);}
+.pcard.dragging{opacity:.35;}
+.pcard.drag-over{border-color:var(--accent);}
+
+/* 左欄 — 名稱＋日期＋badge，佔50% */
+.pcard-left{
+  width:60%;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding-right:16px;
+  border-right:1px solid var(--line);
+}
+.pcard-top{}
+.pcard-title{font-size:17px;font-weight:500;color:var(--accent);margin-bottom:5px;line-height:1.4;}
+.pcard-date{font-size:12px;color:var(--text3);}
+.pcard-badge-wrap{margin-top:14px;}
+.badge{
+  font-size:10px;font-weight:500;
+  padding:2px 8px;letter-spacing:.04em;
+  border:1px solid;display:inline-block;
+}
+.badge-on{color:var(--success);border-color:var(--success);}
+.badge-off{color:var(--text3);border-color:var(--line);}
+
+/* 右欄 — 各項目累計，佔50% */
+.pcard-right{
+  width:40%;
+  display:flex;flex-direction:column;gap:12px;
+  padding-left:16px;
+  justify-content:center;
+}
+.stat-item{display:flex;flex-direction:column;gap:6px;}
+.stat-l{font-size:14px;color:var(--text3);letter-spacing:.03em;line-height:1;}
+.stat-n{font-size:22px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1.1;}
+
+/* ── DETAIL SUMMARY ── */
+.summary-row{display:flex;gap:0;border-top:1px solid var(--line);margin-bottom:32px;}
+.scard{
+  flex:1;padding:20px 0;
+  border-right:1px solid var(--line);
+  text-align:center;
+}
+.scard:last-child{border-right:none;}
+.scard-n{font-size:26px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1;}
+.scard-l{font-size:14px;color:var(--text2);margin-bottom:6px;letter-spacing:.01em;}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;margin-bottom:40px;border-top:1px solid var(--line);}
+table{width:100%;border-collapse:collapse;min-width:320px;}
+th{
+  padding:10px 12px;text-align:center;
+  font-size:11px;font-weight:500;color:var(--text3);
+  border-bottom:1px solid var(--line);
+  letter-spacing:.04em;white-space:nowrap;
+}
+th:first-child{text-align:left;padding-left:0;}
+td{
+  padding:12px 12px;
+  border-bottom:1px solid var(--line-light);
+  font-size:13px;text-align:center;color:var(--text);
+}
+td:first-child{text-align:left;padding-left:0;color:var(--text2);}
+tr:last-child td{border-bottom:none;}
+.total-row td{
+  font-weight:500;color:var(--text);
+  border-top:1px solid var(--line);
+  border-bottom:none;
+  font-size:13px;
+}
+.date-cell{font-size:13px;white-space:nowrap;}
+
+/* ── ASSISTANT ── */
+.psel-list{display:flex;flex-direction:column;gap:0;margin-top:0;}
+.psel-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 0;
+  border-bottom:1px solid var(--line);
+  cursor:pointer;transition:opacity .15s;
+}
+.psel-item:first-child{border-top:1px solid var(--line);}
+.psel-item:hover{opacity:.6;}
+.psel-name{font-size:17px;font-weight:500;color:var(--accent);}
+.psel-date{font-size:12px;color:var(--text3);margin-top:3px;}
+.psel-arrow{color:var(--text3);font-size:16px;}
+
+.entry-section{margin-top:0;}
+.entry-title{font-size:17px;font-weight:500;letter-spacing:-.1px;margin-bottom:4px;color:var(--accent);}
+.entry-subtitle{font-size:12px;color:var(--text3);margin-bottom:28px;}
+
+/* Date picker row */
+.entry-date-row{margin-bottom:28px;}
+.entry-date-label{font-size:12px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:7px;display:block;}
+.date-input{
+  background:none;border:none;border-bottom:1px solid var(--line);
+  font-size:16px;font-family:inherit;color:var(--text);
+  padding:6px 0;width:100%;max-width:180px;
+  outline:none;transition:border-color .15s;
+}
+.date-input:focus{border-color:var(--text);}
+
+/* Fields */
+.entry-fields{display:flex;flex-direction:column;gap:0;margin-bottom:28px;}
+.efield-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0;
+  border-bottom:1px solid var(--line-light);
+}
+.efield-row:first-child{border-top:1px solid var(--line-light);}
+.efield-label{font-size:14px;font-weight:500;color:var(--text);}
+.efield-input{
+  width:90px;
+  background:none;border:none;border-bottom:1px solid var(--line);
+  font-size:22px;font-weight:400;text-align:right;
+  font-family:inherit;color:var(--text);
+  padding:4px 0;outline:none;
+  transition:border-color .15s;
+  -moz-appearance:textfield;
+}
+.efield-input::-webkit-outer-spin-button,
+.efield-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.efield-input:focus{border-color:var(--text);}
+.efield-input:disabled{color:var(--text3);border-color:var(--line-light);}
+.efield-input.prefilled{color:var(--warn);}
+
+/* Status banner */
+.status-banner{
+  font-size:12px;padding:10px 12px;margin-bottom:20px;
+  color:var(--text2);letter-spacing:.02em;
+  display:none;border-radius:2px;
+}
+.status-banner.show{display:block;}
+.status-banner.warn-text{
+  color:var(--danger);
+  border:1px solid var(--danger);
+  background:rgba(192,57,43,.04);
+}
+
+/* ── MODAL ── */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:500;
+  align-items:flex-end;
+  justify-content:center;
+  padding:0;
+}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--surface);
+  width:100%;max-width:520px;
+  max-height:92vh;overflow-y:auto;
+  padding:28px 24px 36px;
+  animation:mIn .22s ease;
+  border-top:1px solid var(--line);
+}
+@keyframes mIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{
+  width:36px;height:3px;background:var(--line);
+  border-radius:2px;margin:0 auto 22px;
+}
+.modal-title{font-size:17px;font-weight:500;letter-spacing:-.2px;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--text3);margin-bottom:22px;letter-spacing:.02em;}
+.modal-foot{
+  display:flex;gap:10px;justify-content:flex-end;
+  margin-top:24px;padding-top:20px;border-top:1px solid var(--line);
+  align-items:center;
+}
+.modal-foot-space{justify-content:space-between;}
+
+/* ── FORM ── */
+.fg{margin-bottom:18px;}
+.fl{
+  display:block;font-size:11px;font-weight:500;color:var(--text3);
+  margin-bottom:7px;letter-spacing:.06em;text-transform:uppercase;
+}
+.fi{
+  width:100%;padding:10px 0;
+  border:none;border-bottom:1px solid var(--line);
+  font-size:15px;font-family:inherit;color:var(--text);
+  background:none;outline:none;transition:border-color .15s;
+  border-radius:0;
+}
+.fi:focus{border-color:var(--text);}
+.fi[type=date]{font-size:15px;}
+.field-list{display:flex;flex-direction:column;gap:8px;}
+.field-item{display:flex;gap:8px;align-items:center;}
+.field-item .fi{flex:1;}
+.rm-btn{
+  background:none;border:none;
+  color:var(--text3);cursor:pointer;
+  font-size:18px;padding:0 4px;line-height:1;
+  transition:color .15s;flex-shrink:0;
+}
+.rm-btn:hover{color:var(--danger);}
+.section-divider{
+  font-size:11px;color:var(--text3);
+  letter-spacing:.06em;text-transform:uppercase;
+  margin:22px 0 12px;border-top:1px solid var(--line);padding-top:18px;
+}
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:4px 0;
+}
+.toggle-label{font-size:14px;color:var(--text);}
+.toggle-desc{font-size:12px;color:var(--text3);margin-top:2px;}
+.tog{position:relative;width:40px;height:22px;flex-shrink:0;}
+.tog input{opacity:0;width:0;height:0;}
+.tog-sl{position:absolute;inset:0;background:var(--line);border-radius:22px;cursor:pointer;transition:.25s;}
+.tog-sl:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+input:checked+.tog-sl{background:var(--text);}
+input:checked+.tog-sl:before{transform:translateX(18px);}
+
+/* ── TOAST ── */
+.toast-wrap{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;
+  width:calc(100% - 40px);max-width:360px;
+}
+.toast{
+  background:var(--text);color:#fff;
+  padding:12px 18px;font-size:13px;
+  width:100%;text-align:center;
+  letter-spacing:.02em;
+  animation:tIn .2s ease;
+}
+.toast.ok{background:var(--success);}
+.toast.err{background:var(--danger);}
+@keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:60px 20px;color:var(--text3);}
+.empty-ico{font-size:32px;margin-bottom:12px;opacity:.4;}
+.empty p{font-size:13px;letter-spacing:.02em;}
+
+/* ── TABLE SECTION ── */
+.table-section{margin-bottom:40px;}
+.table-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  margin-bottom:0;
+}
+.table-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
+.table-actions{display:flex;gap:6px;}
+.tbl-btn{
+  font-size:11px;font-weight:500;color:var(--text2);
+  background:none;border:1px solid var(--line);
+  cursor:pointer;font-family:inherit;
+  padding:5px 10px;letter-spacing:.02em;
+  transition:all .15s;
+}
+.tbl-btn:hover{border-color:var(--text);color:var(--text);}
+.table-wrap{overflow-x:auto;}
+
+/* ── SCROLLBAR ── */
+#detailName{color:var(--accent);font-size:20px;font-weight:500;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--line);}
+
+/* ── DESKTOP TWEAKS ── */
+@media(min-width:600px){
+  .overlay{align-items:center;padding:20px;}
+  .modal{border-radius:2px;border:1px solid var(--line);border-top:1px solid var(--line);}
+}
 </style>
 </head>
 <body>
 
+<!-- TOPBAR -->
 <div class="topbar">
-  <div style="display:flex;align-items:center;gap:10px">
-    <svg width="36" height="36" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-      <path d="M8,2 H26 Q32,2 32,8 L32,13 Q29,13 29,15 Q29,17 32,17 L32,21 Q29,21 29,23 Q29,25 32,25 L32,26 Q32,32 26,32 H8 Q2,32 2,26 L2,25 Q5,25 5,23 Q5,21 2,21 L2,17 Q5,17 5,15 Q5,13 2,13 L2,8 Q2,2 8,2 Z" fill="#f0ede8" stroke="#d1d0c8" stroke-width="0.8"/>
-      <line x1="13" y1="3" x2="13" y2="31" stroke="#d1d0c8" stroke-width="0.7" stroke-dasharray="2.5,2.5"/>
-      <rect x="3.5" y="7" width="8" height="6" rx="1.5" fill="#e67a59"/>
-      <rect x="3.5" y="15" width="8" height="2" rx="1" fill="#d1d0c8"/>
-      <rect x="3.5" y="19" width="6" height="2" rx="1" fill="#d1d0c8"/>
-      <rect x="3.5" y="23" width="7" height="2" rx="1" fill="#d1d0c8"/>
-      <text x="15" y="12" font-family="monospace" font-size="4.5" font-weight="700" fill="#e67a59">8888</text>
-      <rect x="15" y="16" width="15" height="2" rx="1" fill="#d1d0c8"/>
-      <rect x="15" y="16" width="10" height="2" rx="1" fill="#e67a59" opacity="0.8"/>
-      <rect x="15" y="21" width="15" height="2" rx="1" fill="#d1d0c8"/>
-      <rect x="15" y="21" width="6"  height="2" rx="1" fill="#e67a59" opacity="0.55"/>
-      <rect x="15" y="26" width="15" height="2" rx="1" fill="#d1d0c8"/>
-      <rect x="15" y="26" width="13" height="2" rx="1" fill="#e67a59" opacity="0.7"/>
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- base bar -->
+      <rect x="2" y="14" width="4" height="6" fill="var(--accent)" opacity="0.35"/>
+      <!-- mid bar -->
+      <rect x="9" y="9" width="4" height="11" fill="var(--accent)" opacity="0.65"/>
+      <!-- tall bar -->
+      <rect x="16" y="4" width="4" height="16" fill="var(--accent)"/>
+      <!-- trend line -->
+      <polyline points="4,13 11,8 18,3" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="18" cy="3" r="1.5" fill="var(--accent)"/>
     </svg>
-    <div style="line-height:1.2">
-      <div style="font-size:13px;font-weight:600;color:#1a1a18">消費證明券統計系統</div>
-      <div style="font-size:10px;color:#6b6b67;letter-spacing:.05em">COUPON TRACKING SYSTEM</div>
-    </div>
+    活動人次追蹤系統
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <button class="lock-btn" id="lock-btn" onclick="lockBtnClick()">🔒 <span id="lock-label">僅限檢視</span></button>
-    <span class="sync-badge">
-      <span class="sync-dot pulse" id="sync-dot"></span>
-      <span id="sync-label">連線中…</span>
-    </span>
+  <div class="topbar-right">
+    <div class="sync-status">
+      <div class="sdot" id="syncDot"></div>
+      <span id="syncText">連線中</span>
+    </div>
+    <button class="role-btn" id="switchRoleBtn" onclick="window.switchRole()">切換至編輯者</button>
   </div>
 </div>
 
-<!-- 密碼輸入框 -->
-<div class="lock-overlay" id="lock-overlay">
-  <div class="lock-modal">
-    <h2>🔐 輸入編輯密碼</h2>
-    <p>請輸入密碼以開啟編輯功能</p>
-    <input type="password" id="pwd-input" maxlength="20" placeholder="••••"
-      onkeydown="if(event.key==='Enter')submitPwd()"/>
-    <div class="err" id="pwd-err"></div>
-    <div class="btns">
-      <button onclick="closeLockModal()" style="border:1px solid #d1d0c8;background:#fff;color:#6b6b67">取消</button>
-      <button onclick="submitPwd()" style="background:#1a1a18;color:#fff;border:none">確認</button>
+<!-- VIEW: 協助者 -->
+<div class="view active" id="viewAssistant">
+  <div class="wrap-sm">
+    <div id="assistantList">
+      <div class="ph">
+        <div>
+          <div class="ph-title">填報人次</div>
+          <div class="ph-sub">請選擇活動</div>
+        </div>
+        <div class="ph-line"></div>
+      </div>
+      <div id="assistantListInner" class="psel-list"></div>
+    </div>
+    <div id="assistantForm" style="display:none">
+      <button class="back-btn" onclick="backToList()">返回</button>
+      <div class="entry-section">
+        <div class="entry-title" id="entryName"></div>
+        <div class="entry-subtitle" id="entrySubtitle"></div>
+        <div class="entry-date-row">
+          <span class="entry-date-label">填報日期</span>
+          <input type="date" class="date-input" id="entryDate">
+        </div>
+        <div id="statusBanner" class="status-banner"></div>
+        <div id="entryFields" class="entry-fields"></div>
+        <button class="btn btn-primary btn-full" id="submitBtn" onclick="handleSubmit()">送出</button>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="container">
-  <h1>消費證明券統計系統</h1>
-  <p class="sub">萬華區合作店家 · 輸入民眾回收流水號後統計各店發放數量</p>
-
-  <div class="offline-banner" id="offline-banner">⚠️ 目前離線，資料將在恢復連線後自動同步。</div>
-
-  <!-- 總計列 -->
-  <div class="grid-grand" style="margin-bottom:8px">
-    <div class="metric metric-total">
-      <div class="metric-label">總回收數（流水號 ＋ 遺漏券）</div>
-      <div class="metric-val" id="m-grand" style="font-size:26px">0</div>
-    </div>
-  </div>
-  <div class="grid-4">
-    <div class="metric"><div class="metric-label">已回收流水號</div><div class="metric-val" id="m-total">0</div></div>
-    <div class="metric"><div class="metric-label">涉及店家數</div><div class="metric-val" id="m-stores">0</div></div>
-    <div class="metric"><div class="metric-label">回收率</div><div class="metric-val" id="m-rate">0%</div></div>
-    <div class="metric"><div class="metric-label">遺漏券登記</div><div class="metric-val warn" id="m-miss">0</div></div>
-  </div>
-
-  <div class="card" id="main-card">
-    <div class="tab-row">
-      <button class="tab active" onclick="switchTab('input')">✏️ 流水號</button>
-      <button class="tab warn-tab" onclick="switchTab('missing')">⚠️ 遺漏券</button>
-      <button class="tab" onclick="switchTab('daily')">📆 單日紀錄</button>
-      <button class="tab" onclick="switchTab('stores')">🏪 店家管理</button>
-    </div>
-
-    <!-- 輸入流水號 -->
-    <div id="tab-input">
-      <div class="lock-notice">🔒 解鎖後才能輸入流水號</div>
-      <div class="edit-action">
-        <div class="date-bar">
-          <label>📅 回收日期</label>
-          <input type="date" id="collect-date" oninput="updateDateHint()"/>
-          <span class="date-hint" id="date-hint"></span>
-        </div>
-        <div class="irow">
-          <input type="text" id="sn-input" placeholder="輸入流水號，例如 0481 或 1234" onkeydown="if(event.key==='Enter'){addSN();this.focus()}"/>
-          <button class="btn btn-p" onclick="addSN()">＋ 新增</button>
-          <button class="btn btn-o" onclick="showBatch()">≡ 批次輸入</button>
-        </div>
-        <div id="err" class="err-msg"></div>
-        <p id="tags-hint" class="hint"></p>
-      </div>
-    </div>
-
-    <!-- 批次輸入 -->
-    <div id="tab-batch" style="display:none">
-      <div class="edit-action">
-        <div class="date-bar">
-          <label>📅 套用回收日期</label>
-          <input type="date" id="batch-date" oninput="updateBatchDateHint()"/>
-          <span class="date-hint" id="batch-date-hint"></span>
-        </div>
-        <p style="font-size:13px;color:#6b6b67;margin-bottom:8px">每行一個流水號，或以逗號 / 空格分隔</p>
-        <textarea id="batch-txt" style="width:100%;height:110px;font-size:13px;padding:10px;border:1px solid #d1d0c8;border-radius:8px;background:#fff;color:#1a1a18;resize:vertical;font-family:monospace" placeholder="0481&#10;0482&#10;0571, 0572"></textarea>
-        <div class="irow" style="margin-top:10px">
-          <button class="btn btn-p" onclick="processBatch()">確認匯入</button>
-          <button class="btn btn-o" onclick="switchTab('input')">取消</button>
+<!-- VIEW: 編輯者 — 列表 -->
+<div class="view" id="viewEditor">
+  <div class="wrap">
+    <div class="ph">
+      <div class="ph-row">
+        <div class="ph-title">專案</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('changePwModal')">修改密碼</button>
+          <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增</button>
         </div>
       </div>
+      <div class="ph-line"></div>
     </div>
-
-    <!-- 遺漏券登記 -->
-    <div id="tab-missing" style="display:none">
-      <div class="lock-notice">🔒 解鎖後才能新增或刪除遺漏券</div>
-      <div class="edit-action">
-        <p style="font-size:13px;color:#6b6b67;margin-bottom:12px">民眾表明已消費但無流水號時，選擇店家與消費日期登記。</p>
-        <div class="miss-form-grid">
-          <div>
-            <div style="font-size:12px;color:#6b6b67;margin-bottom:4px">店家</div>
-            <select id="miss-store" style="height:42px;padding:0 10px;border:1px solid #d1d0c8;border-radius:8px;font-size:14px;background:#fff;color:#1a1a18;width:100%"><option value="">— 選擇店家 —</option></select>
-          </div>
-          <div>
-            <div style="font-size:12px;color:#6b6b67;margin-bottom:4px">消費日期</div>
-            <input type="date" id="miss-date" style="height:42px;padding:0 10px;border:1px solid #d1d0c8;border-radius:8px;font-size:14px;background:#fff;color:#1a1a18;width:100%"/>
-          </div>
-          <div>
-            <div style="font-size:12px;color:#6b6b67;margin-bottom:4px">憑證類型</div>
-            <select id="miss-proof" style="height:42px;padding:0 10px;border:1px solid #d1d0c8;border-radius:8px;font-size:14px;background:#fff;color:#1a1a18;width:100%">
-              <option value="收據">🧾 收據</option>
-              <option value="無憑證">❌ 無憑證</option>
-            </select>
-          </div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn btn-w" onclick="addMissing()" style="width:100%;justify-content:center">＋ 登記</button>
-          </div>
-        </div>
-        <div id="miss-err" class="err-msg"></div>
-      </div>
-      <div id="miss-list" style="margin-top:12px"></div>
-    </div>
-
-    <!-- 每日登記 -->
-    <div id="tab-daily" style="display:none">
-      <div id="daily-list"><div style="text-align:center;padding:2rem;color:#9ca3af;font-size:13px">尚無資料</div></div>
-    </div>
-
-    <!-- 店家管理 -->
-    <div id="tab-stores" style="display:none">
-      <div class="lock-notice">🔒 解鎖後才能修改流水號範圍</div>
-      <div class="edit-action">
-        <p style="font-size:12px;color:#6b6b67;margin-bottom:14px">選擇店家後可新增追加的消費證明券流水號範圍。</p>
-      </div>
-      <div class="store-select-row">
-        <select id="mgmt-store-select" onchange="renderStorePanel()">
-          <option value="">— 選擇店家 —</option>
-        </select>
-      </div>
-      <div id="store-detail-panel" style="display:none"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <span style="font-size:15px;font-weight:600">各店家統計</span>
-      <button class="btn btn-o" style="height:30px;font-size:12px" onclick="exportCSV()">↓ 匯出 CSV</button>
-    </div>
-    <div class="stat-hdr">
-      <span></span><span>店家名稱</span>
-      <span style="text-align:right">配發</span>
-      <span style="text-align:right">回收</span>
-      <span style="text-align:right;color:#dc2626">遺漏</span>
-      <span style="text-align:right;color:#9ca3af">佔比</span>
-      <span></span>
-    </div>
-    <div id="stat-list"><div style="text-align:center;padding:2rem;color:#9ca3af;font-size:13px">尚無回收資料</div></div>
+    <div class="project-grid" id="editorGrid"></div>
   </div>
 </div>
+
+<!-- VIEW: 編輯者 — 詳情 -->
+<div class="view" id="viewDetail">
+  <div class="wrap">
+    <button class="back-btn" onclick="backToEditor()">返回</button>
+    <div class="ph">
+      <div>
+        <div class="ph-title" id="detailName"></div>
+        <div class="ph-sub" id="detailDates"></div>
+      </div>
+
+      <div class="ph-line"></div>
+    </div>
+    <div id="summaryRow" class="summary-row"></div>
+    <div class="table-section">
+      <div class="table-header">
+        <span class="table-label">填報數據</span>
+        <div class="table-actions">
+          <button class="tbl-btn" onclick="openEditModal()">編輯設定</button>
+          <button class="tbl-btn" onclick="openManualModal()">編輯數據</button>
+          <button class="tbl-btn" onclick="downloadCSV()">下載 CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 新增/編輯專案 -->
+<div class="overlay" id="projectModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="projectModalTitle">新增專案</div>
+    <div class="modal-sub">活動資訊與登記項目</div>
+    <div class="fg">
+      <label class="fl">活動名稱</label>
+      <input class="fi" id="fieldName" placeholder="">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="fg">
+        <label class="fl">開始日期</label>
+        <input class="fi" type="date" id="fieldStart">
+      </div>
+      <div class="fg">
+        <label class="fl">結束日期</label>
+        <input class="fi" type="date" id="fieldEnd">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">登記項目</label>
+      <div class="field-list" id="fieldList"></div>
+      <button class="add-field-btn" onclick="addFieldItem()">+ 新增項目</button>
+    </div>
+    <div class="section-divider">狀態</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">進行中</div>
+        <div class="toggle-desc">開啟後協助者可看到此專案</div>
+      </div>
+      <label class="tog">
+        <input type="checkbox" id="statusToggle" checked>
+        <span class="tog-sl"></span>
+      </label>
+    </div>
+    <div class="modal-foot modal-foot-space">
+      <button class="btn-danger-txt" id="deleteBtn" onclick="deleteProject()" style="display:none">刪除此專案</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="closeModal('projectModal')">取消</button>
+        <button class="btn btn-primary btn-sm" onclick="saveProject()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 編輯數據 -->
+<div class="overlay" id="manualModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">編輯數據</div>
+    <div class="modal-sub" id="manualSub"></div>
+    <div class="fg">
+      <label class="fl">日期</label>
+      <input class="fi" type="date" id="manualDate">
+    </div>
+    <div id="manualFields"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('manualModal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="saveManualEntry()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 驗證密碼 -->
+<div class="overlay" id="pwModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">編輯者登入</div>
+    <div class="modal-sub">請輸入密碼以進入編輯模式</div>
+    <div class="fg">
+      <label class="fl">密碼</label>
+      <div style="position:relative;display:flex;align-items:center;">
+        <input class="fi" type="password" id="pwInput" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter')verifyPassword()" style="padding-right:36px">
+        <button type="button" onclick="togglePwVis('pwInput',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <div id="pwError" style="font-size:12px;color:var(--danger);margin-top:-8px;margin-bottom:8px;display:none">密碼錯誤，請再試一次</div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('pwModal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="verifyPassword()">確認</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 修改密碼 -->
+<div class="overlay" id="changePwModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">修改密碼</div>
+    <div class="modal-sub">修改後下次切換至編輯者時生效</div>
+    <div class="fg">
+      <label class="fl">目前密碼</label>
+      <div style="position:relative;display:flex;align-items:center;">
+        <input class="fi" type="password" id="cpwCurrent" placeholder="" autocomplete="off" style="padding-right:36px">
+        <button type="button" onclick="togglePwVis('cpwCurrent',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">新密碼</label>
+      <div style="position:relative;display:flex;align-items:center;">
+        <input class="fi" type="password" id="cpwNew" placeholder="" autocomplete="off" style="padding-right:36px">
+        <button type="button" onclick="togglePwVis('cpwNew',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">確認新密碼</label>
+      <div style="position:relative;display:flex;align-items:center;">
+        <input class="fi" type="password" id="cpwConfirm" placeholder="" autocomplete="off" style="padding-right:36px">
+        <button type="button" onclick="togglePwVis('cpwConfirm',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <div id="cpwError" style="font-size:12px;color:var(--danger);margin-top:-8px;margin-bottom:8px;display:none"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('changePwModal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="changePassword()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-// ── 店家資料 ──────────────────────────────────────
-const STORES_INIT = [
-  {id:'s01',name:'淡然曙光 自烘咖啡館',ranges:[[481,570]]},
-  {id:'s02',name:'甘心咖啡 GanXinCoffee',ranges:[[571,660]]},
-  {id:'s03',name:'新選商號',ranges:[[991,1050]]},
-  {id:'s04',name:'萬華太和餅舖',ranges:[[1051,1110]]},
-  {id:'s05',name:'九日咖啡（本店）',ranges:[[91,150]]},
-  {id:'s06',name:'九日咖啡（中華店）',ranges:[[151,210]]},
-  {id:'s07',name:'富特士多早餐店 FOOTD STORE',ranges:[[661,720]]},
-  {id:'s08',name:'春桃手作厚工甜品',ranges:[[721,780]]},
-  {id:'s09',name:'小馬轉轉',ranges:[[781,840]]},
-  {id:'s10',name:'陳師傅足體養生館',ranges:[[1111,1170]]},
-  {id:'s11',name:'tokyobike cafe',ranges:[[1171,1230]]},
-  {id:'s12',name:'愛嬌青春製冰室',ranges:[[1231,1320]]},
-  {id:'s13',name:'多餃舍',ranges:[[1321,1380]]},
-  {id:'s14',name:'三水食品花生行',ranges:[[1381,1440]]},
-  {id:'s15',name:'飛地nowhere',ranges:[[211,240]]},
-  {id:'s16',name:'永富冰淇淋',ranges:[[841,930]]},
-  {id:'s17',name:'天天旗袍體驗館',ranges:[[931,990]]},
-  {id:'s18',name:'樂福蛋糕 Love Cake-萬華店',ranges:[[1441,1500],[2341,2370]]},
-  {id:'s19',name:'豬血幫&米血糕',ranges:[[1501,1560]]},
-  {id:'s20',name:'胡椒餅烤地瓜',ranges:[[1561,1650]]},
-  {id:'s21',name:'豬飽飽雞蛋糕',ranges:[[1651,1740]]},
-  {id:'s22',name:'老明玉香舖',ranges:[[241,270]]},
-  {id:'s23',name:'福大同茶莊',ranges:[[271,330]]},
-  {id:'s24',name:'台北堂餅行摩那卡餅（最中餅）本舖',ranges:[[331,390]]},
-  {id:'s25',name:'時報本舖書店',ranges:[[391,450]]},
-  {id:'s26',name:'新富町文化市場',ranges:[[1741,1800]]},
-  {id:'s27',name:'金海峰實業有限公司',ranges:[[1801,1860]]},
-  {id:'s28',name:'旺旺屋',ranges:[[451,480]]},
-  {id:'s29',name:'西門紅樓選品',ranges:[[31,90]]},
-  {id:'s30',name:'萬味福利社',ranges:[[1861,1920]]},
-  {id:'s31',name:'莽葛拾遺二手書店',ranges:[[1921,1980]]},
-  {id:'s32',name:'二和珍傳統餅舖',ranges:[[1981,2040]]},
-  {id:'s33',name:'豐生蔘藥行',ranges:[[2041,2070]]},
-];
+var projects = {};
+var projectOrder = [];
+var currentRole = 'assistant';
+var currentProjectId = null;
+var editingProjectId = null;
+var dragSrcEl = null;
 
-// ── 狀態 ─────────────────────────────────────────
-let stores = JSON.parse(JSON.stringify(STORES_INIT));
-let collected = {};   // { "0481": { date:"2026-05-18" }, ... }
-let missing = {};     // { "m1": { sid, name, date }, ... }
-let openStores = new Set();
-let db = null;
-let isConnected = false;
-
-// ── Firebase 初始化 ───────────────────────────────
-function initFirebase() {
-  try {
-    if (FIREBASE_CONFIG.apiKey === 'PASTE_YOUR_API_KEY') {
-      setSyncStatus('no-config');
-      return;
-    }
-    firebase.initializeApp(FIREBASE_CONFIG);
-    db = firebase.database();
-
-    // 連線狀態
-    db.ref('.info/connected').on('value', snap => {
-      isConnected = !!snap.val();
-      setSyncStatus(isConnected ? 'ok' : 'offline');
-      document.getElementById('offline-banner').classList.toggle('show', !isConnected);
-    });
-
-    // 即時同步：已回收流水號
-    db.ref('collected').on('value', snap => {
-      collected = snap.val() || {};
-      renderStatList(); updateMetrics(); updateHint(); renderDailyList();
-    });
-
-    // 即時同步：遺漏券
-    db.ref('missing').on('value', snap => {
-      missing = snap.val() || {};
-      renderMissList(); renderStatList(); updateMetrics(); renderDailyList();
-    });
-
-    // 即時同步：店家範圍
-    db.ref('stores').on('value', snap => {
-      const data = snap.val();
-      if (data) {
-        stores = data;
-        populateStoreSelects();
-        renderStorePanel();
-        renderStatList();
-        updateMetrics();
-      }
-    });
-
-  } catch(e) {
-    console.error('Firebase init error:', e);
-    setSyncStatus('err');
-  }
+/* ── UI UTILS ── */
+function showView(id) {
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
 }
-
-function setSyncStatus(state) {
-  const dot = document.getElementById('sync-dot');
-  const label = document.getElementById('sync-label');
-  dot.className = 'sync-dot';
-  if (state === 'ok')        { dot.classList.add('ok');   label.textContent = '即時同步中'; }
-  else if (state === 'offline') { dot.classList.add('err');  label.textContent = '離線中'; }
-  else if (state === 'no-config') { dot.classList.add('err'); label.textContent = '尚未設定 Firebase'; }
-  else                       { dot.classList.add('err');  label.textContent = '連線錯誤'; dot.classList.add('pulse'); }
+function setSyncStatus(s, t) {
+  document.getElementById('syncDot').className = 'sdot ' + s;
+  document.getElementById('syncText').textContent = t;
 }
-
-// ── 工具函式 ──────────────────────────────────────
-function pad(n) { return String(n).padStart(4,'0'); }
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+window.openModal = openModal;
+window.closeModal = closeModal;
 function todayStr() {
-  const d = new Date();
+  var d = new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
-function formatDisp(d) { return d ? d.replace(/^(\d{4})-(\d{2})-(\d{2})$/,'$1/$2/$3') : ''; }
-function totalAllocated() { return stores.reduce((s,st)=>s+st.ranges.reduce((a,[f,t])=>a+(t-f+1),0),0); }
-function findStore(sn) {
-  const n = parseInt(sn,10);
-  if (isNaN(n)) return null;
-  for (const s of stores) for (const [f,t] of s.ranges) if (n>=f && n<=t) return s;
-  return null;
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg, type) {
+  var w = document.getElementById('toastWrap');
+  var t = document.createElement('div');
+  t.className = 'toast' + (type === 'err' ? ' err' : type === 'ok' ? ' ok' : '');
+  t.textContent = msg;
+  w.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 3000);
 }
 
-// ── 輸入流水號 ────────────────────────────────────
-function updateDateHint() {
-  document.getElementById('date-hint').textContent =
-    document.getElementById('collect-date').value ? '之後新增的流水號均套用此日期' : '（未設定日期）';
-}
-function updateBatchDateHint() {
-  document.getElementById('batch-date-hint').textContent =
-    document.getElementById('batch-date').value ? '批次匯入將套用此日期' : '（未設定日期）';
+document.querySelectorAll('.overlay').forEach(function(o){
+  o.addEventListener('click', function(e){ if(e.target===o) o.classList.remove('open'); });
+});
+
+/* ── PASSWORD ── */
+var DEFAULT_PW = '0000';
+function getPassword() {
+  return localStorage.getItem('editorPw') || DEFAULT_PW;
 }
 
-function addSN(val) {
-  const inp = document.getElementById('sn-input');
-  const raw = (val || inp.value).trim();
-  const date = document.getElementById('collect-date').value;
-  document.getElementById('err').textContent = '';
-  if (!raw) { document.getElementById('err').textContent = '請輸入流水號'; return; }
-  if (isNaN(parseInt(raw,10))) { document.getElementById('err').textContent = '流水號必須為數字'; return; }
-  const key = pad(parseInt(raw,10));
-  if (collected[key]) { document.getElementById('err').textContent = '此流水號已輸入過'; return; }
-  if (!findStore(raw)) {
-    document.getElementById('err').textContent = `「${key}」找不到對應店家，請確認號碼是否在有效範圍內`;
+window.togglePwVis = function(inputId, btn) {
+  var el = document.getElementById(inputId);
+  var eyeOpen = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var eyeOff  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  if (el.type === 'password') {
+    el.type = 'text';
+    btn.innerHTML = eyeOff;
+    btn.style.color = 'var(--text)';
+  } else {
+    el.type = 'password';
+    btn.innerHTML = eyeOpen;
+    btn.style.color = 'var(--text3)';
+  }
+};
+
+function switchRole() {
+  if (currentRole === 'editor') {
+    // 離開編輯者 → 直接切回
+    currentRole = 'assistant';
+    document.getElementById('switchRoleBtn').textContent = '切換至編輯者';
+    showView('viewAssistant');
+    renderAssistantProjects();
+  } else {
+    // 進入編輯者 → 先驗證密碼
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwError').style.display = 'none';
+    openModal('pwModal');
+    setTimeout(function(){ document.getElementById('pwInput').focus(); }, 100);
+  }
+}
+window.switchRole = switchRole;
+
+window.verifyPassword = function() {
+  var input = document.getElementById('pwInput').value;
+  if (input === getPassword()) {
+    closeModal('pwModal');
+    currentRole = 'editor';
+    document.getElementById('switchRoleBtn').textContent = '切換至協助者';
+    showView('viewEditor');
+    renderEditorProjects();
+  } else {
+    document.getElementById('pwError').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+};
+
+window.changePassword = function() {
+  var cur     = document.getElementById('cpwCurrent').value;
+  var newPw   = document.getElementById('cpwNew').value;
+  var confirm = document.getElementById('cpwConfirm').value;
+  var errEl   = document.getElementById('cpwError');
+  errEl.style.display = 'none';
+  if (cur !== getPassword()) {
+    errEl.textContent = '目前密碼錯誤'; errEl.style.display = 'block'; return;
+  }
+  if (!newPw) {
+    errEl.textContent = '新密碼不可為空'; errEl.style.display = 'block'; return;
+  }
+  if (newPw !== confirm) {
+    errEl.textContent = '兩次輸入的新密碼不相符'; errEl.style.display = 'block'; return;
+  }
+  localStorage.setItem('editorPw', newPw);
+  document.getElementById('cpwCurrent').value = '';
+  document.getElementById('cpwNew').value = '';
+  document.getElementById('cpwConfirm').value = '';
+  closeModal('changePwModal');
+  toast('✅ 密碼已更新', 'ok');
+};
+
+/* ── RENDER ── */
+function renderAssistantProjects() {
+  var el = document.getElementById('assistantListInner');
+  var active = projectOrder.filter(function(k){ return projects[k] && projects[k].status === 'active'; });
+  if (!active.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';
     return;
   }
-  if (db) {
-    db.ref('collected/' + key).set({ date: date || '' });
-  } else {
-    collected[key] = { date: date || '' };
-    updateHint(); renderStatList(); updateMetrics();
-  }
-  inp.value = '';
-}
-
-function removeSN(k) {
-  if (db) { db.ref('collected/' + k).remove(); }
-  else { delete collected[k]; updateHint(); renderStatList(); updateMetrics(); }
-}
-
-function updateHint() {
-  const cnt = Object.keys(collected).length;
-  document.getElementById('tags-hint').textContent = cnt ? `已輸入 ${cnt} 筆` : '';
-}
-
-function processBatch() {
-  const txt = document.getElementById('batch-txt').value;
-  const date = document.getElementById('batch-date').value || '';
-  const items = txt.split(/[\n,\s]+/).map(s=>s.trim()).filter(Boolean);
-  let ok=0, dup=0;
-  const updates = {};
-  const badFmt = [];
-  const noStoreList = [];
-  for (const it of items) {
-    if (isNaN(parseInt(it,10))) { badFmt.push(it); continue; }
-    const key = pad(parseInt(it,10));
-    if (collected[key]) { dup++; continue; }
-    if (!findStore(it)) { noStoreList.push(key); continue; }
-    updates[key] = { date };
-    ok++;
-  }
-  if (db && Object.keys(updates).length) {
-    db.ref('collected').update(updates);
-  } else {
-    Object.assign(collected, updates);
-    updateHint(); renderStatList(); updateMetrics();
-  }
-  document.getElementById('batch-txt').value = '';
-  switchTab('input');
-
-  const msgs = [];
-  if (ok) msgs.push(`✅ 成功匯入 ${ok} 筆`);
-  if (dup) msgs.push(`⚠️ 重複略過 ${dup} 筆`);
-  if (noStoreList.length) msgs.push(`❌ 找不到對應店家 ${noStoreList.length} 筆：\n   ${noStoreList.join('、')}`);
-  if (badFmt.length) msgs.push(`❌ 格式錯誤 ${badFmt.length} 筆：\n   ${badFmt.join('、')}`);
-  alert('批次匯入完成\n\n' + msgs.join('\n'));
-}
-
-// ── 遺漏券 ───────────────────────────────────────
-function addMissing() {
-  const sid = document.getElementById('miss-store').value;
-  const date = document.getElementById('miss-date').value;
-  const proof = document.getElementById('miss-proof').value;
-  document.getElementById('miss-err').textContent = '';
-  if (!sid) { document.getElementById('miss-err').textContent = '請選擇店家'; return; }
-  if (!date) { document.getElementById('miss-err').textContent = '請選擇消費日期'; return; }
-  const store = stores.find(s=>s.id===sid);
-  const rec = { sid, name: store.name, date, proof };
-  if (db) {
-    db.ref('missing').push(rec);
-  } else {
-    const id = 'm' + Date.now();
-    missing[id] = rec;
-    renderMissList(); renderStatList(); updateMetrics();
-  }
-  document.getElementById('miss-store').value = '';
-  document.getElementById('miss-date').value = '';
-}
-
-function removeMissing(mid) {
-  if (db) { db.ref('missing/' + mid).remove(); }
-  else { delete missing[mid]; renderMissList(); renderStatList(); updateMetrics(); }
-}
-
-function renderMissList() {
-  const el = document.getElementById('miss-list');
-  const all = Object.entries(missing);
-  if (!all.length) { el.innerHTML = '<p style="font-size:13px;color:#9ca3af;font-style:italic">尚無遺漏券登記</p>'; return; }
-
-  const dates = [...new Set(all.map(([,m])=>m.date||'（未設定日期）'))].sort((a,b)=>b.localeCompare(a));
-  const sel = document.getElementById('miss-date-filter');
-  const currentVal = sel ? sel.value : dates[0];
-  const selectedDate = dates.includes(currentVal) ? currentVal : dates[0];
-  const filtered = all.filter(([,m])=>(m.date||'（未設定日期）')===selectedDate)
-    .sort((a,b)=>a[1].name.localeCompare(b[1].name,'zh-TW'));
-
-  el.innerHTML = `
-    <div class="date-filter-row">
-      <label>📅 查看日期</label>
-      <select id="miss-date-filter" onchange="renderMissList()">
-        ${dates.map(d=>`<option value="${d}" ${d===selectedDate?'selected':''}>${formatDisp(d)||d}（${all.filter(([,m])=>(m.date||'（未設定日期）')===d).length} 筆）</option>`).join('')}
-      </select>
-      <span class="total-cnt">共 ${all.length} 筆</span>
-    </div>
-    ${filtered.length ? `
-    <div style="border:1px solid #e5e3db;border-radius:8px;overflow:hidden">
-      ${filtered.map(([mid,m])=>{
-        const proofClass = m.proof==='收據' ? 'proof-receipt' : 'proof-none';
-        const proofIcon = m.proof==='收據' ? '🧾' : '❌';
-        return `<div class="miss-list-item">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0">
-            <span style="font-size:13px">${m.name}</span>
-            <span class="proof-chip ${proofClass}">${proofIcon} ${m.proof||'—'}</span>
-          </div>
-          ${isEditUnlocked ? `<span style="cursor:pointer;font-size:18px;color:#9ca3af;padding:0 4px;flex-shrink:0" onclick="removeMissing('${mid}')" title="刪除">×</span>` : ''}
-        </div>`;
-      }).join('')}
-    </div>` : '<p style="font-size:13px;color:#9ca3af;font-style:italic">此日期無登記資料</p>'}`;
-}
-
-// ── 指標 ─────────────────────────────────────────
-function getStoreCounts() {
-  const c = {}; stores.forEach(s=>c[s.id]=0);
-  Object.keys(collected).forEach(k=>{const s=findStore(parseInt(k,10));if(s)c[s.id]++;});
-  return c;
-}
-function getMissByStore(sid) { return Object.values(missing).filter(m=>m.sid===sid).length; }
-function getStoreCollected(sid) {
-  return Object.entries(collected)
-    .filter(([k])=>{const s=findStore(parseInt(k,10));return s&&s.id===sid;})
-    .sort((a,b)=>a[0].localeCompare(b[0]));
-}
-function groupByDate(entries) {
-  const map = new Map();
-  for (const [k,v] of entries) {
-    const d = v.date || '（未設定日期）';
-    if (!map.has(d)) map.set(d,[]);
-    map.get(d).push(k);
-  }
-  return [...map.entries()].sort((a,b)=>b[0].localeCompare(a[0])).map(([date,keys])=>({date,keys:keys.sort()}));
-}
-function updateMetrics() {
-  const total = Object.keys(collected).length;
-  const missTotal = Object.keys(missing).length;
-  const counts = getStoreCounts();
-  document.getElementById('m-grand').textContent = total + missTotal;
-  document.getElementById('m-total').textContent = total;
-  document.getElementById('m-stores').textContent = stores.filter(s=>counts[s.id]>0||getMissByStore(s.id)>0).length;
-  document.getElementById('m-rate').textContent = Math.round(total/totalAllocated()*100)+'%';
-  document.getElementById('m-miss').textContent = missTotal;
-}
-
-// ── 統計列表 ──────────────────────────────────────
-function toggleStore(sid) { openStores.has(sid)?openStores.delete(sid):openStores.add(sid); renderStatList(); }
-
-function renderStatList() {
-  const counts = getStoreCounts();
-  const rows = stores.map(s=>({...s,count:counts[s.id]||0,missCount:getMissByStore(s.id)}))
-    .filter(r=>r.count>0||r.missCount>0).sort((a,b)=>(b.count+b.missCount)-(a.count+a.missCount));
-  const el = document.getElementById('stat-list');
-  if (!rows.length) { el.innerHTML='<div style="text-align:center;padding:2rem;color:#9ca3af;font-size:13px">尚無回收資料</div>'; return; }
-  const max = Math.max(...rows.map(r=>r.count+r.missCount),1);
-  el.innerHTML = rows.map(r=>{
-    const alloc = r.ranges.reduce((a,[f,t])=>a+(t-f+1),0);
-    const total = Object.keys(collected).length;
-    const pct = total>0 ? Math.round(r.count/total*100) : 0;
-    const isOpen = openStores.has(r.id);
-    const snEntries = getStoreCollected(r.id);
-    const groups = groupByDate(snEntries);
-    const missList = Object.entries(missing).filter(([,m])=>m.sid===r.id).sort((a,b)=>b[1].date.localeCompare(a[1].date));
-    const snGroupsHtml = groups.length
-      ? groups.map(g=>`<div class="date-group">
-          <div class="date-group-label">📅 ${formatDisp(g.date)||g.date}<span class="cnt">· ${g.keys.length} 筆</span></div>
-          <div class="sn-grid">${g.keys.map(k=>`<span class="sn-chip">${k}${isEditUnlocked?`<span class="rx" onclick="event.stopPropagation();removeSN('${k}')">×</span>`:''}</span>`).join('')}</div>
-        </div>`).join('')
-      : '<span class="empty-txt">尚無回收紀錄</span>';
-    return `<div class="stat-row">
-      <div class="stat-main" onclick="toggleStore('${r.id}')">
-        <span class="chevron ${isOpen?'open':''}">▶</span>
-        <span class="sname">
-          <span class="sname-full">${r.name}</span>
-          <span class="sname-short">${[...r.name].slice(0,3).join('')}…</span>
-        </span>
-        <span class="salloc">${alloc}</span>
-        <span class="scnt">${r.count}</span>
-        <span class="smiss" style="${r.missCount>0?'':'color:#9ca3af;font-weight:400'}">${r.missCount>0?r.missCount:'－'}</span>
-        <span style="font-size:11px;color:#9ca3af;font-weight:400;text-align:right">${pct}%</span>
-        <div style="height:5px;background:#e5e3db;border-radius:99px;overflow:hidden">
-          <div style="height:100%;border-radius:99px;background:#9ca3af;width:${Math.round((r.count+r.missCount)/max*100)}%;transition:width .3s"></div>
-        </div>
-      </div>
-      <div class="stat-detail ${isOpen?'open':''}">
-        <div class="detail-sec">
-          <div class="detail-title">流水號範圍</div>
-          <div>${r.ranges.map(([f,t])=>`<span class="range-chip">${pad(f)}–${pad(t)}</span>`).join('')}</div>
-        </div>
-        <div class="detail-sec">
-          <div class="detail-title">已回收流水號（${snEntries.length} 筆）</div>
-          ${snGroupsHtml}
-        </div>
-        ${missList.length?`<div class="detail-sec">
-          <div class="detail-title" style="color:#b45309">遺漏券登記（${missList.length} 筆）</div>
-          <div>${missList.map(([mid,m])=>{
-            const proofClass = m.proof==='收據'?'proof-receipt':'proof-none';
-            const proofIcon = m.proof==='收據'?'🧾':'❌';
-            return `<span class="miss-chip">⚠️ ${formatDisp(m.date)} <span class="proof-chip ${proofClass}" style="margin-left:2px">${proofIcon} ${m.proof||'—'}</span>${isEditUnlocked?`<span class="rx" onclick="event.stopPropagation();removeMissing('${mid}')">×</span>`:''}</span>`;
-          }).join('')}</div>
-        </div>`:''}
-      </div>
-    </div>`;
+  el.innerHTML = active.map(function(k){
+    var p = projects[k];
+    return '<div class="psel-item" onclick="selectProject(\'' + k + '\')">' +
+      '<div><div class="psel-name">'+esc(p.name)+'</div>'+
+      '<div class="psel-date">'+p.startDate+' ～ '+p.endDate+'</div></div>'+
+      '<span style="color:var(--accent);font-size:16px">&#8250;</span></div>';
   }).join('');
 }
 
-// ── 每日登記 ─────────────────────────────────────
-function renderDailyList() {
-  const el = document.getElementById('daily-list');
-  if (!el) return;
-
-  // 建立日期 → 資料 map
-  const dateMap = new Map();
-  Object.entries(collected).forEach(([k, v]) => {
-    const d = v.date || '（未設定日期）';
-    if (!dateMap.has(d)) dateMap.set(d, { sns: [], missing: [] });
-    const store = findStore(parseInt(k, 10));
-    dateMap.get(d).sns.push({ key: k, storeName: store ? store.name : '未知店家' });
-  });
-  Object.entries(missing).forEach(([mid, m]) => {
-    const d = m.date || '（未設定日期）';
-    if (!dateMap.has(d)) dateMap.set(d, { sns: [], missing: [] });
-    dateMap.get(d).missing.push({ mid, m });
-  });
-
-  if (!dateMap.size) {
-    el.innerHTML = '<div style="text-align:center;padding:2rem;color:#9ca3af;font-size:13px">尚無資料</div>';
+function renderEditorProjects() {
+  var el = document.getElementById('editorGrid');
+  if (!projectOrder.length) {
+    el.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-ico">&#128193;</div><p>尚無專案，點擊「新增專案」開始</p></div>';
     return;
   }
+  el.innerHTML = projectOrder.filter(function(k){ return !!projects[k]; }).map(function(k){
+    var p = projects[k];
+    var fields = p.fields||[];
+    var entries = p.entries||{};
+    // per-field totals
+    var ft = fields.map(function(_,fi){
+      var t=0; Object.values(entries).forEach(function(e){ t+=parseInt(e['f'+fi]||0); }); return t;
+    });
+    var on = p.status === 'active';
+    return '<div class="pcard" draggable="true" data-id="'+k+'"'+
+      ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
+      ' onclick="openDetail(\''+k+'\')">' +
+      '<div class="pcard-left">'+
+        '<div class="pcard-top">'+
+          '<div class="pcard-title">'+esc(p.name)+'</div>'+
+          '<div class="pcard-date">'+p.startDate+' ～ '+p.endDate+'</div>'+
+        '</div>'+
+        '<div class="pcard-badge-wrap"><span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
+      '</div>'+
+      '<div class="pcard-right">'+
+      (fields.length ? fields.map(function(f,i){
+        return '<div class="stat-item">'+
+          '<div class="stat-l">'+esc(f)+'</div>'+
+          '<div class="stat-n">'+ft[i].toLocaleString()+'</div>'+
+        '</div>';
+      }).join('') : '<div class="stat-item"><div class="stat-n" style="color:var(--text3)">—</div></div>')+
+      '</div>'+
+      '</div>';
+  }).join('');
+}
 
-  const dates = [...dateMap.keys()].sort((a, b) => b.localeCompare(a));
-  const sel = document.getElementById('daily-date-filter');
-  const currentVal = sel ? sel.value : '';
-  const selectedDate = dates.includes(currentVal) ? currentVal : dates[0];
-  const data = dateMap.get(selectedDate);
-
-  // group SNs by store
-  const storeSnMap = new Map();
-  data.sns.forEach(({ key, storeName }) => {
-    if (!storeSnMap.has(storeName)) storeSnMap.set(storeName, []);
-    storeSnMap.get(storeName).push(key);
+function renderDetail(id) {
+  var p = projects[id]; if (!p) return;
+  document.getElementById('detailName').textContent = p.name;
+  document.getElementById('detailDates').textContent = p.startDate + ' ～ ' + p.endDate;
+  var fields = p.fields||[], entries = p.entries||{};
+  /* summary — 只顯示各項目總和，無「累計總人次」 */
+  var ft = fields.map(function(_,fi){
+    var t=0; Object.values(entries).forEach(function(e){ t+=parseInt(e['f'+fi]||0); }); return t;
   });
-
-  const totalAll = [...dateMap.values()].reduce((s, d) => s + d.sns.length + d.missing.length, 0);
-
-  el.innerHTML = `
-    <div class="date-filter-row">
-      <label>📅 查看日期</label>
-      <select id="daily-date-filter" onchange="renderDailyList()">
-        ${dates.map(d => {
-          const dd = dateMap.get(d);
-          const cnt = dd.sns.length + dd.missing.length;
-          return `<option value="${d}" ${d===selectedDate?'selected':''}>${formatDisp(d)||d}（${cnt} 筆）</option>`;
-        }).join('')}
-      </select>
-      <span class="total-cnt">共 ${totalAll} 筆</span>
-      ${isEditUnlocked ? `<button class="btn-del" onclick="deleteDay('${selectedDate}')">🗑 刪除當日全部</button>` : ''}
-    </div>
-
-    ${data.sns.length ? `
-      <div style="margin-bottom:14px">
-        <div style="font-size:11px;font-weight:600;color:#6b6b67;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">
-          流水號明細（${data.sns.length} 筆）
-        </div>
-        ${[...storeSnMap.entries()].map(([storeName, keys]) => `
-          <div style="margin-bottom:10px">
-            <div style="font-size:12px;color:#6b6b67;margin-bottom:4px">${storeName}</div>
-            <div class="sn-grid">${keys.sort().map(k => `<span class="sn-chip">${k}</span>`).join('')}</div>
-          </div>`).join('')}
-      </div>` : ''}
-
-    ${data.missing.length ? `
-      <div>
-        <div style="font-size:11px;font-weight:600;color:#b45309;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">
-          遺漏券明細（${data.missing.length} 筆）
-        </div>
-        <div style="border:1px solid #e5e3db;border-radius:8px;overflow:hidden">
-          ${data.missing.map(({ mid, m }) => {
-            const proofClass = m.proof === '收據' ? 'proof-receipt' : 'proof-none';
-            const proofIcon = m.proof === '收據' ? '🧾' : '❌';
-            return `<div class="miss-list-item">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0">
-                <span style="font-size:13px">${m.name}</span>
-                <span class="proof-chip ${proofClass}">${proofIcon} ${m.proof||'—'}</span>
-              </div>
-              ${isEditUnlocked ? `<span style="cursor:pointer;font-size:18px;color:#9ca3af;padding:0 4px;flex-shrink:0" onclick="removeMissing('${mid}')" title="刪除">×</span>` : ''}
-            </div>`;
-          }).join('')}
-        </div>
-      </div>` : ''}
-
-    ${!data.sns.length && !data.missing.length ? '<p style="font-size:13px;color:#9ca3af;font-style:italic">此日期無登記資料</p>' : ''}`;
-}
-
-function deleteDay(date) {
-  const snKeys = Object.entries(collected).filter(([,v])=>(v.date||'（未設定日期）')===date).map(([k])=>k);
-  const midKeys = Object.entries(missing).filter(([,m])=>(m.date||'（未設定日期）')===date).map(([k])=>k);
-  const total = snKeys.length + midKeys.length;
-  if (!total) return;
-  if (!confirm(`確定要刪除 ${formatDisp(date)||date} 的全部 ${total} 筆資料嗎？\n（流水號 ${snKeys.length} 筆 ＋ 遺漏券 ${midKeys.length} 筆）\n\n此操作無法復原。`)) return;
-  if (db) {
-    const updates = {};
-    snKeys.forEach(k => updates['collected/' + k] = null);
-    midKeys.forEach(k => updates['missing/' + k] = null);
-    db.ref().update(updates);
-  } else {
-    snKeys.forEach(k => delete collected[k]);
-    midKeys.forEach(k => delete missing[k]);
-    renderDailyList(); renderStatList(); updateMetrics(); updateHint();
+  document.getElementById('summaryRow').innerHTML = fields.map(function(f,i){
+    return '<div class="scard"><div class="scard-l">'+esc(f)+'</div><div class="scard-n">'+ft[i].toLocaleString()+'</div></div>';
+  }).join('');
+  /* table — all cells centered */
+  var dates = Object.keys(entries).sort();
+  var th = document.getElementById('tHead'), tb = document.getElementById('tBody');
+  if (!dates.length) {
+    th.innerHTML=''; tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>'; return;
   }
-}
-function populateStoreSelects() {
-  const sorted = [...stores].sort((a,b)=>a.name.localeCompare(b.name,'zh-TW'));
-  const opts = '<option value="">— 選擇店家 —</option>' + sorted.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
-  document.getElementById('miss-store').innerHTML = opts;
-  document.getElementById('mgmt-store-select').innerHTML = opts;
-}
-
-function renderStorePanel() {
-  const sid = document.getElementById('mgmt-store-select').value;
-  const panel = document.getElementById('store-detail-panel');
-  if (!sid) { panel.style.display='none'; return; }
-  const si = stores.findIndex(s=>s.id===sid);
-  const s = stores[si];
-  const alloc = s.ranges.reduce((a,[f,t])=>a+(t-f+1),0);
-  panel.style.display = 'block';
-  panel.innerHTML = `<div class="store-panel">
-    <div class="store-panel-name">${s.name}</div>
-    <div style="font-size:12px;color:#6b6b67;margin-bottom:6px">目前流水號範圍 <span style="color:#9ca3af">（共 ${alloc} 張）</span></div>
-    <div>${s.ranges.map(([f,t],ri)=>`<span class="rtag">${pad(f)}–${pad(t)} ${isEditUnlocked?`<span style="cursor:pointer;color:#9ca3af" onclick="removeRange('${sid}',${ri})">×</span>`:''}</span>`).join('')}</div>
-    ${isEditUnlocked ? `<div class="add-rrow">
-      <span style="font-size:12px;color:#6b6b67">追加範圍：</span>
-      <input type="text" id="rf-panel" placeholder="起始號"/>
-      <span style="font-size:12px;color:#9ca3af">–</span>
-      <input type="text" id="rt-panel" placeholder="結束號"/>
-      <button onclick="addRange('${sid}')">＋ 新增</button>
-    </div>
-    <div id="range-err" class="err-msg"></div>` : ''}
-  </div>`;
+  th.innerHTML='<tr><th>日期</th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'</tr>';
+  var ct=fields.map(function(){return 0;}), gs=0;
+  tb.innerHTML=dates.map(function(d){
+    var e=entries[d]||{};
+    var rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
+    var rs=rv.reduce(function(a,b){return a+b;},0);
+    rv.forEach(function(v,i){ct[i]+=v;}); gs+=rs;
+    return '<tr><td class="date-cell">'+d+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
+  }).join('')+
+  '<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
 }
 
-function addRange(sid) {
-  const f = parseInt(document.getElementById('rf-panel').value,10);
-  const t = parseInt(document.getElementById('rt-panel').value,10);
-  const errEl = document.getElementById('range-err');
-  errEl.textContent = '';
-  if (isNaN(f)||isNaN(t)) { errEl.textContent='請輸入有效的數字範圍'; return; }
-  if (f>t) { errEl.textContent='起始號碼不能大於結束號碼'; return; }
-  const si = stores.findIndex(s=>s.id===sid);
-  for (let n=f;n<=t;n++) for (let j=0;j<stores.length;j++) {
-    if (j===si) continue;
-    for (const [sf,st] of stores[j].ranges) if (n>=sf&&n<=st) { errEl.textContent=`號碼 ${pad(n)} 與「${stores[j].name}」的範圍重疊`; return; }
+function refreshView() {
+  if (currentRole==='assistant') renderAssistantProjects();
+  else if (currentProjectId && document.getElementById('viewDetail').classList.contains('active')) renderDetail(currentProjectId);
+  else if (currentRole==='editor') renderEditorProjects();
+}
+
+/* ── ASSISTANT ── */
+window.selectProject = function(id) {
+  currentProjectId = id;
+  var p = projects[id];
+  document.getElementById('assistantList').style.display = 'none';
+  document.getElementById('assistantForm').style.display = 'block';
+  document.getElementById('entryName').textContent = p.name;
+  var sb=document.getElementById('statusBanner'); sb.className='status-banner';
+  document.getElementById('submitBtn').disabled = false;
+
+  // date picker with today as default
+  // date input already in HTML
+  document.getElementById('entryDate').value = todayStr();
+
+  function loadFieldsForDate(d) {
+    var existing = (p.entries && p.entries[d]) || null;
+    document.getElementById('entryFields').innerHTML = (p.fields||[]).map(function(f,i){
+      var v = existing ? parseInt(existing['f'+i]||0) : '';
+      return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
+        '<input class="efield-input" type="number" min="0" id="ef_'+i+'" value="'+(v!==''?v:'')+'" placeholder="0"'+
+        (existing?' class="efield-input prefilled"':'')+
+        '></div>';
+    }).join('');
+    if (existing) {
+      var sb=document.getElementById('statusBanner'); sb.textContent='此日期已有填報數字，修改後可重新送出'; sb.className='status-banner warn-text show';
+    } else {
+      var sb=document.getElementById('statusBanner'); sb.className='status-banner';
+    }
+    document.getElementById('submitBtn').disabled = false;
   }
-  const updated = JSON.parse(JSON.stringify(stores));
-  updated[si].ranges.push([f,t]);
-  if (db) { db.ref('stores').set(updated); }
-  else { stores = updated; renderStorePanel(); updateMetrics(); }
-}
 
-function removeRange(sid, ri) {
-  const si = stores.findIndex(s=>s.id===sid);
-  if (stores[si].ranges.length<=1) { alert('至少需保留一個流水號範圍'); return; }
-  const updated = JSON.parse(JSON.stringify(stores));
-  updated[si].ranges.splice(ri,1);
-  if (db) { db.ref('stores').set(updated); }
-  else { stores = updated; renderStorePanel(); updateMetrics(); }
-}
+  loadFieldsForDate(todayStr());
 
-// ── 頁籤切換 ──────────────────────────────────────
-function switchTab(t) {
-  ['input','batch','missing','daily','stores'].forEach(id=>{
-    const el = document.getElementById('tab-'+id);
-    if (el) el.style.display = id===t ? '' : 'none';
+  document.getElementById('entryDate').onchange = function() {
+    loadFieldsForDate(this.value);
+  };
+};
+
+window.backToList = function() {
+  document.getElementById('assistantList').style.display = 'block';
+  document.getElementById('assistantForm').style.display = 'none';
+};
+
+window.handleSubmit = function() {
+  var dateEl = document.getElementById('entryDate');
+  var date = dateEl ? dateEl.value : todayStr();
+  if (!date) { toast('請選擇填報日期', 'err'); return; }
+  var p = projects[currentProjectId];
+  var values = (p.fields||[]).map(function(f,i){
+    return { label:f, value:parseInt(document.getElementById('ef_'+i).value)||0 };
   });
-  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',
-    (i===0&&t==='input')||(i===1&&t==='missing')||(i===2&&t==='daily')||(i===3&&t==='stores')));
-  if (t==='missing') { populateStoreSelects(); renderMissList(); }
-  if (t==='daily')   { renderDailyList(); }
-  if (t==='stores')  { populateStoreSelects(); renderStorePanel(); }
-}
-function showBatch() {
-  ['input','batch','missing','stores'].forEach(id=>{const el=document.getElementById('tab-'+id);if(el)el.style.display=id==='batch'?'':'none';});
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  const cur = document.getElementById('collect-date').value;
-  if (cur) document.getElementById('batch-date').value = cur;
-  updateBatchDateHint();
-}
-
-// ── 匯出 CSV ──────────────────────────────────────
-function exportCSV() {
-  const counts = getStoreCounts();
-  const rows = [['店家名稱','流水號範圍','配發張數','回收數量','遺漏券登記','回收率','已回收流水號（含回收日期）','遺漏日期','憑證類型']];
-  stores.forEach(s=>{
-    const alloc = s.ranges.reduce((a,[f,t])=>a+(t-f+1),0);
-    const cnt = counts[s.id]||0;
-    const missCount = getMissByStore(s.id);
-    const rangeStr = s.ranges.map(([f,t])=>pad(f)+'-'+pad(t)).join(' + ');
-    const snStr = getStoreCollected(s.id).map(([k,v])=>v.date?`${k}(${v.date})`:k).join(' ');
-    const missEntries = Object.values(missing).filter(m=>m.sid===s.id);
-    const missDates = missEntries.map(m=>m.date).join(' ');
-    const missProofs = missEntries.map(m=>m.proof||'—').join(' ');
-    rows.push([s.name,rangeStr,alloc,cnt,missCount,alloc?Math.round(cnt/alloc*100)+'%':'0%',snStr,missDates,missProofs]);
-  });
-  const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '消費證明券統計.csv';
-  a.click();
-}
-
-// ── 密碼鎖 ───────────────────────────────────────
-const EDIT_PASSWORD = '4254';
-let isEditUnlocked = false;
-
-function applyLockState() {
-  const btn = document.getElementById('lock-btn');
-  const lbl = document.getElementById('lock-label');
-  if (isEditUnlocked) {
-    document.body.classList.remove('edit-locked');
-    btn.classList.add('unlocked');
-    lbl.textContent = '編輯中';
-  } else {
-    document.body.classList.add('edit-locked');
-    btn.classList.remove('unlocked');
-    lbl.textContent = '僅限檢視';
+  var alreadyFilled = p.entries && p.entries[date];
+  if (alreadyFilled) {
+    if (!confirm('該日期已填報過，確認是否重新填報？')) return;
   }
-  // 重新渲染有刪除按鈕的區塊
-  renderStatList();
-  renderMissList();
-  renderDailyList();
-}
-
-function lockBtnClick() {
-  if (isEditUnlocked) {
-    isEditUnlocked = false;
-    applyLockState();
+  if (window._dbSubmit) {
+    window._dbSubmit(currentProjectId, date, values);
   } else {
-    document.getElementById('pwd-input').value = '';
-    document.getElementById('pwd-err').textContent = '';
-    document.getElementById('lock-overlay').classList.add('show');
-    setTimeout(()=>document.getElementById('pwd-input').focus(), 100);
+    toast('資料庫尚未就緒，請稍後', 'err');
   }
-}
+};
 
-function submitPwd() {
-  const val = document.getElementById('pwd-input').value;
-  if (val === EDIT_PASSWORD) {
-    isEditUnlocked = true;
-    document.getElementById('lock-overlay').classList.remove('show');
-    applyLockState();
-    switchTab('input');
-  } else {
-    document.getElementById('pwd-err').textContent = '密碼錯誤，請再試一次';
-    document.getElementById('pwd-input').value = '';
-    document.getElementById('pwd-input').focus();
+/* ── EDITOR ── */
+window.openDetail = function(id) {
+  currentProjectId = id;
+  showView('viewDetail');
+  renderDetail(id);
+};
+window.backToEditor = function() {
+  currentProjectId = null;
+  showView('viewEditor');
+  renderEditorProjects();
+};
+
+window.openNewProjectModal = function() {
+  editingProjectId = null;
+  document.getElementById('projectModalTitle').textContent = '新增專案';
+  document.getElementById('fieldName').value = '';
+  document.getElementById('fieldStart').value = '';
+  document.getElementById('fieldEnd').value = '';
+  document.getElementById('fieldList').innerHTML = '';
+  document.getElementById('statusToggle').checked = true;
+  document.getElementById('deleteBtn').style.display = 'none';
+  addFieldItem('一般入場');
+  openModal('projectModal');
+};
+
+window.openEditModal = function() {
+  if (!currentProjectId) return;
+  editingProjectId = currentProjectId;
+  var p = projects[currentProjectId];
+  document.getElementById('projectModalTitle').textContent = '編輯設定';
+  document.getElementById('fieldName').value = p.name;
+  document.getElementById('fieldStart').value = p.startDate;
+  document.getElementById('fieldEnd').value = p.endDate;
+  document.getElementById('statusToggle').checked = p.status === 'active';
+  document.getElementById('deleteBtn').style.display = 'inline-flex';
+  var fl = document.getElementById('fieldList'); fl.innerHTML = '';
+  (p.fields||[]).forEach(function(f){ addFieldItem(f); });
+  openModal('projectModal');
+};
+
+function addFieldItem(val) {
+  var fl = document.getElementById('fieldList');
+  var div = document.createElement('div'); div.className = 'field-item';
+  div.innerHTML = '<input class="fi" placeholder="" value="'+esc(val||'')+'">'+
+    '<button class="rm-btn" onclick="this.parentElement.remove()">&#215;</button>';
+  fl.appendChild(div);
+}
+window.addFieldItem = addFieldItem;
+
+window.openManualModal = function(date) {
+  var p = projects[currentProjectId];
+  document.getElementById('manualSub').textContent = p.name;
+  var d = date || todayStr();
+  document.getElementById('manualDate').value = d;
+  // pre-fill with existing data if any
+  var existing = (p.entries && p.entries[d]) || {};
+  document.getElementById('manualFields').innerHTML = (p.fields||[]).map(function(f,i){
+    var val = parseInt(existing['f'+i]||0);
+    return '<div class="fg"><label class="fl">'+esc(f)+'</label>'+
+      '<input class="fi" type="number" min="0" id="mf_'+i+'" value="'+(val||'')+'"></div>';
+  }).join('');
+  // when date changes, reload existing values
+  document.getElementById('manualDate').onchange = function() {
+    var nd = this.value;
+    var ex = (p.entries && p.entries[nd]) || {};
+    (p.fields||[]).forEach(function(_,i){
+      var el = document.getElementById('mf_'+i);
+      if (el) el.value = parseInt(ex['f'+i]||0)||'';
+    });
+  };
+  openModal('manualModal');
+};
+
+/* ── DRAG & DROP ── */
+window.onDS = function(e){ dragSrcEl=e.currentTarget; dragSrcEl.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragSrcEl.dataset.id); };
+window.onDO = function(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); };
+window.onDL = function(e){ e.currentTarget.classList.remove('drag-over'); };
+window.onDE = function(e){ e.currentTarget.classList.remove('dragging'); };
+window.onDP = function(e){ e.preventDefault(); }; /* overwritten after Firebase ready */
+
+/* ── FIREBASE ── */
+(async function(){
+  try {
+    var fbApp = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    var fbDb  = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+    var initializeApp=fbApp.initializeApp, getApps=fbApp.getApps;
+    var getDatabase=fbDb.getDatabase, ref=fbDb.ref, set=fbDb.set, update=fbDb.update, remove=fbDb.remove, onValue=fbDb.onValue, get=fbDb.get;
+    var app = getApps().length ? getApps()[0] : initializeApp({databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/'});
+    var db = getDatabase(app);
+
+    setSyncStatus('syncing','連線中...');
+    onValue(ref(db,'tracker'), function(snap){
+      var d = snap.val()||{};
+      projects = d.projects||{};
+      projectOrder = d.projectOrder||Object.keys(projects);
+      Object.keys(projects).forEach(function(k){ if(projectOrder.indexOf(k)<0) projectOrder.push(k); });
+      projectOrder = projectOrder.filter(function(k){ return !!projects[k]; });
+      setSyncStatus('synced','已同步');
+      refreshView();
+    }, function(err){ setSyncStatus('error','連線失敗'); toast('連線失敗：'+err.message,'err'); });
+
+    /* Seed if empty */
+    try {
+      var s0 = await new Promise(function(res){ var u=onValue(ref(db,'tracker/projects'),function(s){u();res(s);}); });
+      if (!s0.val()) {
+        await update(ref(db,'tracker/projects/p_citynorth2026'),{name:'2026城西夏樂慶',startDate:'2026-05-16',endDate:'2026-05-31',fields:['服務台人次'],status:'active'});
+        await update(ref(db,'tracker'),{projectOrder:['p_citynorth2026']});
+      }
+    } catch(e){ console.warn('seed skip',e.message); }
+
+    /* DB writes */
+    window._dbSubmit = async function(pid, date, values) {
+      var obj={}; values.forEach(function(v,i){ obj['f'+i]=v.value; });
+      try {
+        await set(ref(db,'tracker/projects/'+pid+'/entries/'+date), obj);
+        /* 送出後：disable inputs & show filled values */
+        values.forEach(function(v,i){
+          var el = document.getElementById('ef_'+i);
+          if (el) { el.value = v.value; el.disabled = true; }
+        });
+        var sb=document.getElementById('statusBanner'); sb.textContent='數據已送出'; sb.className='status-banner show'; document.getElementById('submitBtn').disabled = true;
+        toast('✅ 數據已送出！','ok');
+      } catch(e){ toast('送出失敗：'+e.message,'err'); }
+    };
+
+    window.saveProject = async function() {
+      var name  = document.getElementById('fieldName').value.trim();
+      var start = document.getElementById('fieldStart').value;
+      var end   = document.getElementById('fieldEnd').value;
+      var fields= Array.from(document.querySelectorAll('#fieldList .field-item .fi')).map(function(i){return i.value.trim();}).filter(Boolean);
+      var status= document.getElementById('statusToggle').checked ? 'active' : 'ended';
+      if (!name||!start||!end){ toast('請填寫活動名稱與日期','err'); return; }
+      if (!fields.length){ toast('請至少新增一個登記項目','err'); return; }
+      var isNew = !editingProjectId;
+      var id = editingProjectId||'p_'+Date.now();
+      setSyncStatus('syncing','儲存中...');
+      try {
+        await update(ref(db,'tracker/projects/'+id),{name:name,startDate:start,endDate:end,fields:fields,status:status});
+        if (isNew) {
+          var snap = await get(ref(db,'tracker/projectOrder'));
+          var cur = snap.val();
+          if (!cur || !Array.isArray(cur)) cur = projectOrder.slice();
+          if (cur.indexOf(id) < 0) cur = cur.concat([id]);
+          await update(ref(db,'tracker'),{projectOrder:cur});
+        }
+        closeModal('projectModal');
+        toast('✅ 已儲存','ok');
+      } catch(e){ toast('儲存失敗：'+e.message,'err'); setSyncStatus('error','儲存失敗'); }
+    };
+
+    window.downloadCSV = function() {
+      var p = projects[currentProjectId];
+      if (!p) return;
+      var fields = p.fields||[], entries = p.entries||{};
+      var dates = Object.keys(entries).sort();
+      if (!dates.length) { toast('尚無數據可下載','err'); return; }
+      var header = ['日期'].concat(fields);
+      var rows = dates.map(function(d){
+        var e = entries[d]||{};
+        var rv = fields.map(function(_,i){ return parseInt(e['f'+i]||0); });
+        return [d].concat(rv);
+      });
+      // totals row
+      var ct = fields.map(function(_,fi){
+        return dates.reduce(function(s,d){ return s+parseInt((entries[d]||{})['f'+fi]||0); },0);
+      });
+      var gs = ct.reduce(function(a,b){return a+b;},0);
+      rows.push(['合計'].concat(ct));
+      var csv = [header].concat(rows).map(function(r){ return r.join(','); }).join('\n');
+      var bom = '\uFEFF'; // UTF-8 BOM for Excel
+      var blob = new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = p.name+'_數據.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    window.deleteProject = async function() {
+      if (!editingProjectId) return;
+      var p = projects[editingProjectId];
+      if (!confirm('確定要刪除「'+(p?p.name:editingProjectId)+'」？此操作無法復原。')) return;
+      try {
+        await remove(ref(db,'tracker/projects/'+editingProjectId));
+        var newOrder = projectOrder.filter(function(k){ return k !== editingProjectId; });
+        await update(ref(db,'tracker'),{projectOrder:newOrder});
+        closeModal('projectModal');
+        /* if we're in detail view, go back */
+        if (currentProjectId === editingProjectId) { currentProjectId=null; showView('viewEditor'); }
+        toast('專案已刪除');
+      } catch(e){ toast('刪除失敗：'+e.message,'err'); }
+    };
+
+    window.saveManualEntry = async function() {
+      var date = document.getElementById('manualDate').value;
+      if (!date){ toast('請選擇日期','err'); return; }
+      var p=projects[currentProjectId], obj={};
+      (p.fields||[]).forEach(function(_,i){ obj['f'+i]=parseInt(document.getElementById('mf_'+i).value)||0; });
+      try {
+        await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date), obj);
+        closeModal('manualModal');
+        toast('✅ 數據已儲存','ok');
+      } catch(e){ toast('儲存失敗：'+e.message,'err'); }
+    };
+
+    window.onDP = function(e) {
+      e.preventDefault();
+      var tgt=e.currentTarget; tgt.classList.remove('drag-over');
+      if (!dragSrcEl||dragSrcEl===tgt) return;
+      var si=projectOrder.indexOf(dragSrcEl.dataset.id), ti=projectOrder.indexOf(tgt.dataset.id);
+      if (si<0||ti<0) return;
+      projectOrder.splice(si,1); projectOrder.splice(ti,0,dragSrcEl.dataset.id);
+      update(ref(db,'tracker'),{projectOrder:projectOrder.slice()});
+    };
+
+    console.log('Firebase ready');
+  } catch(err){
+    console.error('Firebase error:',err);
+    setSyncStatus('error','連線失敗');
+    toast('初始化失敗：'+err.message,'err');
   }
-}
-
-function closeLockModal() {
-  document.getElementById('lock-overlay').classList.remove('show');
-}
-
-// 點擊遮罩關閉
-document.getElementById('lock-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeLockModal();
-});
-
-// ── 啟動 ─────────────────────────────────────────
-const t = todayStr();
-document.getElementById('collect-date').value = t;
-document.getElementById('batch-date').value = t;
-updateDateHint(); updateBatchDateHint();
-populateStoreSelects(); renderStatList(); updateMetrics();
-applyLockState();
-initFirebase();
+})();
 </script>
 </body>
 </html>
