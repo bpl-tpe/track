@@ -8,435 +8,71 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-/* ── RESET & BASE ── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
-  --bg:#F5F4F4;
-  --surface:#ffffff;
-  --line:#e2e2e2;
-  --line-light:#ebebeb;
-  --text:#212A33;
-  --text2:#3a4450;
-  --text3:#8a95a0;
-  --accent:#526FBD;
-  --accent-pale:#eef1f9;
-  --success:#1a8a5a;
-  --danger:#CB7758;
-  --warn:#CB7758;
+  --bg:#F5F4F4;--surface:#ffffff;--line:#e2e2e2;--line-light:#ebebeb;
+  --text:#212A33;--text2:#3a4450;--text3:#8a95a0;
+  --accent:#526FBD;--accent-pale:#eef1f9;
+  --success:#1a8a5a;--danger:#CB7758;--warn:#CB7758;
 }
 html{font-size:16px;}
-body{
-  font-family:"Noto Sans TC",system-ui,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  font-weight:400;
-  line-height:1.7;
-  -webkit-font-smoothing:antialiased;
-}
-
-/* ── VIEWS ── */
-.view{display:none;}
-.view.active{display:block;}
-
-/* ── TOPBAR ── */
-.topbar{
-  height:54px;
-  background:var(--surface);
-  border-bottom:1px solid var(--line);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 20px;
-  position:sticky;
-  top:0;
-  z-index:200;
-}
-.brand{
-  font-size:13px;
-  font-weight:500;
-  color:var(--text);
-  letter-spacing:.02em;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
+body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-weight:400;line-height:1.7;-webkit-font-smoothing:antialiased;}
+.view{display:none;}.view.active{display:block;}
+.topbar{height:54px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:200;}
+.brand{font-size:13px;font-weight:500;color:var(--text);letter-spacing:.02em;display:flex;align-items:center;gap:8px;}
 .topbar-right{display:flex;align-items:center;gap:14px;}
-.sync-status{
-  display:flex;align-items:center;gap:5px;
-  font-size:11px;color:var(--text3);
-  letter-spacing:.02em;
-}
-.sdot{
-  width:5px;height:5px;border-radius:50%;
-  background:var(--text3);flex-shrink:0;transition:background .4s;
-}
-.sdot.synced{background:var(--success);}
-.sdot.syncing{background:var(--warn);animation:blink 1.2s infinite;}
-.sdot.error{background:var(--danger);}
+.sync-status{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);letter-spacing:.02em;}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .4s;}
+.sdot.synced{background:var(--success);}.sdot.syncing{background:var(--warn);animation:blink 1.2s infinite;}.sdot.error{background:var(--danger);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.role-btn{
-  font-size:12px;font-weight:400;
-  color:var(--text2);
-  background:none;border:none;
-  cursor:pointer;font-family:inherit;
-  padding:6px 0;
-  border-bottom:1px solid var(--text2);
-  line-height:1;
-  transition:color .15s, border-color .15s;
-}
-.role-btn:hover{color:var(--accent);border-color:var(--accent);}
-
-/* ── LAYOUT ── */
-.wrap{max-width:680px;margin:0 auto;padding:36px 20px 60px;}
 .wrap-sm{max-width:480px;margin:0 auto;padding:36px 20px 60px;}
-
-/* ── PAGE HEADER ── */
-.ph{margin-bottom:32px;}
-.ph-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;}
-.ph-title{font-size:20px;font-weight:500;letter-spacing:-.3px;color:var(--text);line-height:1.2;}
-.ph-sub{font-size:13px;color:var(--text3);margin-top:6px;font-weight:400;}
-.ph-line{height:1px;background:var(--line);margin-top:18px;}
-
-/* ── BACK BUTTON ── */
-.back-btn{
-  display:inline-flex;align-items:center;gap:6px;
-  font-size:12px;color:var(--text3);
-  background:none;border:none;cursor:pointer;
-  font-family:inherit;padding:0;margin-bottom:28px;
-  letter-spacing:.03em;transition:color .15s;
-}
-.back-btn:hover{color:var(--text);}
-.back-btn::before{content:"←";font-size:14px;}
-
-/* ── BUTTONS ── */
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:5px;
-  font-size:13px;font-weight:400;cursor:pointer;
-  font-family:inherit;line-height:1;
-  transition:all .15s;border:none;
-  padding:11px 22px;
-  letter-spacing:.02em;
-}
-.btn-primary{
-  background:var(--accent);color:#fff;
-}
-.btn-primary:hover{background:#3d5aa8;}
-.btn-primary:active{transform:scale(.98);}
-.btn-outline{
-  background:none;color:var(--text);
-  border:1px solid var(--line);
-}
-.btn-outline:hover{border-color:var(--text);}
-.btn-ghost{
-  background:none;color:var(--text2);
-  border:none;padding:8px 12px;font-size:12px;
-}
-.btn-ghost:hover{color:var(--text);}
-.btn-danger-txt{
-  background:none;color:var(--danger);
-  border:none;font-size:12px;padding:8px 0;cursor:pointer;
-  font-family:inherit;letter-spacing:.02em;
-}
-.btn-danger-txt:hover{text-decoration:underline;}
+.ph{margin-bottom:32px;}.ph-title{font-size:20px;font-weight:500;letter-spacing:-.3px;color:var(--text);line-height:1.2;}
+.ph-sub{font-size:13px;color:var(--text3);margin-top:6px;}.ph-line{height:1px;background:var(--line);margin-top:18px;}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-bottom:28px;letter-spacing:.03em;transition:color .15s;}
+.back-btn:hover{color:var(--text);}.back-btn::before{content:"\2190";font-size:14px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:400;cursor:pointer;font-family:inherit;line-height:1;transition:all .15s;border:none;padding:11px 22px;letter-spacing:.02em;}
+.btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#3d5aa8;}.btn-primary:active{transform:scale(.98);}
 .btn-full{width:100%;padding:14px;}
-.btn-sm{padding:7px 14px;font-size:12px;}
-.add-field-btn{
-  display:inline-flex;align-items:center;gap:4px;
-  color:var(--accent);font-size:12px;font-weight:400;
-  cursor:pointer;background:none;border:none;
-  font-family:inherit;padding:6px 0;margin-top:6px;
-  letter-spacing:.02em;
-}
-.add-field-btn:hover{text-decoration:underline;}
-
-/* ── PROJECT CARDS (Editor) ── */
-.project-grid{display:flex;flex-direction:column;gap:12px;}
-.pcard{
-  background:var(--surface);
-  border:1.5px solid var(--line);
-  padding:20px;
-  cursor:pointer;
-  transition:border-color .18s, box-shadow .18s;
-  display:flex;align-items:stretch;gap:0;
-}
-.pcard:hover{border-color:var(--text3);box-shadow:0 2px 10px rgba(0,0,0,.07);}
-.pcard.dragging{opacity:.35;}
-.pcard.drag-over{border-color:var(--accent);}
-
-/* 左欄 — 名稱＋日期＋badge，佔50% */
-.pcard-left{
-  width:60%;
-  display:flex;flex-direction:column;justify-content:space-between;
-  padding-right:16px;
-  border-right:1px solid var(--line);
-}
-.pcard-top{}
-.pcard-title{font-size:17px;font-weight:500;color:var(--accent);margin-bottom:5px;line-height:1.4;}
-.pcard-date{font-size:12px;color:var(--text3);}
-.pcard-badge-wrap{margin-top:14px;}
-.badge{
-  font-size:10px;font-weight:500;
-  padding:2px 8px;letter-spacing:.04em;
-  border:1px solid;display:inline-block;
-}
-.badge-on{color:var(--success);border-color:var(--success);}
-.badge-off{color:var(--text3);border-color:var(--line);}
-
-/* 右欄 — 各項目累計，佔50% */
-.pcard-right{
-  width:40%;
-  display:flex;flex-direction:column;gap:12px;
-  padding-left:16px;
-  justify-content:center;
-}
-.stat-item{display:flex;flex-direction:column;gap:6px;}
-.stat-l{font-size:14px;color:var(--text3);letter-spacing:.03em;line-height:1;}
-.stat-n{font-size:22px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1.1;}
-
-/* ── DETAIL SUMMARY ── */
-.summary-row{display:flex;gap:0;border-top:1px solid var(--line);margin-bottom:32px;}
-.scard{
-  flex:1;padding:20px 0;
-  border-right:1px solid var(--line);
-  text-align:center;
-}
-.scard:last-child{border-right:none;}
-.scard-n{font-size:26px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1;}
-.scard-l{font-size:14px;color:var(--text2);margin-bottom:6px;letter-spacing:.01em;}
-
-/* ── TABLE ── */
-.table-wrap{overflow-x:auto;margin-bottom:40px;border-top:1px solid var(--line);}
-table{width:100%;border-collapse:collapse;min-width:320px;}
-th{
-  padding:10px 12px;text-align:center;
-  font-size:11px;font-weight:500;color:var(--text3);
-  border-bottom:1px solid var(--line);
-  letter-spacing:.04em;white-space:nowrap;
-}
-th:first-child{text-align:left;padding-left:0;}
-td{
-  padding:12px 12px;
-  border-bottom:1px solid var(--line-light);
-  font-size:13px;text-align:center;color:var(--text);
-}
-td:first-child{text-align:left;padding-left:0;color:var(--text2);}
-tr:last-child td{border-bottom:none;}
-.total-row td{
-  font-weight:500;color:var(--text);
-  border-top:1px solid var(--line);
-  border-bottom:none;
-  font-size:13px;
-}
-.date-cell{font-size:13px;white-space:nowrap;}
-
-/* ── ASSISTANT ── */
 .psel-list{display:flex;flex-direction:column;gap:0;margin-top:0;}
-.psel-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px 0;
-  border-bottom:1px solid var(--line);
-  cursor:pointer;transition:opacity .15s;
-}
-.psel-item:first-child{border-top:1px solid var(--line);}
-.psel-item:hover{opacity:.6;}
+.psel-item{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:opacity .15s;}
+.psel-item:first-child{border-top:1px solid var(--line);}.psel-item:hover{opacity:.6;}
 .psel-name{font-size:17px;font-weight:500;color:var(--accent);}
 .psel-date{font-size:12px;color:var(--text3);margin-top:3px;}
-.psel-arrow{color:var(--text3);font-size:16px;}
-
 .entry-section{margin-top:0;}
 .entry-title{font-size:17px;font-weight:500;letter-spacing:-.1px;margin-bottom:4px;color:var(--accent);}
-.entry-subtitle{font-size:12px;color:var(--text3);margin-bottom:28px;}
-
-/* Date picker row */
 .entry-date-row{margin-bottom:28px;}
 .entry-date-label{font-size:12px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:7px;display:block;}
-.date-input{
-  background:none;border:none;border-bottom:1px solid var(--line);
-  font-size:16px;font-family:inherit;color:var(--text);
-  padding:6px 0;width:100%;max-width:180px;
-  outline:none;transition:border-color .15s;
-}
+.date-input{background:none;border:none;border-bottom:1px solid var(--line);font-size:16px;font-family:inherit;color:var(--text);padding:6px 0;width:100%;max-width:180px;outline:none;transition:border-color .15s;}
 .date-input:focus{border-color:var(--text);}
-
-/* Fields */
 .entry-fields{display:flex;flex-direction:column;gap:0;margin-bottom:28px;}
-.efield-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 0;
-  border-bottom:1px solid var(--line-light);
-}
+.efield-row{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--line-light);}
 .efield-row:first-child{border-top:1px solid var(--line-light);}
 .efield-label{font-size:14px;font-weight:500;color:var(--text);}
-.efield-input{
-  width:90px;
-  background:none;border:none;border-bottom:1px solid var(--line);
-  font-size:22px;font-weight:400;text-align:right;
-  font-family:inherit;color:var(--text);
-  padding:4px 0;outline:none;
-  transition:border-color .15s;
-  -moz-appearance:textfield;
-}
-.efield-input::-webkit-outer-spin-button,
-.efield-input::-webkit-inner-spin-button{-webkit-appearance:none;}
-.efield-input:focus{border-color:var(--text);}
-.efield-input:disabled{color:var(--text3);border-color:var(--line-light);}
+.efield-input{width:90px;background:none;border:none;border-bottom:1px solid var(--line);font-size:22px;font-weight:400;text-align:right;font-family:inherit;color:var(--text);padding:4px 0;outline:none;transition:border-color .15s;-moz-appearance:textfield;}
+.efield-input::-webkit-outer-spin-button,.efield-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.efield-input:focus{border-color:var(--text);}.efield-input:disabled{color:var(--text3);border-color:var(--line-light);}
 .efield-input.prefilled{color:var(--warn);}
-
-/* Status banner */
-.status-banner{
-  font-size:12px;padding:10px 12px;margin-bottom:20px;
-  color:var(--text2);letter-spacing:.02em;
-  display:none;border-radius:2px;
-}
+.status-banner{font-size:12px;padding:10px 12px;margin-bottom:20px;color:var(--text2);letter-spacing:.02em;display:none;border-radius:2px;}
 .status-banner.show{display:block;}
-.status-banner.warn-text{
-  color:var(--danger);
-  border:1px solid var(--danger);
-  background:rgba(192,57,43,.04);
-}
-
-/* ── MODAL ── */
-.overlay{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.35);
-  z-index:500;
-  align-items:flex-end;
-  justify-content:center;
-  padding:0;
-}
-.overlay.open{display:flex;}
-.modal{
-  background:var(--surface);
-  width:100%;max-width:520px;
-  max-height:92vh;overflow-y:auto;
-  padding:28px 24px 36px;
-  animation:mIn .22s ease;
-  border-top:1px solid var(--line);
-}
-@keyframes mIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-handle{
-  width:36px;height:3px;background:var(--line);
-  border-radius:2px;margin:0 auto 22px;
-}
-.modal-title{font-size:17px;font-weight:500;letter-spacing:-.2px;margin-bottom:4px;}
-.modal-sub{font-size:12px;color:var(--text3);margin-bottom:22px;letter-spacing:.02em;}
-.modal-foot{
-  display:flex;gap:10px;justify-content:flex-end;
-  margin-top:24px;padding-top:20px;border-top:1px solid var(--line);
-  align-items:center;
-}
-.modal-foot-space{justify-content:space-between;}
-
-/* ── FORM ── */
-.fg{margin-bottom:18px;}
-.fl{
-  display:block;font-size:11px;font-weight:500;color:var(--text3);
-  margin-bottom:7px;letter-spacing:.06em;text-transform:uppercase;
-}
-.fi{
-  width:100%;padding:10px 0;
-  border:none;border-bottom:1px solid var(--line);
-  font-size:15px;font-family:inherit;color:var(--text);
-  background:none;outline:none;transition:border-color .15s;
-  border-radius:0;
-}
-.fi:focus{border-color:var(--text);}
-.fi[type=date]{font-size:15px;}
-.field-list{display:flex;flex-direction:column;gap:8px;}
-.field-item{display:flex;gap:8px;align-items:center;}
-.field-item .fi{flex:1;}
-.rm-btn{
-  background:none;border:none;
-  color:var(--text3);cursor:pointer;
-  font-size:18px;padding:0 4px;line-height:1;
-  transition:color .15s;flex-shrink:0;
-}
-.rm-btn:hover{color:var(--danger);}
-.section-divider{
-  font-size:11px;color:var(--text3);
-  letter-spacing:.06em;text-transform:uppercase;
-  margin:22px 0 12px;border-top:1px solid var(--line);padding-top:18px;
-}
-.toggle-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:4px 0;
-}
-.toggle-label{font-size:14px;color:var(--text);}
-.toggle-desc{font-size:12px;color:var(--text3);margin-top:2px;}
-.tog{position:relative;width:40px;height:22px;flex-shrink:0;}
-.tog input{opacity:0;width:0;height:0;}
-.tog-sl{position:absolute;inset:0;background:var(--line);border-radius:22px;cursor:pointer;transition:.25s;}
-.tog-sl:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.15);}
-input:checked+.tog-sl{background:var(--text);}
-input:checked+.tog-sl:before{transform:translateX(18px);}
-
-/* ── TOAST ── */
-.toast-wrap{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;
-  width:calc(100% - 40px);max-width:360px;
-}
-.toast{
-  background:var(--text);color:#fff;
-  padding:12px 18px;font-size:13px;
-  width:100%;text-align:center;
-  letter-spacing:.02em;
-  animation:tIn .2s ease;
-}
-.toast.ok{background:var(--success);}
-.toast.err{background:var(--danger);}
+.status-banner.warn-text{color:var(--danger);border:1px solid var(--danger);background:rgba(203,119,88,.06);}
+.toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 40px);max-width:360px;}
+.toast{background:var(--text);color:#fff;padding:12px 18px;font-size:13px;width:100%;text-align:center;letter-spacing:.02em;animation:tIn .2s ease;}
+.toast.ok{background:var(--success);}.toast.err{background:var(--danger);}
 @keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── EMPTY ── */
 .empty{text-align:center;padding:60px 20px;color:var(--text3);}
 .empty-ico{font-size:32px;margin-bottom:12px;opacity:.4;}
 .empty p{font-size:13px;letter-spacing:.02em;}
-
-/* ── TABLE SECTION ── */
-.table-section{margin-bottom:40px;}
-.table-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-  margin-bottom:0;
-}
-.table-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
-.table-actions{display:flex;gap:6px;}
-.tbl-btn{
-  font-size:11px;font-weight:500;color:var(--text2);
-  background:none;border:1px solid var(--line);
-  cursor:pointer;font-family:inherit;
-  padding:5px 10px;letter-spacing:.02em;
-  transition:all .15s;
-}
-.tbl-btn:hover{border-color:var(--text);color:var(--text);}
-.table-wrap{overflow-x:auto;}
-
-/* ── SCROLLBAR ── */
-#detailName{color:var(--accent);font-size:20px;font-weight:500;}
 ::-webkit-scrollbar{width:3px;height:3px;}
 ::-webkit-scrollbar-thumb{background:var(--line);}
-
-/* ── DESKTOP TWEAKS ── */
-@media(min-width:600px){
-  .overlay{align-items:center;padding:20px;}
-  .modal{border-radius:2px;border:1px solid var(--line);border-top:1px solid var(--line);}
-}
 </style>
 </head>
 <body>
-
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="brand">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <!-- base bar -->
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="2" y="14" width="4" height="6" fill="var(--accent)" opacity="0.35"/>
-      <!-- mid bar -->
       <rect x="9" y="9" width="4" height="11" fill="var(--accent)" opacity="0.65"/>
-      <!-- tall bar -->
       <rect x="16" y="4" width="4" height="16" fill="var(--accent)"/>
-      <!-- trend line -->
       <polyline points="4,13 11,8 18,3" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <circle cx="18" cy="3" r="1.5" fill="var(--accent)"/>
     </svg>
@@ -447,202 +83,32 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
       <div class="sdot" id="syncDot"></div>
       <span id="syncText">連線中</span>
     </div>
-    <button class="role-btn" id="switchRoleBtn" onclick="window.switchRole()">切換至編輯者</button>
   </div>
 </div>
 
-<!-- VIEW: 協助者 -->
-<div class="view active" id="viewAssistant">
+<div class="view active" id="viewList">
   <div class="wrap-sm">
-    <div id="assistantList">
-      <div class="ph">
-        <div>
-          <div class="ph-title">填報人次</div>
-          <div class="ph-sub">請選擇活動</div>
-        </div>
-        <div class="ph-line"></div>
-      </div>
-      <div id="assistantListInner" class="psel-list"></div>
-    </div>
-    <div id="assistantForm" style="display:none">
-      <button class="back-btn" onclick="backToList()">返回</button>
-      <div class="entry-section">
-        <div class="entry-title" id="entryName"></div>
-        <div class="entry-subtitle" id="entrySubtitle"></div>
-        <div class="entry-date-row">
-          <span class="entry-date-label">填報日期</span>
-          <input type="date" class="date-input" id="entryDate">
-        </div>
-        <div id="statusBanner" class="status-banner"></div>
-        <div id="entryFields" class="entry-fields"></div>
-        <button class="btn btn-primary btn-full" id="submitBtn" onclick="handleSubmit()">送出</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- VIEW: 編輯者 — 列表 -->
-<div class="view" id="viewEditor">
-  <div class="wrap">
     <div class="ph">
-      <div class="ph-row">
-        <div class="ph-title">專案</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="btn btn-ghost btn-sm" onclick="openModal('changePwModal')">修改密碼</button>
-          <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增</button>
-        </div>
-      </div>
+      <div class="ph-title">填報人次</div>
+      <div class="ph-sub">請選擇活動</div>
       <div class="ph-line"></div>
     </div>
-    <div class="project-grid" id="editorGrid"></div>
+    <div id="listInner" class="psel-list"></div>
   </div>
 </div>
 
-<!-- VIEW: 編輯者 — 詳情 -->
-<div class="view" id="viewDetail">
-  <div class="wrap">
-    <button class="back-btn" onclick="backToEditor()">返回</button>
-    <div class="ph">
-      <div>
-        <div class="ph-title" id="detailName"></div>
-        <div class="ph-sub" id="detailDates"></div>
+<div class="view" id="viewForm">
+  <div class="wrap-sm">
+    <button class="back-btn" onclick="backToList()">返回</button>
+    <div class="entry-section">
+      <div class="entry-title" id="entryName"></div>
+      <div class="entry-date-row">
+        <span class="entry-date-label">填報日期</span>
+        <input type="date" class="date-input" id="entryDate">
       </div>
-
-      <div class="ph-line"></div>
-    </div>
-    <div id="summaryRow" class="summary-row"></div>
-    <div class="table-section">
-      <div class="table-header">
-        <span class="table-label">填報數據</span>
-        <div class="table-actions">
-          <button class="tbl-btn" onclick="openEditModal()">編輯設定</button>
-          <button class="tbl-btn" onclick="openManualModal()">編輯數據</button>
-          <button class="tbl-btn" onclick="downloadCSV()">下載 CSV</button>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: 新增/編輯專案 -->
-<div class="overlay" id="projectModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="projectModalTitle">新增專案</div>
-    <div class="modal-sub">活動資訊與登記項目</div>
-    <div class="fg">
-      <label class="fl">活動名稱</label>
-      <input class="fi" id="fieldName" placeholder="">
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="fg">
-        <label class="fl">開始日期</label>
-        <input class="fi" type="date" id="fieldStart">
-      </div>
-      <div class="fg">
-        <label class="fl">結束日期</label>
-        <input class="fi" type="date" id="fieldEnd">
-      </div>
-    </div>
-    <div class="fg">
-      <label class="fl">登記項目</label>
-      <div class="field-list" id="fieldList"></div>
-      <button class="add-field-btn" onclick="addFieldItem()">+ 新增項目</button>
-    </div>
-    <div class="section-divider">狀態</div>
-    <div class="toggle-row">
-      <div>
-        <div class="toggle-label">進行中</div>
-        <div class="toggle-desc">開啟後協助者可看到此專案</div>
-      </div>
-      <label class="tog">
-        <input type="checkbox" id="statusToggle" checked>
-        <span class="tog-sl"></span>
-      </label>
-    </div>
-    <div class="modal-foot modal-foot-space">
-      <button class="btn-danger-txt" id="deleteBtn" onclick="deleteProject()" style="display:none">刪除此專案</button>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-ghost" onclick="closeModal('projectModal')">取消</button>
-        <button class="btn btn-primary btn-sm" onclick="saveProject()">儲存</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: 編輯數據 -->
-<div class="overlay" id="manualModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">編輯數據</div>
-    <div class="modal-sub" id="manualSub"></div>
-    <div class="fg">
-      <label class="fl">日期</label>
-      <input class="fi" type="date" id="manualDate">
-    </div>
-    <div id="manualFields"></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('manualModal')">取消</button>
-      <button class="btn btn-primary btn-sm" onclick="saveManualEntry()">儲存</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: 驗證密碼 -->
-<div class="overlay" id="pwModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">編輯者登入</div>
-    <div class="modal-sub">請輸入密碼以進入編輯模式</div>
-    <div class="fg">
-      <label class="fl">密碼</label>
-      <div style="position:relative;display:flex;align-items:center;">
-        <input class="fi" type="password" id="pwInput" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter')verifyPassword()" style="padding-right:36px">
-        <button type="button" onclick="togglePwVis('pwInput',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-      </div>
-    </div>
-    <div id="pwError" style="font-size:12px;color:var(--danger);margin-top:-8px;margin-bottom:8px;display:none">密碼錯誤，請再試一次</div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('pwModal')">取消</button>
-      <button class="btn btn-primary btn-sm" onclick="verifyPassword()">確認</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: 修改密碼 -->
-<div class="overlay" id="changePwModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">修改密碼</div>
-    <div class="modal-sub">修改後下次切換至編輯者時生效</div>
-    <div class="fg">
-      <label class="fl">目前密碼</label>
-      <div style="position:relative;display:flex;align-items:center;">
-        <input class="fi" type="password" id="cpwCurrent" placeholder="" autocomplete="off" style="padding-right:36px">
-        <button type="button" onclick="togglePwVis('cpwCurrent',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-      </div>
-    </div>
-    <div class="fg">
-      <label class="fl">新密碼</label>
-      <div style="position:relative;display:flex;align-items:center;">
-        <input class="fi" type="password" id="cpwNew" placeholder="" autocomplete="off" style="padding-right:36px">
-        <button type="button" onclick="togglePwVis('cpwNew',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-      </div>
-    </div>
-    <div class="fg">
-      <label class="fl">確認新密碼</label>
-      <div style="position:relative;display:flex;align-items:center;">
-        <input class="fi" type="password" id="cpwConfirm" placeholder="" autocomplete="off" style="padding-right:36px">
-        <button type="button" onclick="togglePwVis('cpwConfirm',this)" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px;letter-spacing:.03em;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-      </div>
-    </div>
-    <div id="cpwError" style="font-size:12px;color:var(--danger);margin-top:-8px;margin-bottom:8px;display:none"></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('changePwModal')">取消</button>
-      <button class="btn btn-primary btn-sm" onclick="changePassword()">儲存</button>
+      <div id="statusBanner" class="status-banner"></div>
+      <div id="entryFields" class="entry-fields"></div>
+      <button class="btn btn-primary btn-full" id="submitBtn" onclick="handleSubmit()">送出</button>
     </div>
   </div>
 </div>
@@ -652,492 +118,97 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 <script>
 var projects = {};
 var projectOrder = [];
-var currentRole = 'assistant';
 var currentProjectId = null;
-var editingProjectId = null;
-var dragSrcEl = null;
 
-/* ── UI UTILS ── */
-function showView(id) {
-  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
-  document.getElementById(id).classList.add('active');
-}
-function setSyncStatus(s, t) {
-  document.getElementById('syncDot').className = 'sdot ' + s;
-  document.getElementById('syncText').textContent = t;
-}
-function openModal(id)  { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-window.openModal = openModal;
-window.closeModal = closeModal;
-function todayStr() {
-  var d = new Date();
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function toast(msg, type) {
-  var w = document.getElementById('toastWrap');
-  var t = document.createElement('div');
-  t.className = 'toast' + (type === 'err' ? ' err' : type === 'ok' ? ' ok' : '');
-  t.textContent = msg;
-  w.appendChild(t);
-  setTimeout(function(){ t.remove(); }, 3000);
-}
+function setSyncStatus(s,t){document.getElementById('syncDot').className='sdot '+s;document.getElementById('syncText').textContent=t;}
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(msg,type){var w=document.getElementById('toastWrap');var t=document.createElement('div');t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');t.textContent=msg;w.appendChild(t);setTimeout(function(){t.remove();},3000);}
+function showView(id){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.getElementById(id).classList.add('active');}
 
-document.querySelectorAll('.overlay').forEach(function(o){
-  o.addEventListener('click', function(e){ if(e.target===o) o.classList.remove('open'); });
-});
-
-/* ── PASSWORD ── */
-var DEFAULT_PW = '0000';
-function getPassword() {
-  return localStorage.getItem('editorPw') || DEFAULT_PW;
-}
-
-window.togglePwVis = function(inputId, btn) {
-  var el = document.getElementById(inputId);
-  var eyeOpen = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-  var eyeOff  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
-  if (el.type === 'password') {
-    el.type = 'text';
-    btn.innerHTML = eyeOff;
-    btn.style.color = 'var(--text)';
-  } else {
-    el.type = 'password';
-    btn.innerHTML = eyeOpen;
-    btn.style.color = 'var(--text3)';
-  }
-};
-
-function switchRole() {
-  if (currentRole === 'editor') {
-    // 離開編輯者 → 直接切回
-    currentRole = 'assistant';
-    document.getElementById('switchRoleBtn').textContent = '切換至編輯者';
-    showView('viewAssistant');
-    renderAssistantProjects();
-  } else {
-    // 進入編輯者 → 先驗證密碼
-    document.getElementById('pwInput').value = '';
-    document.getElementById('pwError').style.display = 'none';
-    openModal('pwModal');
-    setTimeout(function(){ document.getElementById('pwInput').focus(); }, 100);
-  }
-}
-window.switchRole = switchRole;
-
-window.verifyPassword = function() {
-  var input = document.getElementById('pwInput').value;
-  if (input === getPassword()) {
-    closeModal('pwModal');
-    currentRole = 'editor';
-    document.getElementById('switchRoleBtn').textContent = '切換至協助者';
-    showView('viewEditor');
-    renderEditorProjects();
-  } else {
-    document.getElementById('pwError').style.display = 'block';
-    document.getElementById('pwInput').value = '';
-    document.getElementById('pwInput').focus();
-  }
-};
-
-window.changePassword = function() {
-  var cur     = document.getElementById('cpwCurrent').value;
-  var newPw   = document.getElementById('cpwNew').value;
-  var confirm = document.getElementById('cpwConfirm').value;
-  var errEl   = document.getElementById('cpwError');
-  errEl.style.display = 'none';
-  if (cur !== getPassword()) {
-    errEl.textContent = '目前密碼錯誤'; errEl.style.display = 'block'; return;
-  }
-  if (!newPw) {
-    errEl.textContent = '新密碼不可為空'; errEl.style.display = 'block'; return;
-  }
-  if (newPw !== confirm) {
-    errEl.textContent = '兩次輸入的新密碼不相符'; errEl.style.display = 'block'; return;
-  }
-  localStorage.setItem('editorPw', newPw);
-  document.getElementById('cpwCurrent').value = '';
-  document.getElementById('cpwNew').value = '';
-  document.getElementById('cpwConfirm').value = '';
-  closeModal('changePwModal');
-  toast('✅ 密碼已更新', 'ok');
-};
-
-/* ── RENDER ── */
-function renderAssistantProjects() {
-  var el = document.getElementById('assistantListInner');
-  var active = projectOrder.filter(function(k){ return projects[k] && projects[k].status === 'active'; });
-  if (!active.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';
-    return;
-  }
-  el.innerHTML = active.map(function(k){
-    var p = projects[k];
-    return '<div class="psel-item" onclick="selectProject(\'' + k + '\')">' +
-      '<div><div class="psel-name">'+esc(p.name)+'</div>'+
-      '<div class="psel-date">'+p.startDate+' ～ '+p.endDate+'</div></div>'+
-      '<span style="color:var(--accent);font-size:16px">&#8250;</span></div>';
+function renderList(){
+  var el=document.getElementById('listInner');
+  var active=projectOrder.filter(function(k){return projects[k]&&projects[k].status==='active';});
+  if(!active.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';return;}
+  el.innerHTML=active.map(function(k){
+    var p=projects[k];
+    return '<div class="psel-item" onclick="selectProject(''+k+'')">'+
+      '<div><div class="psel-name">'+esc(p.name)+'</div><div class="psel-date">'+p.startDate+' ～ '+p.endDate+'</div></div>'+
+      '<span style="color:var(--text3);font-size:16px">&#8250;</span></div>';
   }).join('');
 }
 
-function renderEditorProjects() {
-  var el = document.getElementById('editorGrid');
-  if (!projectOrder.length) {
-    el.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-ico">&#128193;</div><p>尚無專案，點擊「新增專案」開始</p></div>';
-    return;
-  }
-  el.innerHTML = projectOrder.filter(function(k){ return !!projects[k]; }).map(function(k){
-    var p = projects[k];
-    var fields = p.fields||[];
-    var entries = p.entries||{};
-    // per-field totals
-    var ft = fields.map(function(_,fi){
-      var t=0; Object.values(entries).forEach(function(e){ t+=parseInt(e['f'+fi]||0); }); return t;
-    });
-    var on = p.status === 'active';
-    return '<div class="pcard" draggable="true" data-id="'+k+'"'+
-      ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
-      ' onclick="openDetail(\''+k+'\')">' +
-      '<div class="pcard-left">'+
-        '<div class="pcard-top">'+
-          '<div class="pcard-title">'+esc(p.name)+'</div>'+
-          '<div class="pcard-date">'+p.startDate+' ～ '+p.endDate+'</div>'+
-        '</div>'+
-        '<div class="pcard-badge-wrap"><span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
-      '</div>'+
-      '<div class="pcard-right">'+
-      (fields.length ? fields.map(function(f,i){
-        return '<div class="stat-item">'+
-          '<div class="stat-l">'+esc(f)+'</div>'+
-          '<div class="stat-n">'+ft[i].toLocaleString()+'</div>'+
-        '</div>';
-      }).join('') : '<div class="stat-item"><div class="stat-n" style="color:var(--text3)">—</div></div>')+
-      '</div>'+
-      '</div>';
+window.selectProject=function(id){
+  currentProjectId=id;
+  var p=projects[id];
+  document.getElementById('entryName').textContent=p.name;
+  document.getElementById('statusBanner').className='status-banner';
+  document.getElementById('submitBtn').disabled=false;
+  var today=todayStr();
+  document.getElementById('entryDate').value=today;
+  loadFields(today);
+  document.getElementById('entryDate').onchange=function(){loadFields(this.value);};
+  showView('viewForm');
+};
+
+function loadFields(d){
+  var p=projects[currentProjectId];
+  var existing=(p.entries&&p.entries[d])||null;
+  document.getElementById('entryFields').innerHTML=(p.fields||[]).map(function(f,i){
+    var v=existing?parseInt(existing['f'+i]||0):'';
+    return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
+      '<input class="efield-input'+(existing?' prefilled':'')+'" type="number" min="0" id="ef_'+i+'" value="'+(v!==''?v:'')+'" placeholder="0"></div>';
   }).join('');
+  var sb=document.getElementById('statusBanner');
+  if(existing){sb.textContent='此日期已有填報數字，修改後可重新送出';sb.className='status-banner warn-text show';}
+  else{sb.className='status-banner';}
+  document.getElementById('submitBtn').disabled=false;
 }
 
-function renderDetail(id) {
-  var p = projects[id]; if (!p) return;
-  document.getElementById('detailName').textContent = p.name;
-  document.getElementById('detailDates').textContent = p.startDate + ' ～ ' + p.endDate;
-  var fields = p.fields||[], entries = p.entries||{};
-  /* summary — 只顯示各項目總和，無「累計總人次」 */
-  var ft = fields.map(function(_,fi){
-    var t=0; Object.values(entries).forEach(function(e){ t+=parseInt(e['f'+fi]||0); }); return t;
-  });
-  document.getElementById('summaryRow').innerHTML = fields.map(function(f,i){
-    return '<div class="scard"><div class="scard-l">'+esc(f)+'</div><div class="scard-n">'+ft[i].toLocaleString()+'</div></div>';
-  }).join('');
-  /* table — all cells centered */
-  var dates = Object.keys(entries).sort();
-  var th = document.getElementById('tHead'), tb = document.getElementById('tBody');
-  if (!dates.length) {
-    th.innerHTML=''; tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>'; return;
-  }
-  th.innerHTML='<tr><th>日期</th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'</tr>';
-  var ct=fields.map(function(){return 0;}), gs=0;
-  tb.innerHTML=dates.map(function(d){
-    var e=entries[d]||{};
-    var rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
-    var rs=rv.reduce(function(a,b){return a+b;},0);
-    rv.forEach(function(v,i){ct[i]+=v;}); gs+=rs;
-    return '<tr><td class="date-cell">'+d+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
-  }).join('')+
-  '<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
-}
+window.backToList=function(){showView('viewList');};
 
-function refreshView() {
-  if (currentRole==='assistant') renderAssistantProjects();
-  else if (currentProjectId && document.getElementById('viewDetail').classList.contains('active')) renderDetail(currentProjectId);
-  else if (currentRole==='editor') renderEditorProjects();
-}
-
-/* ── ASSISTANT ── */
-window.selectProject = function(id) {
-  currentProjectId = id;
-  var p = projects[id];
-  document.getElementById('assistantList').style.display = 'none';
-  document.getElementById('assistantForm').style.display = 'block';
-  document.getElementById('entryName').textContent = p.name;
-  var sb=document.getElementById('statusBanner'); sb.className='status-banner';
-  document.getElementById('submitBtn').disabled = false;
-
-  // date picker with today as default
-  // date input already in HTML
-  document.getElementById('entryDate').value = todayStr();
-
-  function loadFieldsForDate(d) {
-    var existing = (p.entries && p.entries[d]) || null;
-    document.getElementById('entryFields').innerHTML = (p.fields||[]).map(function(f,i){
-      var v = existing ? parseInt(existing['f'+i]||0) : '';
-      return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
-        '<input class="efield-input" type="number" min="0" id="ef_'+i+'" value="'+(v!==''?v:'')+'" placeholder="0"'+
-        (existing?' class="efield-input prefilled"':'')+
-        '></div>';
-    }).join('');
-    if (existing) {
-      var sb=document.getElementById('statusBanner'); sb.textContent='此日期已有填報數字，修改後可重新送出'; sb.className='status-banner warn-text show';
-    } else {
-      var sb=document.getElementById('statusBanner'); sb.className='status-banner';
-    }
-    document.getElementById('submitBtn').disabled = false;
-  }
-
-  loadFieldsForDate(todayStr());
-
-  document.getElementById('entryDate').onchange = function() {
-    loadFieldsForDate(this.value);
-  };
+window.handleSubmit=function(){
+  var date=document.getElementById('entryDate').value;
+  if(!date){toast('請選擇填報日期','err');return;}
+  var p=projects[currentProjectId];
+  var values=(p.fields||[]).map(function(f,i){return{label:f,value:parseInt(document.getElementById('ef_'+i).value)||0};});
+  var alreadyFilled=p.entries&&p.entries[date];
+  if(alreadyFilled){if(!confirm('該日期已填報過，確認是否重新填報？'))return;}
+  if(window._dbSet){window._dbSet(currentProjectId,date,values);}
+  else{toast('資料庫尚未就緒，請稍後','err');}
 };
 
-window.backToList = function() {
-  document.getElementById('assistantList').style.display = 'block';
-  document.getElementById('assistantForm').style.display = 'none';
-};
-
-window.handleSubmit = function() {
-  var dateEl = document.getElementById('entryDate');
-  var date = dateEl ? dateEl.value : todayStr();
-  if (!date) { toast('請選擇填報日期', 'err'); return; }
-  var p = projects[currentProjectId];
-  var values = (p.fields||[]).map(function(f,i){
-    return { label:f, value:parseInt(document.getElementById('ef_'+i).value)||0 };
-  });
-  var alreadyFilled = p.entries && p.entries[date];
-  if (alreadyFilled) {
-    if (!confirm('該日期已填報過，確認是否重新填報？')) return;
-  }
-  if (window._dbSubmit) {
-    window._dbSubmit(currentProjectId, date, values);
-  } else {
-    toast('資料庫尚未就緒，請稍後', 'err');
-  }
-};
-
-/* ── EDITOR ── */
-window.openDetail = function(id) {
-  currentProjectId = id;
-  showView('viewDetail');
-  renderDetail(id);
-};
-window.backToEditor = function() {
-  currentProjectId = null;
-  showView('viewEditor');
-  renderEditorProjects();
-};
-
-window.openNewProjectModal = function() {
-  editingProjectId = null;
-  document.getElementById('projectModalTitle').textContent = '新增專案';
-  document.getElementById('fieldName').value = '';
-  document.getElementById('fieldStart').value = '';
-  document.getElementById('fieldEnd').value = '';
-  document.getElementById('fieldList').innerHTML = '';
-  document.getElementById('statusToggle').checked = true;
-  document.getElementById('deleteBtn').style.display = 'none';
-  addFieldItem('一般入場');
-  openModal('projectModal');
-};
-
-window.openEditModal = function() {
-  if (!currentProjectId) return;
-  editingProjectId = currentProjectId;
-  var p = projects[currentProjectId];
-  document.getElementById('projectModalTitle').textContent = '編輯設定';
-  document.getElementById('fieldName').value = p.name;
-  document.getElementById('fieldStart').value = p.startDate;
-  document.getElementById('fieldEnd').value = p.endDate;
-  document.getElementById('statusToggle').checked = p.status === 'active';
-  document.getElementById('deleteBtn').style.display = 'inline-flex';
-  var fl = document.getElementById('fieldList'); fl.innerHTML = '';
-  (p.fields||[]).forEach(function(f){ addFieldItem(f); });
-  openModal('projectModal');
-};
-
-function addFieldItem(val) {
-  var fl = document.getElementById('fieldList');
-  var div = document.createElement('div'); div.className = 'field-item';
-  div.innerHTML = '<input class="fi" placeholder="" value="'+esc(val||'')+'">'+
-    '<button class="rm-btn" onclick="this.parentElement.remove()">&#215;</button>';
-  fl.appendChild(div);
-}
-window.addFieldItem = addFieldItem;
-
-window.openManualModal = function(date) {
-  var p = projects[currentProjectId];
-  document.getElementById('manualSub').textContent = p.name;
-  var d = date || todayStr();
-  document.getElementById('manualDate').value = d;
-  // pre-fill with existing data if any
-  var existing = (p.entries && p.entries[d]) || {};
-  document.getElementById('manualFields').innerHTML = (p.fields||[]).map(function(f,i){
-    var val = parseInt(existing['f'+i]||0);
-    return '<div class="fg"><label class="fl">'+esc(f)+'</label>'+
-      '<input class="fi" type="number" min="0" id="mf_'+i+'" value="'+(val||'')+'"></div>';
-  }).join('');
-  // when date changes, reload existing values
-  document.getElementById('manualDate').onchange = function() {
-    var nd = this.value;
-    var ex = (p.entries && p.entries[nd]) || {};
-    (p.fields||[]).forEach(function(_,i){
-      var el = document.getElementById('mf_'+i);
-      if (el) el.value = parseInt(ex['f'+i]||0)||'';
-    });
-  };
-  openModal('manualModal');
-};
-
-/* ── DRAG & DROP ── */
-window.onDS = function(e){ dragSrcEl=e.currentTarget; dragSrcEl.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragSrcEl.dataset.id); };
-window.onDO = function(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); };
-window.onDL = function(e){ e.currentTarget.classList.remove('drag-over'); };
-window.onDE = function(e){ e.currentTarget.classList.remove('dragging'); };
-window.onDP = function(e){ e.preventDefault(); }; /* overwritten after Firebase ready */
-
-/* ── FIREBASE ── */
 (async function(){
-  try {
-    var fbApp = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    var fbDb  = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
-    var initializeApp=fbApp.initializeApp, getApps=fbApp.getApps;
-    var getDatabase=fbDb.getDatabase, ref=fbDb.ref, set=fbDb.set, update=fbDb.update, remove=fbDb.remove, onValue=fbDb.onValue, get=fbDb.get;
-    var app = getApps().length ? getApps()[0] : initializeApp({databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/'});
-    var db = getDatabase(app);
+  try{
+    var fbApp=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    var fbDb=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+    var initializeApp=fbApp.initializeApp,getApps=fbApp.getApps;
+    var getDatabase=fbDb.getDatabase,ref=fbDb.ref,set=fbDb.set,onValue=fbDb.onValue;
+    var app=getApps().length?getApps()[0]:initializeApp({databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/'});
+    var db=getDatabase(app);
 
     setSyncStatus('syncing','連線中...');
-    onValue(ref(db,'tracker'), function(snap){
-      var d = snap.val()||{};
-      projects = d.projects||{};
-      projectOrder = d.projectOrder||Object.keys(projects);
-      Object.keys(projects).forEach(function(k){ if(projectOrder.indexOf(k)<0) projectOrder.push(k); });
-      projectOrder = projectOrder.filter(function(k){ return !!projects[k]; });
+    onValue(ref(db,'tracker'),function(snap){
+      var d=snap.val()||{};
+      projects=d.projects||{};
+      projectOrder=d.projectOrder||Object.keys(projects);
+      Object.keys(projects).forEach(function(k){if(projectOrder.indexOf(k)<0)projectOrder.push(k);});
+      projectOrder=projectOrder.filter(function(k){return!!projects[k];});
       setSyncStatus('synced','已同步');
-      refreshView();
-    }, function(err){ setSyncStatus('error','連線失敗'); toast('連線失敗：'+err.message,'err'); });
+      renderList();
+    },function(err){setSyncStatus('error','連線失敗');toast('連線失敗：'+err.message,'err');});
 
-    /* Seed if empty */
-    try {
-      var s0 = await new Promise(function(res){ var u=onValue(ref(db,'tracker/projects'),function(s){u();res(s);}); });
-      if (!s0.val()) {
-        await update(ref(db,'tracker/projects/p_citynorth2026'),{name:'2026城西夏樂慶',startDate:'2026-05-16',endDate:'2026-05-31',fields:['服務台人次'],status:'active'});
-        await update(ref(db,'tracker'),{projectOrder:['p_citynorth2026']});
-      }
-    } catch(e){ console.warn('seed skip',e.message); }
-
-    /* DB writes */
-    window._dbSubmit = async function(pid, date, values) {
-      var obj={}; values.forEach(function(v,i){ obj['f'+i]=v.value; });
-      try {
-        await set(ref(db,'tracker/projects/'+pid+'/entries/'+date), obj);
-        /* 送出後：disable inputs & show filled values */
-        values.forEach(function(v,i){
-          var el = document.getElementById('ef_'+i);
-          if (el) { el.value = v.value; el.disabled = true; }
-        });
-        var sb=document.getElementById('statusBanner'); sb.textContent='數據已送出'; sb.className='status-banner show'; document.getElementById('submitBtn').disabled = true;
-        toast('✅ 數據已送出！','ok');
-      } catch(e){ toast('送出失敗：'+e.message,'err'); }
+    window._dbSet=async function(pid,date,values){
+      var obj={};values.forEach(function(v,i){obj['f'+i]=v.value;});
+      try{
+        await set(ref(db,'tracker/projects/'+pid+'/entries/'+date),obj);
+        (p.fields||[]).forEach(function(_,i){var el=document.getElementById('ef_'+i);if(el){el.disabled=true;}});
+        var sb=document.getElementById('statusBanner');sb.textContent='數據已送出';sb.className='status-banner show';
+        document.getElementById('submitBtn').disabled=true;
+        toast('\u2705 數據已送出！','ok');
+      }catch(e){toast('送出失敗：'+e.message,'err');}
     };
-
-    window.saveProject = async function() {
-      var name  = document.getElementById('fieldName').value.trim();
-      var start = document.getElementById('fieldStart').value;
-      var end   = document.getElementById('fieldEnd').value;
-      var fields= Array.from(document.querySelectorAll('#fieldList .field-item .fi')).map(function(i){return i.value.trim();}).filter(Boolean);
-      var status= document.getElementById('statusToggle').checked ? 'active' : 'ended';
-      if (!name||!start||!end){ toast('請填寫活動名稱與日期','err'); return; }
-      if (!fields.length){ toast('請至少新增一個登記項目','err'); return; }
-      var isNew = !editingProjectId;
-      var id = editingProjectId||'p_'+Date.now();
-      setSyncStatus('syncing','儲存中...');
-      try {
-        await update(ref(db,'tracker/projects/'+id),{name:name,startDate:start,endDate:end,fields:fields,status:status});
-        if (isNew) {
-          var snap = await get(ref(db,'tracker/projectOrder'));
-          var cur = snap.val();
-          if (!cur || !Array.isArray(cur)) cur = projectOrder.slice();
-          if (cur.indexOf(id) < 0) cur = cur.concat([id]);
-          await update(ref(db,'tracker'),{projectOrder:cur});
-        }
-        closeModal('projectModal');
-        toast('✅ 已儲存','ok');
-      } catch(e){ toast('儲存失敗：'+e.message,'err'); setSyncStatus('error','儲存失敗'); }
-    };
-
-    window.downloadCSV = function() {
-      var p = projects[currentProjectId];
-      if (!p) return;
-      var fields = p.fields||[], entries = p.entries||{};
-      var dates = Object.keys(entries).sort();
-      if (!dates.length) { toast('尚無數據可下載','err'); return; }
-      var header = ['日期'].concat(fields);
-      var rows = dates.map(function(d){
-        var e = entries[d]||{};
-        var rv = fields.map(function(_,i){ return parseInt(e['f'+i]||0); });
-        return [d].concat(rv);
-      });
-      // totals row
-      var ct = fields.map(function(_,fi){
-        return dates.reduce(function(s,d){ return s+parseInt((entries[d]||{})['f'+fi]||0); },0);
-      });
-      var gs = ct.reduce(function(a,b){return a+b;},0);
-      rows.push(['合計'].concat(ct));
-      var csv = [header].concat(rows).map(function(r){ return r.join(','); }).join('\n');
-      var bom = '\uFEFF'; // UTF-8 BOM for Excel
-      var blob = new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = p.name+'_數據.csv';
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    window.deleteProject = async function() {
-      if (!editingProjectId) return;
-      var p = projects[editingProjectId];
-      if (!confirm('確定要刪除「'+(p?p.name:editingProjectId)+'」？此操作無法復原。')) return;
-      try {
-        await remove(ref(db,'tracker/projects/'+editingProjectId));
-        var newOrder = projectOrder.filter(function(k){ return k !== editingProjectId; });
-        await update(ref(db,'tracker'),{projectOrder:newOrder});
-        closeModal('projectModal');
-        /* if we're in detail view, go back */
-        if (currentProjectId === editingProjectId) { currentProjectId=null; showView('viewEditor'); }
-        toast('專案已刪除');
-      } catch(e){ toast('刪除失敗：'+e.message,'err'); }
-    };
-
-    window.saveManualEntry = async function() {
-      var date = document.getElementById('manualDate').value;
-      if (!date){ toast('請選擇日期','err'); return; }
-      var p=projects[currentProjectId], obj={};
-      (p.fields||[]).forEach(function(_,i){ obj['f'+i]=parseInt(document.getElementById('mf_'+i).value)||0; });
-      try {
-        await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date), obj);
-        closeModal('manualModal');
-        toast('✅ 數據已儲存','ok');
-      } catch(e){ toast('儲存失敗：'+e.message,'err'); }
-    };
-
-    window.onDP = function(e) {
-      e.preventDefault();
-      var tgt=e.currentTarget; tgt.classList.remove('drag-over');
-      if (!dragSrcEl||dragSrcEl===tgt) return;
-      var si=projectOrder.indexOf(dragSrcEl.dataset.id), ti=projectOrder.indexOf(tgt.dataset.id);
-      if (si<0||ti<0) return;
-      projectOrder.splice(si,1); projectOrder.splice(ti,0,dragSrcEl.dataset.id);
-      update(ref(db,'tracker'),{projectOrder:projectOrder.slice()});
-    };
-
-    console.log('Firebase ready');
-  } catch(err){
-    console.error('Firebase error:',err);
-    setSyncStatus('error','連線失敗');
-    toast('初始化失敗：'+err.message,'err');
-  }
+  }catch(err){setSyncStatus('error','連線失敗');toast('初始化失敗：'+err.message,'err');}
 })();
 </script>
 </body>
