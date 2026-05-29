@@ -315,7 +315,7 @@ function renderEditorProjects(){
     var on=p.status==='active';
     return '<div class="pcard" draggable="true" data-id="'+k+'"'+
       ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
-      ' onclick="openDetail(''+k+'')">'+
+      ' onclick="openDetail(\''+k+'\')">'+
       '<div class="pcard-left">'+
         '<div><div class="pcard-title">'+esc(p.name)+'</div><div class="pcard-date">'+p.startDate+' ～ '+p.endDate+'</div></div>'+
         '<div class="pcard-badge-wrap"><span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
