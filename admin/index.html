@@ -470,7 +470,7 @@ window.onDP=function(e){e.preventDefault();};// overwritten after Firebase ready
       if(!user){showView('viewLogin');return;}
       currentUser=user;
       // check admin
-      var snap=await get(ref(db,'admins/'+user.uid));
+      var snap=await get(ref(db,'admin/'+user.uid));
       if(snap.val()===true){
         isAdmin=true;
         // show user info
