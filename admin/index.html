@@ -18,8 +18,6 @@
 html{font-size:16px;}
 body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-weight:400;line-height:1.7;-webkit-font-smoothing:antialiased;}
 .view{display:none;}.view.active{display:block;}
-
-/* TOPBAR */
 .topbar{height:54px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:200;}
 .brand{font-size:13px;font-weight:500;color:var(--text);letter-spacing:.02em;display:flex;align-items:center;gap:8px;}
 .topbar-right{display:flex;align-items:center;gap:14px;}
@@ -27,40 +25,34 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .sdot{width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .4s;}
 .sdot.synced{background:var(--success);}.sdot.syncing{background:var(--warn);animation:blink 1.2s infinite;}.sdot.error{background:var(--danger);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.user-info{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);}
-.user-avatar{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--line);}
-.logout-btn{font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 0;border-bottom:1px solid transparent;transition:all .15s;}
+.topbar-link{font-size:12px;color:var(--text3);text-decoration:none;border-bottom:1px solid var(--text3);padding-bottom:1px;transition:color .15s,border-color .15s;letter-spacing:.02em;}
+.topbar-link:hover{color:var(--accent);border-color:var(--accent);}
+.user-info{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);}
+.logout-btn{font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;border-bottom:1px solid var(--text3);line-height:1;transition:all .15s;}
 .logout-btn:hover{color:var(--danger);border-color:var(--danger);}
-
-/* LOGIN SCREEN */
 .login-screen{min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center;padding:40px 20px;}
-.login-box{width:100%;max-width:340px;text-align:center;}
-.login-title{font-size:22px;font-weight:400;letter-spacing:-.3px;margin-bottom:8px;color:var(--text);}
-.login-sub{font-size:13px;color:var(--text3);margin-bottom:36px;line-height:1.6;}
-.google-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:10px;
-  width:100%;padding:13px 20px;
-  background:var(--surface);border:1.5px solid var(--line);
-  font-size:14px;font-weight:500;color:var(--text);
-  cursor:pointer;font-family:inherit;
-  transition:border-color .15s,box-shadow .15s;letter-spacing:.01em;
-}
-.google-btn:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(82,111,189,.12);}
-.no-access{margin-top:24px;font-size:13px;color:var(--danger);display:none;padding:12px;border:1px solid var(--danger);background:rgba(203,119,88,.06);}
-.uid-box{margin-top:24px;padding:14px;background:var(--accent-pale);border:1px solid var(--accent);font-size:12px;color:var(--text2);text-align:left;display:none;}
-.uid-box strong{display:block;margin-bottom:6px;color:var(--text);font-size:13px;}
-.uid-val{word-break:break-all;font-family:monospace;font-size:11px;color:var(--accent);user-select:all;}
-.uid-note{margin-top:8px;font-size:11px;color:var(--text3);line-height:1.5;}
-
-/* LAYOUT */
+.login-box{width:100%;max-width:320px;}
+.login-title{font-size:20px;font-weight:500;letter-spacing:-.3px;margin-bottom:6px;color:var(--text);}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:32px;line-height:1.6;}
+.login-form{display:flex;flex-direction:column;gap:18px;}
+.lf-group{display:flex;flex-direction:column;gap:6px;}
+.lf-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
+.lf-input{background:none;border:none;border-bottom:1px solid var(--line);font-size:16px;font-family:inherit;color:var(--text);padding:8px 0;outline:none;transition:border-color .15s;width:100%;}
+.lf-input:focus{border-color:var(--text);}
+.lf-input-wrap{position:relative;display:flex;align-items:center;}
+.lf-input-wrap .lf-input{padding-right:40px;}
+.pw-toggle{position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;display:flex;align-items:center;transition:color .15s;}
+.pw-toggle:hover{color:var(--text);}
+.login-error{font-size:12px;color:var(--danger);display:none;padding:8px 0;}
+.login-btn{background:var(--accent);color:#fff;border:none;padding:13px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;transition:background .15s;width:100%;letter-spacing:.02em;}
+.login-btn:hover{background:#3d5aa8;}
+.login-btn:active{transform:scale(.98);}
 .wrap{max-width:680px;margin:0 auto;padding:36px 20px 60px;}
 .ph{margin-bottom:32px;}.ph-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 .ph-title{font-size:20px;font-weight:500;letter-spacing:-.3px;color:var(--text);line-height:1.2;}
 .ph-sub{font-size:13px;color:var(--text3);margin-top:6px;}.ph-line{height:1px;background:var(--line);margin-top:18px;}
 .back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-bottom:28px;letter-spacing:.03em;transition:color .15s;}
 .back-btn:hover{color:var(--text);}.back-btn::before{content:"\2190";font-size:14px;}
-
-/* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:400;cursor:pointer;font-family:inherit;line-height:1;transition:all .15s;border:none;padding:11px 22px;letter-spacing:.02em;}
 .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#3d5aa8;}.btn-primary:active{transform:scale(.98);}
 .btn-outline{background:none;color:var(--text);border:1px solid var(--line);}.btn-outline:hover{border-color:var(--text);}
@@ -70,8 +62,6 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .btn-sm{padding:7px 14px;font-size:12px;}
 .add-field-btn{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:12px;cursor:pointer;background:none;border:none;font-family:inherit;padding:6px 0;margin-top:6px;}
 .add-field-btn:hover{text-decoration:underline;}
-
-/* CARDS */
 .project-grid{display:flex;flex-direction:column;gap:12px;}
 .pcard{background:var(--surface);border:1.5px solid var(--line);padding:20px;cursor:pointer;transition:border-color .18s,box-shadow .18s;display:flex;align-items:stretch;}
 .pcard:hover{border-color:var(--text3);box-shadow:0 2px 10px rgba(0,0,0,.07);}
@@ -85,15 +75,11 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .stat-item{display:flex;flex-direction:column;gap:6px;}
 .stat-l{font-size:12px;color:var(--text3);line-height:1;}
 .stat-n{font-size:22px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1.1;}
-
-/* SUMMARY */
 .summary-row{display:flex;gap:0;border-top:1px solid var(--line);margin-bottom:32px;}
 .scard{flex:1;padding:20px 0;border-right:1px solid var(--line);text-align:center;}
 .scard:last-child{border-right:none;}
 .scard-n{font-size:26px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1;}
 .scard-l{font-size:14px;color:var(--text2);margin-bottom:6px;}
-
-/* TABLE */
 .table-section{margin-bottom:40px;}
 .table-header{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
 .table-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
@@ -108,8 +94,6 @@ td{padding:12px 12px;border-bottom:1px solid var(--line-light);font-size:13px;te
 td:first-child{text-align:left;padding-left:0;color:var(--text2);}
 tr:last-child td{border-bottom:none;}
 .total-row td{font-weight:500;color:var(--text);border-top:1px solid var(--line);border-bottom:none;font-size:13px;}
-
-/* MODAL */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;align-items:flex-end;justify-content:center;padding:0;}
 .overlay.open{display:flex;}
 .modal{background:var(--surface);width:100%;max-width:520px;max-height:92vh;overflow-y:auto;padding:28px 24px 36px;animation:mIn .22s ease;border-top:1px solid var(--line);}
@@ -136,8 +120,6 @@ tr:last-child td{border-bottom:none;}
 .tog-sl:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.15);}
 input:checked+.tog-sl{background:var(--text);}
 input:checked+.tog-sl:before{transform:translateX(18px);}
-
-/* TOAST */
 .toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 40px);max-width:360px;}
 .toast{background:var(--text);color:#fff;padding:12px 18px;font-size:13px;width:100%;text-align:center;letter-spacing:.02em;animation:tIn .2s ease;}
 .toast.ok{background:var(--success);}.toast.err{background:var(--danger);}
@@ -152,7 +134,6 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="brand">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -169,8 +150,8 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
       <div class="sdot" id="syncDot"></div>
       <span id="syncText">—</span>
     </div>
+    <a href="../index.html" class="topbar-link">協助者頁面</a>
     <div class="user-info" id="userInfo" style="display:none">
-      <img class="user-avatar" id="userAvatar" src="" alt="">
       <span id="userName"></span>
       <button class="logout-btn" onclick="doLogout()">登出</button>
     </div>
@@ -182,18 +163,23 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
   <div class="login-screen">
     <div class="login-box">
       <div class="login-title">編輯者登入</div>
-      <div class="login-sub">使用 Google 帳號登入<br>系統將驗證您的編輯權限</div>
-      <button class="google-btn" onclick="doLogin()">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-        使用 Google 帳號登入
-      </button>
-      <div class="no-access" id="noAccess">
-        您的帳號尚未取得編輯權限。<br>請將下方 UID 傳給系統管理員。
-      </div>
-      <div class="uid-box" id="uidBox">
-        <strong>您的 UID</strong>
-        <div class="uid-val" id="uidVal"></div>
-        <div class="uid-note">請複製此 UID 傳給管理員，管理員新增後即可使用編輯功能。</div>
+      <div class="login-sub">請輸入帳號與密碼</div>
+      <div class="login-form">
+        <div class="lf-group">
+          <label class="lf-label">帳號</label>
+          <input class="lf-input" type="text" id="loginUser" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+        </div>
+        <div class="lf-group">
+          <label class="lf-label">密碼</label>
+          <div class="lf-input-wrap">
+            <input class="lf-input" type="password" id="loginPass" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+            <button type="button" class="pw-toggle" onclick="togglePw('loginPass',this)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="login-error" id="loginError">帳號或密碼錯誤，請再試一次</div>
+        <button class="login-btn" onclick="doLogin()">登入</button>
       </div>
     </div>
   </div>
@@ -205,9 +191,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     <div class="ph">
       <div class="ph-row">
         <div class="ph-title">專案</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增</button>
-        </div>
+        <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增</button>
       </div>
       <div class="ph-line"></div>
     </div>
@@ -293,7 +277,6 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 
 <script>
 var projects={},projectOrder=[],currentProjectId=null,editingProjectId=null,dragSrcEl=null;
-var currentUser=null,isAdmin=false;
 
 function showView(id){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.getElementById(id).classList.add('active');}
 function setSyncStatus(s,t){document.getElementById('syncDot').className='sdot '+s;document.getElementById('syncText').textContent=t;}
@@ -305,7 +288,14 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function toast(msg,type){var w=document.getElementById('toastWrap');var t=document.createElement('div');t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');t.textContent=msg;w.appendChild(t);setTimeout(function(){t.remove();},3000);}
 document.querySelectorAll('.overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});});
 
-/* RENDER */
+window.togglePw=function(id,btn){
+  var el=document.getElementById(id);
+  var eyeOpen='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var eyeOff='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  if(el.type==='password'){el.type='text';btn.innerHTML=eyeOff;}
+  else{el.type='password';btn.innerHTML=eyeOpen;}
+};
+
 function renderEditorProjects(){
   var el=document.getElementById('editorGrid');
   if(!projectOrder.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128193;</div><p>尚無專案，點擊「新增」開始</p></div>';return;}
@@ -341,10 +331,9 @@ function renderDetail(id){
   th.innerHTML='<tr><th>日期</th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'</tr>';
   var ct=fields.map(function(){return 0;});
   tb.innerHTML=dates.map(function(d){
-    var e=entries[d]||{};
-    var rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
+    var e=entries[d]||{},rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
     rv.forEach(function(v,i){ct[i]+=v;});
-    return '<tr><td class="date-cell">'+d+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
+    return '<tr><td>'+d+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
   }).join('')+'<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
 }
 
@@ -353,10 +342,8 @@ function refreshView(){
   else if(document.getElementById('viewEditor').classList.contains('active'))renderEditorProjects();
 }
 
-/* EDITOR ACTIONS */
 window.openDetail=function(id){currentProjectId=id;showView('viewDetail');renderDetail(id);};
 window.backToEditor=function(){currentProjectId=null;showView('viewEditor');renderEditorProjects();};
-
 window.openNewProjectModal=function(){
   editingProjectId=null;
   document.getElementById('projectModalTitle').textContent='新增專案';
@@ -389,7 +376,6 @@ function addFieldItem(val){
   fl.appendChild(div);
 }
 window.addFieldItem=addFieldItem;
-
 window.openManualModal=function(date){
   var p=projects[currentProjectId];
   document.getElementById('manualSub').textContent=p.name;
@@ -405,102 +391,89 @@ window.openManualModal=function(date){
   };
   openModal('manualModal');
 };
-
 window.downloadCSV=function(){
   var p=projects[currentProjectId];if(!p)return;
   var fields=p.fields||[],entries=p.entries||{},dates=Object.keys(entries).sort();
   if(!dates.length){toast('尚無數據可下載','err');return;}
-  var header=['日期'].concat(fields);
   var rows=dates.map(function(d){var e=entries[d]||{};return[d].concat(fields.map(function(_,i){return parseInt(e['f'+i]||0);}));});
   var ct=fields.map(function(_,fi){return dates.reduce(function(s,d){return s+parseInt((entries[d]||{})['f'+fi]||0);},0);});
   rows.push(['合計'].concat(ct));
-  var csv=[header].concat(rows).map(function(r){return r.join(',');}).join('\n');
+  var csv=[['日期'].concat(fields)].concat(rows).map(function(r){return r.join(',');}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download=p.name+'_數據.csv';a.click();URL.revokeObjectURL(url);
 };
-
-/* DRAG DROP */
 window.onDS=function(e){dragSrcEl=e.currentTarget;dragSrcEl.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dragSrcEl.dataset.id);};
 window.onDO=function(e){e.preventDefault();e.currentTarget.classList.add('drag-over');};
 window.onDL=function(e){e.currentTarget.classList.remove('drag-over');};
 window.onDE=function(e){e.currentTarget.classList.remove('dragging');};
-window.onDP=function(e){e.preventDefault();};// overwritten after Firebase ready
+window.onDP=function(e){e.preventDefault();};
 
-/* FIREBASE */
 (async function(){
   try{
     var fbApp=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     var fbAuth=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
     var fbDb=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
-
     var initializeApp=fbApp.initializeApp,getApps=fbApp.getApps;
-    var getAuth=fbAuth.getAuth,GoogleAuthProvider=fbAuth.GoogleAuthProvider,signInWithPopup=fbAuth.signInWithPopup,signOut=fbAuth.signOut,onAuthStateChanged=fbAuth.onAuthStateChanged;
+    var getAuth=fbAuth.getAuth,signInWithEmailAndPassword=fbAuth.signInWithEmailAndPassword,signOut=fbAuth.signOut,onAuthStateChanged=fbAuth.onAuthStateChanged;
     var getDatabase=fbDb.getDatabase,ref=fbDb.ref,set=fbDb.set,update=fbDb.update,remove=fbDb.remove,onValue=fbDb.onValue,get=fbDb.get;
-
-    var FIREBASE_CONFIG={
-      apiKey:"AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ",
-      authDomain:"project-1794474641398451810.firebaseapp.com",
-      databaseURL:"https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId:"project-1794474641398451810",
-      storageBucket:"project-1794474641398451810.firebasestorage.app",
-      messagingSenderId:"660717432614",
-      appId:"1:660717432614:web:5067d9a791339b6c275be7"
-    };
-    var app=getApps().length?getApps()[0]:initializeApp(FIREBASE_CONFIG);
+    var DOMAIN='@bpl.com';
+    var app=getApps().length?getApps()[0]:initializeApp({
+      apiKey:'AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ',
+      authDomain:'project-1794474641398451810.firebaseapp.com',
+      databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app',
+      projectId:'project-1794474641398451810',
+      storageBucket:'project-1794474641398451810.firebasestorage.app',
+      messagingSenderId:'660717432614',
+      appId:'1:660717432614:web:5067d9a791339b6c275be7'
+    });
     var auth=getAuth(app);
     var db=getDatabase(app);
-    var provider=new GoogleAuthProvider();
 
-    /* AUTH */
     window.doLogin=async function(){
-      try{await signInWithPopup(auth,provider);}
-      catch(e){if(e.code!=='auth/popup-closed-by-user')toast('登入失敗：'+e.message,'err');}
+      var user=document.getElementById('loginUser').value.trim();
+      var pass=document.getElementById('loginPass').value;
+      var errEl=document.getElementById('loginError');
+      errEl.style.display='none';
+      if(!user||!pass){errEl.style.display='block';return;}
+      var email=user+DOMAIN;
+      try{
+        await signInWithEmailAndPassword(auth,email,pass);
+      }catch(e){
+        errEl.style.display='block';
+        document.getElementById('loginPass').value='';
+      }
     };
+
     window.doLogout=async function(){
       await signOut(auth);
-      showView('viewLogin');
-      document.getElementById('userInfo').style.display='none';
-      document.getElementById('noAccess').style.display='none';
-      document.getElementById('uidBox').style.display='none';
-      isAdmin=false;currentUser=null;
     };
 
-    onAuthStateChanged(auth,async function(user){
-      if(!user){showView('viewLogin');return;}
-      currentUser=user;
-      // check admin
-      var snap=await get(ref(db,'admin/'+user.uid));
-      if(snap.val()===true){
-        isAdmin=true;
-        // show user info
-        document.getElementById('userInfo').style.display='flex';
-        document.getElementById('userName').textContent=user.displayName||user.email;
-        document.getElementById('userAvatar').src=user.photoURL||'';
-        // start listening
-        setSyncStatus('syncing','連線中...');
-        onValue(ref(db,'tracker'),function(snap){
-          var d=snap.val()||{};
-          projects=d.projects||{};
-          projectOrder=d.projectOrder||Object.keys(projects);
-          Object.keys(projects).forEach(function(k){if(projectOrder.indexOf(k)<0)projectOrder.push(k);});
-          projectOrder=projectOrder.filter(function(k){return!!projects[k];});
-          setSyncStatus('synced','已同步');
-          refreshView();
-        },function(err){setSyncStatus('error','連線失敗');});
-        showView('viewEditor');
-      } else {
-        // no access — show UID for registration
-        document.getElementById('noAccess').style.display='block';
-        document.getElementById('uidBox').style.display='block';
-        document.getElementById('uidVal').textContent=user.uid;
-        document.getElementById('userInfo').style.display='flex';
-        document.getElementById('userName').textContent=user.displayName||user.email;
-        document.getElementById('userAvatar').src=user.photoURL||'';
+    onAuthStateChanged(auth,function(user){
+      if(!user){
+        showView('viewLogin');
+        document.getElementById('userInfo').style.display='none';
+        setSyncStatus('','—');
+        return;
       }
+      var displayName=user.email.replace(DOMAIN,'');
+      document.getElementById('userInfo').style.display='flex';
+      document.getElementById('userName').textContent=displayName;
+      setSyncStatus('syncing','連線中...');
+      onValue(ref(db,'tracker'),function(snap){
+        var d=snap.val()||{};
+        projects=d.projects||{};
+        projectOrder=d.projectOrder||Object.keys(projects);
+        Object.keys(projects).forEach(function(k){if(projectOrder.indexOf(k)<0)projectOrder.push(k);});
+        projectOrder=projectOrder.filter(function(k){return!!projects[k];});
+        setSyncStatus('synced','已同步');
+        if(document.getElementById('viewLogin').classList.contains('active')){
+          showView('viewEditor');
+        }
+        refreshView();
+      },function(err){setSyncStatus('error','連線失敗');});
     });
 
-    /* DB WRITES */
     window.saveProject=async function(){
       var name=document.getElementById('fieldName').value.trim();
       var start=document.getElementById('fieldStart').value;
