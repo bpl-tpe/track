@@ -438,7 +438,15 @@ window.onDP=function(e){e.preventDefault();};// overwritten after Firebase ready
     var getAuth=fbAuth.getAuth,GoogleAuthProvider=fbAuth.GoogleAuthProvider,signInWithPopup=fbAuth.signInWithPopup,signOut=fbAuth.signOut,onAuthStateChanged=fbAuth.onAuthStateChanged;
     var getDatabase=fbDb.getDatabase,ref=fbDb.ref,set=fbDb.set,update=fbDb.update,remove=fbDb.remove,onValue=fbDb.onValue,get=fbDb.get;
 
-    var FIREBASE_CONFIG={databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/'};
+    var FIREBASE_CONFIG={
+      apiKey:"AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ",
+      authDomain:"project-1794474641398451810.firebaseapp.com",
+      databaseURL:"https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId:"project-1794474641398451810",
+      storageBucket:"project-1794474641398451810.firebasestorage.app",
+      messagingSenderId:"660717432614",
+      appId:"1:660717432614:web:5067d9a791339b6c275be7"
+    };
     var app=getApps().length?getApps()[0]:initializeApp(FIREBASE_CONFIG);
     var auth=getAuth(app);
     var db=getDatabase(app);
