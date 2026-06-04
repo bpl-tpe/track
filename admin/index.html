@@ -80,8 +80,19 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .scard:last-child{border-right:none;}
 .scard-n{font-size:26px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1;}
 .scard-l{font-size:14px;color:var(--text2);margin-bottom:6px;}
-.table-section{margin-bottom:40px;}
-.table-header{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.table-section{margin-bottom:10px;}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.filter-bar{
+  overflow:hidden;max-height:0;opacity:0;
+  transition:max-height .3s ease, opacity .3s ease, padding .3s ease;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line-light);padding:0;
+}
+.filter-bar.open{max-height:60px;opacity:1;padding:8px 0;}
+.filter-bar .fi{max-width:140px;padding:4px 0;font-size:13px;}
+.filter-bar-label{font-size:11px;color:var(--text3);letter-spacing:.03em;white-space:nowrap;}
+#filterBtn{transition:transform .3s ease;}
+#filterBtn.active{transform:translateX(-4px);color:var(--accent);border-color:var(--accent);}
 .table-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
 .table-actions{display:flex;gap:6px;}
 .tbl-btn{font-size:11px;font-weight:500;color:var(--text2);background:none;border:1px solid var(--line);cursor:pointer;font-family:inherit;padding:5px 10px;letter-spacing:.02em;transition:all .15s;}
@@ -218,9 +229,20 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
       <div class="table-header">
         <span class="table-label" style="color:var(--accent);font-weight:500;font-size:13px;">活動數據</span>
         <div class="table-actions">
+          <button class="tbl-btn" id="filterBtn" onclick="toggleFilterBar()" title="篩選日期">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
           <button class="tbl-btn" onclick="openManualModal()">編輯數據</button>
           <button class="tbl-btn" onclick="downloadCSV()">下載 CSV</button>
         </div>
+      </div>
+      <div id="filterBar" class="filter-bar">
+        <span class="filter-bar-label">從</span>
+        <input type="date" id="filterFrom" class="fi" onchange="applyFilter()">
+        <span class="filter-bar-label">至</span>
+        <input type="date" id="filterTo" class="fi" onchange="applyFilter()">
+        <button class="tbl-btn" onclick="clearFilter()" style="font-size:11px;padding:4px 8px;">清除</button>
+      </div>
       </div>
       <div class="table-wrap">
         <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
@@ -327,6 +349,47 @@ function formatDate(d){
   return yy+'/'+parts[1]+'/'+parts[2]+'（'+week+'）';
 }
 
+var tableSort = 'asc';
+var tableFilterFrom = '';
+var tableFilterTo = '';
+
+var SVG_ASC  = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
+var SVG_DESC = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+window.toggleSort = function() {
+  tableSort = tableSort === 'asc' ? 'desc' : 'asc';
+  renderDetail(currentProjectId);
+};
+
+window.toggleFilterBar = function() {
+  var bar = document.getElementById('filterBar');
+  var btn = document.getElementById('filterBtn');
+  var isOpen = bar.classList.contains('open');
+  if (isOpen) {
+    bar.classList.remove('open');
+    btn.classList.remove('active');
+  } else {
+    bar.classList.add('open');
+    btn.classList.add('active');
+    setTimeout(function(){ document.getElementById('filterFrom').focus(); }, 320);
+  }
+};
+
+window.applyFilter = function() {
+  tableFilterFrom = document.getElementById('filterFrom').value || '';
+  tableFilterTo   = document.getElementById('filterTo').value   || '';
+  renderDetail(currentProjectId);
+};
+
+window.clearFilter = function() {
+  tableFilterFrom = ''; tableFilterTo = '';
+  document.getElementById('filterFrom').value = '';
+  document.getElementById('filterTo').value = '';
+  document.getElementById('filterBar').classList.remove('open');
+  document.getElementById('filterBtn').classList.remove('active');
+  renderDetail(currentProjectId);
+};
+
 function renderDetail(id){
   var p=projects[id];if(!p)return;
   document.getElementById('detailName').textContent=p.name;
@@ -336,10 +399,26 @@ function renderDetail(id){
   document.getElementById('summaryRow').innerHTML=fields.map(function(f,i){
     return '<div class="scard"><div class="scard-l">'+esc(f)+'</div><div class="scard-n">'+ft[i].toLocaleString()+'</div></div>';
   }).join('');
-  var dates=Object.keys(entries).sort();
+
+  var allDates=Object.keys(entries).sort();
+  if(tableSort==='desc') allDates=allDates.slice().reverse();
+  var dates = allDates.filter(function(d){
+    if(tableFilterFrom && d < tableFilterFrom) return false;
+    if(tableFilterTo   && d > tableFilterTo)   return false;
+    return true;
+  });
+
   var th=document.getElementById('tHead'),tb=document.getElementById('tBody');
-  if(!dates.length){th.innerHTML='';tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>';return;}
-  th.innerHTML='<tr><th>日期</th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'</tr>';
+  if(!allDates.length){th.innerHTML='';tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>';return;}
+
+  var sortIcon = tableSort==='asc' ? SVG_ASC : SVG_DESC;
+  th.innerHTML='<tr><th style="cursor:pointer;user-select:none;" onclick="toggleSort()">日期 <span style="vertical-align:middle;opacity:.6">'+sortIcon+'</span></th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'</tr>';
+
+  if(!dates.length){
+    tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:24px;color:var(--text3)">此日期無數據</td></tr>';
+    return;
+  }
+
   var ct=fields.map(function(){return 0;});
   tb.innerHTML=dates.map(function(d){
     var e=entries[d]||{},rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
@@ -353,7 +432,17 @@ function refreshView(){
   else if(document.getElementById('viewEditor').classList.contains('active'))renderEditorProjects();
 }
 
-window.openDetail=function(id){currentProjectId=id;showView('viewDetail');renderDetail(id);};
+window.openDetail=function(id){
+  currentProjectId=id;
+  tableSort='asc';
+  tableFilterFrom=''; tableFilterTo='';
+  document.getElementById('filterFrom').value='';
+  document.getElementById('filterTo').value='';
+  document.getElementById('filterBar').classList.remove('open');
+  document.getElementById('filterBtn').classList.remove('active');
+  showView('viewDetail');
+  renderDetail(id);
+};
 window.backToEditor=function(){currentProjectId=null;showView('viewEditor');renderEditorProjects();};
 window.openNewProjectModal=function(){
   editingProjectId=null;
@@ -383,8 +472,11 @@ window.openEditModal=function(){
 function addFieldItem(val){
   var fl=document.getElementById('fieldList');
   var div=document.createElement('div');div.className='field-item';
-  div.innerHTML='<input class="fi" placeholder="" value="'+esc(val||'')+'"><button class="rm-btn" onclick="this.parentElement.remove()">&#215;</button>';
+  div.innerHTML='<input class="fi" placeholder="輸入項目名稱" value="'+esc(val||'')+'"><button class="rm-btn" onclick="this.parentElement.remove()">&#215;</button>';
   fl.appendChild(div);
+  // focus the new input
+  var inputs=fl.querySelectorAll('.field-item input');
+  if(inputs.length) inputs[inputs.length-1].focus();
 }
 window.addFieldItem=addFieldItem;
 window.openManualModal=function(date){
