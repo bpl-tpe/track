@@ -149,9 +149,16 @@ window.selectProject=function(id){
   document.getElementById('statusBanner').className='status-banner';
   document.getElementById('submitBtn').disabled=false;
   var today=todayStr();
-  document.getElementById('entryDate').value=today;
-  loadFields(today);
-  document.getElementById('entryDate').onchange=function(){loadFields(this.value);};
+  // clamp today to project date range
+  var d=today;
+  if(p.startDate && d < p.startDate) d=p.startDate;
+  if(p.endDate   && d > p.endDate)   d=p.endDate;
+  var dateEl=document.getElementById('entryDate');
+  dateEl.value=d;
+  dateEl.min=p.startDate||'';
+  dateEl.max=p.endDate||'';
+  loadFields(d);
+  dateEl.onchange=function(){loadFields(this.value);};
   showView('viewForm');
 };
 
