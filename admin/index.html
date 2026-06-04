@@ -71,7 +71,7 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .pcard-title{font-size:17px;font-weight:500;color:var(--accent);margin-bottom:5px;line-height:1.4;}
 .pcard-date{font-size:12px;color:var(--text3);}.pcard-badge-wrap{margin-top:14px;}
 .badge{font-size:10px;font-weight:500;padding:2px 8px;letter-spacing:.04em;border:1px solid;display:inline-block;}
-.badge-on{color:var(--success);border-color:var(--success);}.badge-off{color:var(--text3);border-color:var(--line);}
+.badge-on{color:#fff;background:var(--success);border-color:var(--success);}.badge-off{color:#fff;background:var(--text3);border-color:var(--text3);}
 .pcard-right{width:40%;display:flex;flex-direction:column;gap:12px;padding-left:16px;justify-content:center;}
 .stat-item{display:flex;flex-direction:column;gap:6px;}
 .stat-l{font-size:12px;color:var(--text3);line-height:1;}
@@ -489,12 +489,18 @@ window.openManualModal=function(date){
   var p=projects[currentProjectId];
   document.getElementById('manualSub').textContent=p.name;
   var d=date||todayStr();
-  document.getElementById('manualDate').value=d;
+  // clamp to project date range
+  if(p.startDate && d < p.startDate) d=p.startDate;
+  if(p.endDate   && d > p.endDate)   d=p.endDate;
+  var dateEl=document.getElementById('manualDate');
+  dateEl.value=d;
+  dateEl.min=p.startDate||'';
+  dateEl.max=p.endDate||'';
   var existing=(p.entries&&p.entries[d])||{};
   document.getElementById('manualFields').innerHTML=(p.fields||[]).map(function(f,i){
     return '<div class="fg"><label class="fl">'+esc(f)+'</label><input class="fi" type="number" min="0" id="mf_'+i+'" value="'+(parseInt(existing['f'+i]||0)||'')+'"></div>';
   }).join('');
-  document.getElementById('manualDate').onchange=function(){
+  dateEl.onchange=function(){
     var nd=this.value,ex=(p.entries&&p.entries[nd])||{};
     (p.fields||[]).forEach(function(_,i){var el=document.getElementById('mf_'+i);if(el)el.value=parseInt(ex['f'+i]||0)||'';});
   };
