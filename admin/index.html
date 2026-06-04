@@ -93,7 +93,57 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .filter-bar .fi{max-width:140px;padding:4px 0;font-size:13px;}
 .filter-bar-label{font-size:11px;color:var(--text3);letter-spacing:.03em;white-space:nowrap;}
 #filterBtn{transition:transform .3s ease;}
-#filterBtn.active{transform:translateX(-4px);color:var(--accent);border-color:var(--accent);}
+#editDataBtn.editing{background:var(--text);color:#fff;border-color:var(--text);}
+/* 編輯模式 input — 無框無線，完全透明 */
+.td-input{
+  width:100%;
+  background:transparent;
+  border:none;outline:none;
+  font-size:13px;font-weight:400;
+  text-align:center;
+  font-family:inherit;color:var(--text);
+  padding:4px 0;
+  -moz-appearance:textfield;
+}
+.td-input::-webkit-outer-spin-button,.td-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.td-input:focus{color:var(--accent);}
+
+/* 刪除按鈕 — 圓形紅色 */
+.del-row-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:50%;
+  background:rgba(203,119,88,.1);
+  border:none;
+  cursor:pointer;color:var(--danger);
+  transition:all .18s;vertical-align:middle;
+}
+.del-row-btn:hover{
+  background:var(--danger);color:#fff;
+  transform:scale(1.12);
+}
+
+/* 新增列 */
+.add-row-tr td{padding:12px 14px 12px 16px;border-top:1.5px dashed var(--line);}
+.add-row-tr{background:#fafafa !important;}
+.add-date-input{
+  background:transparent;
+  border:none;outline:none;
+  font-size:13px;font-family:inherit;color:var(--text);
+  padding:4px 0;
+}
+.add-row-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:50%;
+  background:rgba(82,111,189,.12);
+  border:none;
+  cursor:pointer;color:var(--accent);
+  font-size:16px;line-height:1;font-family:inherit;
+  transition:all .18s;
+}
+.add-row-btn:hover{
+  background:var(--accent);color:#fff;
+  transform:scale(1.12);
+}
 .table-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
 .table-actions{display:flex;gap:6px;}
 .tbl-btn{font-size:11px;font-weight:500;color:var(--text2);background:none;border:1px solid var(--line);cursor:pointer;font-family:inherit;padding:5px 10px;letter-spacing:.02em;transition:all .15s;}
@@ -236,7 +286,9 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
           <button class="tbl-btn" id="filterBtn" onclick="toggleFilterBar()" title="篩選日期">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </button>
-          <button class="tbl-btn" onclick="openManualModal()">編輯數據</button>
+          <button class="tbl-btn" id="editDataBtn" onclick="toggleEditMode()" title="編輯數據" style="padding:5px 8px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
           <button class="tbl-btn" onclick="downloadCSV()">下載 CSV</button>
         </div>
       </div>
@@ -396,6 +448,21 @@ window.clearFilter = function() {
   renderDetail(currentProjectId);
 };
 
+var tableEditMode = false;
+
+var SVG_PENCIL = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+var SVG_CHECK  = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+window.toggleEditMode = function() {
+  tableEditMode = !tableEditMode;
+  var btn = document.getElementById('editDataBtn');
+  btn.innerHTML = SVG_PENCIL;
+  btn.title = tableEditMode ? '完成編輯' : '編輯數據';
+  if (tableEditMode) btn.classList.add('editing');
+  else btn.classList.remove('editing');
+  renderDetail(currentProjectId);
+};
+
 function renderDetail(id){
   var p=projects[id];if(!p)return;
   document.getElementById('detailName').textContent=p.name;
@@ -408,17 +475,23 @@ function renderDetail(id){
 
   var allDates=Object.keys(entries).sort();
   if(tableSort==='desc') allDates=allDates.slice().reverse();
-  var dates = allDates.filter(function(d){
-    if(tableFilterFrom && d < tableFilterFrom) return false;
-    if(tableFilterTo   && d > tableFilterTo)   return false;
+  var dates=allDates.filter(function(d){
+    if(tableFilterFrom && d<tableFilterFrom) return false;
+    if(tableFilterTo   && d>tableFilterTo)   return false;
     return true;
   });
 
   var th=document.getElementById('tHead'),tb=document.getElementById('tBody');
-  if(!allDates.length){th.innerHTML='';tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>';return;}
+  if(!allDates.length){
+    th.innerHTML='';
+    tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>';
+    return;
+  }
 
-  var sortIcon = tableSort==='asc' ? SVG_ASC : SVG_DESC;
-  th.innerHTML='<tr><th style="cursor:pointer;user-select:none;" onclick="toggleSort()">日期 <span style="vertical-align:middle;opacity:.6">'+sortIcon+'</span></th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'</tr>';
+  var sortIcon=tableSort==='asc'?SVG_ASC:SVG_DESC;
+  var editCol = tableEditMode ? '<th style="width:32px"></th>' : '';
+  th.innerHTML='<tr><th style="cursor:pointer;user-select:none;" onclick="toggleSort()">日期 <span style="vertical-align:middle;opacity:.6">'+sortIcon+'</span></th>'+
+    fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+editCol+'</tr>';
 
   if(!dates.length){
     tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:24px;color:var(--text3)">此日期無數據</td></tr>';
@@ -426,11 +499,35 @@ function renderDetail(id){
   }
 
   var ct=fields.map(function(){return 0;});
-  tb.innerHTML=dates.map(function(d){
+
+  var rows = dates.map(function(d){
     var e=entries[d]||{},rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
     rv.forEach(function(v,i){ct[i]+=v;});
-    return '<tr><td>'+formatDate(d)+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
-  }).join('')+'<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
+    if(tableEditMode){
+      var inputCells = rv.map(function(v,i){
+        return '<td><input class="td-input" type="number" min="0" id="edit_'+d+'_'+i+'" value="'+v+'" onblur="saveRowEdit(\''+d+'\')"></td>';
+      }).join('');
+      return '<tr><td style="padding-left:16px;font-weight:500;white-space:nowrap">'+formatDate(d)+'</td>'+inputCells+
+        '<td style="padding-right:16px"><button class="del-row-btn" onclick="deleteRow(\''+d+'\')" title="刪除此日"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>';
+    } else {
+      return '<tr><td>'+formatDate(d)+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
+    }
+  }).join('');
+
+  // add-row in edit mode
+  var addRow = '';
+  if(tableEditMode){
+    var addInputs = fields.map(function(_,i){
+      return '<td><input class="td-input" type="number" min="0" id="newRowVal_'+i+'" placeholder="0"></td>';
+    }).join('');
+    addRow = '<tr class="add-row-tr" style="background:var(--accent-pale)">'+
+      '<td style="padding-left:16px"><input type="date" class="add-date-input" id="newRowDate" min="'+(p.startDate||'')+'" max="'+(p.endDate||'')+'"></td>'+
+      addInputs+
+      '<td style="padding-right:16px"><button class="add-row-btn" onclick="addNewRow()" title="新增此日數據"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></td></tr>';
+  }
+
+  tb.innerHTML = rows + addRow +
+    '<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+(tableEditMode?'<td></td>':'')+'</tr>';
 }
 
 function refreshView(){
@@ -440,12 +537,14 @@ function refreshView(){
 
 window.openDetail=function(id){
   currentProjectId=id;
-  tableSort='asc';
+  tableSort='asc'; tableEditMode=false;
   tableFilterFrom=''; tableFilterTo='';
   document.getElementById('filterFrom').value='';
   document.getElementById('filterTo').value='';
   document.getElementById('filterBar').classList.remove('open');
   document.getElementById('filterBtn').classList.remove('active');
+  var btn=document.getElementById('editDataBtn');
+  btn.innerHTML=SVG_PENCIL; btn.title='編輯數據'; btn.classList.remove('editing');
   showView('viewDetail');
   renderDetail(id);
 };
@@ -641,6 +740,43 @@ window.onDP=function(e){e.preventDefault();};
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date),obj);
         closeModal('manualModal');toast('\u2705 數據已儲存','ok');
       }catch(e){toast('儲存失敗：'+e.message,'err');}
+    };
+
+    window.saveRowEdit=async function(date){
+      var p=projects[currentProjectId],fields=p.fields||[],obj={};
+      fields.forEach(function(_,i){
+        var el=document.getElementById('edit_'+date+'_'+i);
+        obj['f'+i]=parseInt(el?el.value:0)||0;
+      });
+      try{await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date),obj);}
+      catch(e){toast('儲存失敗：'+e.message,'err');}
+    };
+
+    window.deleteRow=async function(date){
+      if(!confirm(date+' 的數據確定刪除？'))return;
+      try{
+        await remove(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date));
+        toast('已刪除 '+date);
+      }catch(e){toast('刪除失敗：'+e.message,'err');}
+    };
+
+    window.addNewRow=async function(){
+      var dateEl=document.getElementById('newRowDate');
+      var d=dateEl?dateEl.value:'';
+      if(!d){toast('請選擇日期','err');return;}
+      var p=projects[currentProjectId];
+      if(p.entries&&p.entries[d]){toast('此日期已有數據，請直接修改','err');return;}
+      var fields=p.fields||[],obj={};
+      fields.forEach(function(_,i){
+        var el=document.getElementById('newRowVal_'+i);
+        obj['f'+i]=parseInt(el?el.value:0)||0;
+      });
+      try{
+        await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+d),obj);
+        dateEl.value='';
+        fields.forEach(function(_,i){var el=document.getElementById('newRowVal_'+i);if(el)el.value='';});
+        toast('\u2705 已新增 '+d,'ok');
+      }catch(e){toast('新增失敗：'+e.message,'err');}
     };
 
     window.onDP=function(e){
