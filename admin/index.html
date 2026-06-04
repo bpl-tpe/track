@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>編輯者後台｜活動人次追蹤系統</title>
+<title>活動人次追蹤系統</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'><rect x='2' y='14' width='4' height='6' fill='%23526FBD' opacity='0.35'/><rect x='9' y='9' width='4' height='11' fill='%23526FBD' opacity='0.65'/><rect x='16' y='4' width='4' height='16' fill='%23526FBD'/><polyline points='4,13 11,8 18,3' stroke='%23526FBD' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='18' cy='3' r='1.5' fill='%23526FBD'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
@@ -21,116 +22,42 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .topbar{height:54px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:200;}
 .brand{font-size:13px;font-weight:500;color:var(--text);letter-spacing:.02em;display:flex;align-items:center;gap:8px;}
 .topbar-right{display:flex;align-items:center;gap:14px;}
-.sync-status{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);}
+.admin-link{font-size:12px;color:var(--text3);text-decoration:none;border-bottom:1px solid var(--text3);padding-bottom:1px;transition:color .15s,border-color .15s;letter-spacing:.02em;}
+.admin-link:hover{color:var(--accent);border-color:var(--accent);}
+.sync-status{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);letter-spacing:.02em;}
 .sdot{width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .4s;}
 .sdot.synced{background:var(--success);}.sdot.syncing{background:var(--warn);animation:blink 1.2s infinite;}.sdot.error{background:var(--danger);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.topbar-link{font-size:12px;color:var(--text3);text-decoration:none;border-bottom:1px solid var(--text3);padding-bottom:1px;transition:color .15s,border-color .15s;letter-spacing:.02em;}
-.topbar-link:hover{color:var(--accent);border-color:var(--accent);}
-.user-info{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);}
-.logout-btn{font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;border-bottom:1px solid var(--text3);line-height:1;transition:all .15s;}
-.logout-btn:hover{color:var(--danger);border-color:var(--danger);}
-.login-screen{min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center;padding:40px 20px;}
-.login-box{width:100%;max-width:320px;}
-.login-title{font-size:20px;font-weight:500;letter-spacing:-.3px;margin-bottom:6px;color:var(--text);}
-.login-sub{font-size:13px;color:var(--text3);margin-bottom:32px;line-height:1.6;}
-.login-form{display:flex;flex-direction:column;gap:18px;}
-.lf-group{display:flex;flex-direction:column;gap:6px;}
-.lf-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
-.lf-input{background:none;border:none;border-bottom:1px solid var(--line);font-size:16px;font-family:inherit;color:var(--text);padding:8px 0;outline:none;transition:border-color .15s;width:100%;}
-.lf-input:focus{border-color:var(--text);}
-.lf-input-wrap{position:relative;display:flex;align-items:center;}
-.lf-input-wrap .lf-input{padding-right:40px;}
-.pw-toggle{position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;display:flex;align-items:center;transition:color .15s;}
-.pw-toggle:hover{color:var(--text);}
-.login-error{font-size:12px;color:var(--danger);display:none;padding:8px 0;}
-.login-btn{background:var(--accent);color:#fff;border:none;padding:13px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;transition:background .15s;width:100%;letter-spacing:.02em;}
-.login-btn:hover{background:#3d5aa8;}
-.login-btn:active{transform:scale(.98);}
-.wrap{max-width:680px;margin:0 auto;padding:36px 20px 60px;}
-.ph{margin-bottom:32px;}.ph-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-.ph-title{font-size:20px;font-weight:500;letter-spacing:-.3px;color:var(--text);line-height:1.2;}
+.wrap-sm{max-width:480px;margin:0 auto;padding:36px 20px 60px;}
+.ph{margin-bottom:32px;}.ph-title{font-size:20px;font-weight:500;letter-spacing:-.3px;color:var(--text);line-height:1.2;}
 .ph-sub{font-size:13px;color:var(--text3);margin-top:6px;}.ph-line{height:1px;background:var(--line);margin-top:18px;}
 .back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-bottom:28px;letter-spacing:.03em;transition:color .15s;}
 .back-btn:hover{color:var(--text);}.back-btn::before{content:"\2190";font-size:14px;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:400;cursor:pointer;font-family:inherit;line-height:1;transition:all .15s;border:none;padding:11px 22px;letter-spacing:.02em;}
 .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#3d5aa8;}.btn-primary:active{transform:scale(.98);}
-.btn-outline{background:none;color:var(--text);border:1px solid var(--line);}.btn-outline:hover{border-color:var(--text);}
-.btn-ghost{background:none;color:var(--text2);border:none;padding:8px 12px;font-size:12px;}.btn-ghost:hover{color:var(--text);}
-.btn-danger-txt{background:none;color:var(--danger);border:none;font-size:12px;padding:8px 0;cursor:pointer;font-family:inherit;letter-spacing:.02em;}
-.btn-danger-txt:hover{text-decoration:underline;}
-.btn-sm{padding:7px 14px;font-size:12px;}
-.add-field-btn{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:12px;cursor:pointer;background:none;border:none;font-family:inherit;padding:6px 0;margin-top:6px;}
-.add-field-btn:hover{text-decoration:underline;}
-.project-grid{display:flex;flex-direction:column;gap:12px;}
-.pcard{background:var(--surface);border:1.5px solid var(--line);padding:20px;cursor:pointer;transition:border-color .18s,box-shadow .18s;display:flex;align-items:stretch;}
-.pcard:hover{border-color:var(--text3);box-shadow:0 2px 10px rgba(0,0,0,.07);}
-.pcard.dragging{opacity:.35;}.pcard.drag-over{border-color:var(--accent);}
-.pcard-left{width:60%;display:flex;flex-direction:column;justify-content:space-between;padding-right:16px;border-right:1px solid var(--line);}
-.pcard-title{font-size:17px;font-weight:500;color:var(--accent);margin-bottom:5px;line-height:1.4;}
-.pcard-date{font-size:12px;color:var(--text3);}.pcard-badge-wrap{margin-top:14px;}
-.badge{font-size:10px;font-weight:500;padding:2px 8px;letter-spacing:.04em;border:1px solid;display:inline-block;}
-.badge-on{color:var(--success);border-color:var(--success);}.badge-off{color:var(--text3);border-color:var(--line);}
-.pcard-right{width:40%;display:flex;flex-direction:column;gap:12px;padding-left:16px;justify-content:center;}
-.stat-item{display:flex;flex-direction:column;gap:6px;}
-.stat-l{font-size:12px;color:var(--text3);line-height:1;}
-.stat-n{font-size:22px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1.1;}
-.summary-row{display:flex;gap:0;border-top:1px solid var(--line);margin-bottom:32px;}
-.scard{flex:1;padding:20px 0;border-right:1px solid var(--line);text-align:center;}
-.scard:last-child{border-right:none;}
-.scard-n{font-size:26px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1;}
-.scard-l{font-size:14px;color:var(--text2);margin-bottom:6px;}
-.table-section{margin-bottom:10px;}
-.table-header{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
-.filter-bar{
-  overflow:hidden;max-height:0;opacity:0;
-  transition:max-height .3s ease, opacity .3s ease, padding .3s ease;
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  border-bottom:1px solid var(--line-light);padding:0;
-}
-.filter-bar.open{max-height:60px;opacity:1;padding:8px 0;}
-.filter-bar .fi{max-width:140px;padding:4px 0;font-size:13px;}
-.filter-bar-label{font-size:11px;color:var(--text3);letter-spacing:.03em;white-space:nowrap;}
-#filterBtn{transition:transform .3s ease;}
-#filterBtn.active{transform:translateX(-4px);color:var(--accent);border-color:var(--accent);}
-.table-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
-.table-actions{display:flex;gap:6px;}
-.tbl-btn{font-size:11px;font-weight:500;color:var(--text2);background:none;border:1px solid var(--line);cursor:pointer;font-family:inherit;padding:5px 10px;letter-spacing:.02em;transition:all .15s;}
-.tbl-btn:hover{border-color:var(--text);color:var(--text);}
-.table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;min-width:320px;}
-th{padding:10px 12px;text-align:center;font-size:11px;font-weight:500;color:var(--text3);border-bottom:1px solid var(--line);letter-spacing:.04em;white-space:nowrap;}
-th:first-child{text-align:left;padding-left:0;}
-td{padding:12px 12px;border-bottom:1px solid var(--line-light);font-size:13px;text-align:center;color:var(--text);}
-td:first-child{text-align:left;padding-left:0;color:var(--text2);}
-tr:last-child td{border-bottom:none;}
-.total-row td{font-weight:500;color:var(--text);border-top:1px solid var(--line);border-bottom:none;font-size:13px;}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;align-items:flex-end;justify-content:center;padding:0;}
-.overlay.open{display:flex;}
-.modal{background:var(--surface);width:100%;max-width:520px;max-height:92vh;overflow-y:auto;padding:28px 24px 36px;animation:mIn .22s ease;border-top:1px solid var(--line);}
-@keyframes mIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-handle{width:36px;height:3px;background:var(--line);border-radius:2px;margin:0 auto 22px;}
-.modal-title{font-size:17px;font-weight:500;letter-spacing:-.2px;margin-bottom:4px;}
-.modal-sub{font-size:12px;color:var(--text3);margin-bottom:22px;}
-.modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--line);align-items:center;}
-.modal-foot-space{justify-content:space-between;}
-.fg{margin-bottom:18px;}
-.fl{display:block;font-size:11px;font-weight:500;color:var(--text3);margin-bottom:7px;letter-spacing:.06em;text-transform:uppercase;}
-.fi{width:100%;padding:10px 0;border:none;border-bottom:1px solid var(--line);font-size:15px;font-family:inherit;color:var(--text);background:none;outline:none;transition:border-color .15s;border-radius:0;}
-.fi:focus{border-color:var(--text);}
-.field-list{display:flex;flex-direction:column;gap:8px;}
-.field-item{display:flex;gap:8px;align-items:center;}.field-item .fi{flex:1;}
-.rm-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px;line-height:1;transition:color .15s;flex-shrink:0;}
-.rm-btn:hover{color:var(--danger);}
-.section-divider{font-size:11px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin:22px 0 12px;border-top:1px solid var(--line);padding-top:18px;}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;}
-.toggle-label{font-size:14px;color:var(--text);}.toggle-desc{font-size:12px;color:var(--text3);margin-top:2px;}
-.tog{position:relative;width:40px;height:22px;flex-shrink:0;}
-.tog input{opacity:0;width:0;height:0;}
-.tog-sl{position:absolute;inset:0;background:var(--line);border-radius:22px;cursor:pointer;transition:.25s;}
-.tog-sl:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.15);}
-input:checked+.tog-sl{background:var(--text);}
-input:checked+.tog-sl:before{transform:translateX(18px);}
+.btn-full{width:100%;padding:14px;}
+.psel-list{display:flex;flex-direction:column;gap:0;margin-top:0;}
+.psel-item{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:opacity .15s;}
+.psel-item:first-child{border-top:1px solid var(--line);}.psel-item:hover{opacity:.6;}
+.psel-name{font-size:17px;font-weight:500;color:var(--accent);}
+.psel-date{font-size:12px;color:var(--text3);margin-top:3px;}
+.entry-section{margin-top:0;}
+.entry-title{font-size:17px;font-weight:500;letter-spacing:-.1px;margin-bottom:4px;color:var(--accent);}
+.entry-date-row{margin-bottom:28px;}
+.entry-date-label{font-size:12px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:7px;display:block;}
+.date-input{background:none;border:none;border-bottom:1px solid var(--line);font-size:16px;font-family:inherit;color:var(--text);padding:6px 0;width:100%;max-width:180px;outline:none;transition:border-color .15s;}
+.date-input:focus{border-color:var(--text);}
+.entry-fields{display:flex;flex-direction:column;gap:0;margin-bottom:28px;}
+.efield-row{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--line-light);}
+.efield-row:first-child{border-top:1px solid var(--line-light);}
+.efield-label{font-size:14px;font-weight:500;color:var(--text);}
+.efield-input{width:90px;background:none;border:none;border-bottom:1px solid var(--line);font-size:22px;font-weight:400;text-align:right;font-family:inherit;color:var(--text);padding:4px 0;outline:none;transition:border-color .15s;-moz-appearance:textfield;}
+.efield-input::-webkit-outer-spin-button,.efield-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.efield-input:focus{border-color:var(--text);}.efield-input:disabled{color:var(--text3);border-color:var(--line-light);}
+.efield-input.prefilled{color:var(--warn);}
+.status-banner{font-size:12px;padding:10px 12px;margin-bottom:20px;color:var(--text2);letter-spacing:.02em;display:none;border-radius:2px;}
+.status-banner.show{display:block;}
+.status-banner.warn-text{color:var(--danger);border:1px solid var(--danger);background:rgba(203,119,88,.06);}
 .toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 40px);max-width:360px;}
 .toast{background:var(--text);color:#fff;padding:12px 18px;font-size:13px;width:100%;text-align:center;letter-spacing:.02em;animation:tIn .2s ease;}
 .toast.ok{background:var(--success);}.toast.err{background:var(--danger);}
@@ -138,13 +65,11 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 .empty{text-align:center;padding:60px 20px;color:var(--text3);}
 .empty-ico{font-size:32px;margin-bottom:12px;opacity:.4;}
 .empty p{font-size:13px;letter-spacing:.02em;}
-#detailName{color:var(--accent);font-size:20px;font-weight:500;}
-::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:var(--line);}
-@media(min-width:600px){.overlay{align-items:center;padding:20px;}.modal{border-radius:2px;border:1px solid var(--line);}}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--line);}
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <div class="brand">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -154,145 +79,40 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
       <polyline points="4,13 11,8 18,3" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <circle cx="18" cy="3" r="1.5" fill="var(--accent)"/>
     </svg>
-    編輯者後台
+    活動人次追蹤系統
   </div>
   <div class="topbar-right">
     <div class="sync-status">
       <div class="sdot" id="syncDot"></div>
-      <span id="syncText">—</span>
+      <span id="syncText">連線中</span>
     </div>
-    <a href="../index.html" class="topbar-link">協助者頁面</a>
-    <div class="user-info" id="userInfo" style="display:none">
-      <span id="userName"></span>
-      <button class="logout-btn" onclick="doLogout()">登出</button>
-    </div>
+    <a href="./admin/index.html" class="admin-link">編輯者後台</a>
   </div>
 </div>
 
-<!-- 登入畫面 -->
-<div class="view active" id="viewLogin">
-  <div class="login-screen">
-    <div class="login-box">
-      <div class="login-title">編輯者登入</div>
-      <div class="login-sub">請輸入帳號與密碼</div>
-      <div class="login-form">
-        <div class="lf-group">
-          <label class="lf-label">帳號</label>
-          <input class="lf-input" type="text" id="loginUser" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
-        </div>
-        <div class="lf-group">
-          <label class="lf-label">密碼</label>
-          <div class="lf-input-wrap">
-            <input class="lf-input" type="password" id="loginPass" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
-            <button type="button" class="pw-toggle" onclick="togglePw('loginPass',this)">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="login-error" id="loginError">帳號或密碼錯誤，請再試一次</div>
-        <button class="login-btn" onclick="doLogin()">登入</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 編輯者：專案列表 -->
-<div class="view" id="viewEditor">
-  <div class="wrap">
+<div class="view active" id="viewList">
+  <div class="wrap-sm">
     <div class="ph">
-      <div class="ph-row">
-        <div class="ph-title">專案</div>
-        <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增</button>
-      </div>
+      <div class="ph-title">填報人次</div>
+      <div class="ph-sub">請選擇活動</div>
       <div class="ph-line"></div>
     </div>
-    <div class="project-grid" id="editorGrid"></div>
+    <div id="listInner" class="psel-list"></div>
   </div>
 </div>
 
-<!-- 編輯者：專案詳情 -->
-<div class="view" id="viewDetail">
-  <div class="wrap">
-    <button class="back-btn" onclick="backToEditor()">返回</button>
-    <div class="ph">
-      <div class="ph-row">
-        <div>
-          <div class="ph-title" id="detailName"></div>
-          <div class="ph-sub" id="detailDates"></div>
-        </div>
-        <button class="tbl-btn" onclick="openEditModal()">活動設定</button>
+<div class="view" id="viewForm">
+  <div class="wrap-sm">
+    <button class="back-btn" onclick="backToList()">返回</button>
+    <div class="entry-section">
+      <div class="entry-title" id="entryName"></div>
+      <div class="entry-date-row">
+        <span class="entry-date-label">填報日期</span>
+        <input type="date" class="date-input" id="entryDate">
       </div>
-      <div class="ph-line"></div>
-    </div>
-    <div id="summaryRow" class="summary-row"></div>
-    <div class="table-section">
-      <div class="table-header">
-        <span class="table-label" style="color:var(--accent);font-weight:500;font-size:13px;">活動數據</span>
-        <div class="table-actions">
-          <button class="tbl-btn" id="filterBtn" onclick="toggleFilterBar()" title="篩選日期">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </button>
-          <button class="tbl-btn" onclick="openManualModal()">編輯數據</button>
-          <button class="tbl-btn" onclick="downloadCSV()">下載 CSV</button>
-        </div>
-      </div>
-      <div id="filterBar" class="filter-bar">
-        <span class="filter-bar-label">從</span>
-        <input type="date" id="filterFrom" class="fi" onchange="applyFilter()">
-        <span class="filter-bar-label">至</span>
-        <input type="date" id="filterTo" class="fi" onchange="applyFilter()">
-        <button class="tbl-btn" onclick="clearFilter()" style="font-size:11px;padding:4px 8px;">清除</button>
-      </div>
-      </div>
-      <div class="table-wrap">
-        <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: 新增/編輯專案 -->
-<div class="overlay" id="projectModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="projectModalTitle">新增專案</div>
-    <div class="modal-sub">活動資訊與登記項目</div>
-    <div class="fg"><label class="fl">活動名稱</label><input class="fi" id="fieldName" placeholder=""></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="fg"><label class="fl">開始日期</label><input class="fi" type="date" id="fieldStart"></div>
-      <div class="fg"><label class="fl">結束日期</label><input class="fi" type="date" id="fieldEnd"></div>
-    </div>
-    <div class="fg">
-      <label class="fl">登記項目</label>
-      <div class="field-list" id="fieldList"></div>
-      <button class="add-field-btn" onclick="addFieldItem()">+ 新增項目</button>
-    </div>
-    <div class="section-divider">狀態</div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">進行中</div><div class="toggle-desc">開啟後協助者可看到此專案</div></div>
-      <label class="tog"><input type="checkbox" id="statusToggle" checked><span class="tog-sl"></span></label>
-    </div>
-    <div class="modal-foot modal-foot-space">
-      <button class="btn-danger-txt" id="deleteBtn" onclick="deleteProject()" style="display:none">刪除此專案</button>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-ghost" onclick="closeModal('projectModal')">取消</button>
-        <button class="btn btn-primary btn-sm" onclick="saveProject()">儲存</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: 編輯數據 -->
-<div class="overlay" id="manualModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">編輯數據</div>
-    <div class="modal-sub" id="manualSub"></div>
-    <div class="fg"><label class="fl">日期</label><input class="fi" type="date" id="manualDate"></div>
-    <div id="manualFields"></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('manualModal')">取消</button>
-      <button class="btn btn-primary btn-sm" onclick="saveManualEntry()">儲存</button>
+      <div id="statusBanner" class="status-banner"></div>
+      <div id="entryFields" class="entry-fields"></div>
+      <button class="btn btn-primary btn-full" id="submitBtn" onclick="handleSubmit()">送出</button>
     </div>
   </div>
 </div>
@@ -300,347 +120,99 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-var projects={},projectOrder=[],currentProjectId=null,editingProjectId=null,dragSrcEl=null;
+var projects = {};
+var projectOrder = [];
+var currentProjectId = null;
 
-function showView(id){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.getElementById(id).classList.add('active');}
 function setSyncStatus(s,t){document.getElementById('syncDot').className='sdot '+s;document.getElementById('syncText').textContent=t;}
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-window.openModal=openModal;window.closeModal=closeModal;
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(msg,type){var w=document.getElementById('toastWrap');var t=document.createElement('div');t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');t.textContent=msg;w.appendChild(t);setTimeout(function(){t.remove();},3000);}
-document.querySelectorAll('.overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});});
+function showView(id){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.getElementById(id).classList.add('active');}
 
-window.togglePw=function(id,btn){
-  var el=document.getElementById(id);
-  var eyeOpen='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-  var eyeOff='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
-  if(el.type==='password'){el.type='text';btn.innerHTML=eyeOff;}
-  else{el.type='password';btn.innerHTML=eyeOpen;}
-};
-
-function renderEditorProjects(){
-  var el=document.getElementById('editorGrid');
-  if(!projectOrder.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128193;</div><p>尚無專案，點擊「新增」開始</p></div>';return;}
-  el.innerHTML=projectOrder.filter(function(k){return!!projects[k];}).map(function(k){
-    var p=projects[k],fields=p.fields||[],entries=p.entries||{};
-    var ft=fields.map(function(_,fi){var t=0;Object.values(entries).forEach(function(e){t+=parseInt(e['f'+fi]||0);});return t;});
-    var on=p.status==='active';
-    return '<div class="pcard" draggable="true" data-id="'+k+'"'+
-      ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
-      ' onclick="openDetail(\''+k+'\')">'+
-      '<div class="pcard-left">'+
-        '<div><div class="pcard-title">'+esc(p.name)+'</div><div class="pcard-date">'+p.startDate+' ～ '+p.endDate+'</div></div>'+
-        '<div class="pcard-badge-wrap"><span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
-      '</div>'+
-      '<div class="pcard-right">'+
-      (fields.length?fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(f)+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join(''):'<div class="stat-item"><div class="stat-n" style="color:var(--text3)">—</div></div>')+
-      '</div></div>';
+function renderList(){
+  var el=document.getElementById('listInner');
+  var active=projectOrder.filter(function(k){return projects[k]&&projects[k].status==='active';});
+  if(!active.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';return;}
+  el.innerHTML=active.map(function(k){
+    var p=projects[k];
+    return '<div class="psel-item" onclick="selectProject(\''+k+'\')">'+
+      '<div><div class="psel-name">'+esc(p.name)+'</div><div class="psel-date">'+p.startDate+' ～ '+p.endDate+'</div></div>'+
+      '<span style="color:var(--text3);font-size:16px">&#8250;</span></div>';
   }).join('');
 }
 
-function formatDate(d){
-  // d = 'YYYY-MM-DD'
-  var parts=d.split('-');
-  var dt=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
-  var week=['日','一','二','三','四','五','六'][dt.getDay()];
-  var yy=String(parts[0]).slice(2);
-  return yy+'/'+parts[1]+'/'+parts[2]+'（'+week+'）';
-}
-
-var tableSort = 'asc';
-var tableFilterFrom = '';
-var tableFilterTo = '';
-
-var SVG_ASC  = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
-var SVG_DESC = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-
-window.toggleSort = function() {
-  tableSort = tableSort === 'asc' ? 'desc' : 'asc';
-  renderDetail(currentProjectId);
-};
-
-window.toggleFilterBar = function() {
-  var bar = document.getElementById('filterBar');
-  var btn = document.getElementById('filterBtn');
-  var isOpen = bar.classList.contains('open');
-  if (isOpen) {
-    bar.classList.remove('open');
-    btn.classList.remove('active');
-  } else {
-    bar.classList.add('open');
-    btn.classList.add('active');
-    setTimeout(function(){ document.getElementById('filterFrom').focus(); }, 320);
-  }
-};
-
-window.applyFilter = function() {
-  tableFilterFrom = document.getElementById('filterFrom').value || '';
-  tableFilterTo   = document.getElementById('filterTo').value   || '';
-  renderDetail(currentProjectId);
-};
-
-window.clearFilter = function() {
-  tableFilterFrom = ''; tableFilterTo = '';
-  document.getElementById('filterFrom').value = '';
-  document.getElementById('filterTo').value = '';
-  document.getElementById('filterBar').classList.remove('open');
-  document.getElementById('filterBtn').classList.remove('active');
-  renderDetail(currentProjectId);
-};
-
-function renderDetail(id){
-  var p=projects[id];if(!p)return;
-  document.getElementById('detailName').textContent=p.name;
-  document.getElementById('detailDates').textContent=p.startDate+' ～ '+p.endDate;
-  var fields=p.fields||[],entries=p.entries||{};
-  var ft=fields.map(function(_,fi){var t=0;Object.values(entries).forEach(function(e){t+=parseInt(e['f'+fi]||0);});return t;});
-  document.getElementById('summaryRow').innerHTML=fields.map(function(f,i){
-    return '<div class="scard"><div class="scard-l">'+esc(f)+'</div><div class="scard-n">'+ft[i].toLocaleString()+'</div></div>';
-  }).join('');
-
-  var allDates=Object.keys(entries).sort();
-  if(tableSort==='desc') allDates=allDates.slice().reverse();
-  var dates = allDates.filter(function(d){
-    if(tableFilterFrom && d < tableFilterFrom) return false;
-    if(tableFilterTo   && d > tableFilterTo)   return false;
-    return true;
-  });
-
-  var th=document.getElementById('tHead'),tb=document.getElementById('tBody');
-  if(!allDates.length){th.innerHTML='';tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:32px;color:var(--text3)">尚無數據</td></tr>';return;}
-
-  var sortIcon = tableSort==='asc' ? SVG_ASC : SVG_DESC;
-  th.innerHTML='<tr><th style="cursor:pointer;user-select:none;" onclick="toggleSort()">日期 <span style="vertical-align:middle;opacity:.6">'+sortIcon+'</span></th>'+fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+'</tr>';
-
-  if(!dates.length){
-    tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:24px;color:var(--text3)">此日期無數據</td></tr>';
-    return;
-  }
-
-  var ct=fields.map(function(){return 0;});
-  tb.innerHTML=dates.map(function(d){
-    var e=entries[d]||{},rv=fields.map(function(_,i){return parseInt(e['f'+i]||0);});
-    rv.forEach(function(v,i){ct[i]+=v;});
-    return '<tr><td>'+formatDate(d)+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
-  }).join('')+'<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
-}
-
-function refreshView(){
-  if(currentProjectId&&document.getElementById('viewDetail').classList.contains('active'))renderDetail(currentProjectId);
-  else if(document.getElementById('viewEditor').classList.contains('active'))renderEditorProjects();
-}
-
-window.openDetail=function(id){
+window.selectProject=function(id){
   currentProjectId=id;
-  tableSort='asc';
-  tableFilterFrom=''; tableFilterTo='';
-  document.getElementById('filterFrom').value='';
-  document.getElementById('filterTo').value='';
-  document.getElementById('filterBar').classList.remove('open');
-  document.getElementById('filterBtn').classList.remove('active');
-  showView('viewDetail');
-  renderDetail(id);
+  var p=projects[id];
+  document.getElementById('entryName').textContent=p.name;
+  document.getElementById('statusBanner').className='status-banner';
+  document.getElementById('submitBtn').disabled=false;
+  var today=todayStr();
+  document.getElementById('entryDate').value=today;
+  loadFields(today);
+  document.getElementById('entryDate').onchange=function(){loadFields(this.value);};
+  showView('viewForm');
 };
-window.backToEditor=function(){currentProjectId=null;showView('viewEditor');renderEditorProjects();};
-window.openNewProjectModal=function(){
-  editingProjectId=null;
-  document.getElementById('projectModalTitle').textContent='新增專案';
-  document.getElementById('fieldName').value='';
-  document.getElementById('fieldStart').value='';
-  document.getElementById('fieldEnd').value='';
-  document.getElementById('fieldList').innerHTML='';
-  document.getElementById('statusToggle').checked=true;
-  document.getElementById('deleteBtn').style.display='none';
-  addFieldItem('');openModal('projectModal');
-};
-window.openEditModal=function(){
-  if(!currentProjectId)return;
-  editingProjectId=currentProjectId;
+
+function loadFields(d){
   var p=projects[currentProjectId];
-  document.getElementById('projectModalTitle').textContent='編輯設定';
-  document.getElementById('fieldName').value=p.name;
-  document.getElementById('fieldStart').value=p.startDate;
-  document.getElementById('fieldEnd').value=p.endDate;
-  document.getElementById('statusToggle').checked=p.status==='active';
-  document.getElementById('deleteBtn').style.display='inline-flex';
-  var fl=document.getElementById('fieldList');fl.innerHTML='';
-  (p.fields||[]).forEach(function(f){addFieldItem(f);});
-  openModal('projectModal');
-};
-function addFieldItem(val){
-  var fl=document.getElementById('fieldList');
-  var div=document.createElement('div');div.className='field-item';
-  div.innerHTML='<input class="fi" placeholder="輸入項目名稱" value="'+esc(val||'')+'"><button class="rm-btn" onclick="this.parentElement.remove()">&#215;</button>';
-  fl.appendChild(div);
-  // focus the new input
-  var inputs=fl.querySelectorAll('.field-item input');
-  if(inputs.length) inputs[inputs.length-1].focus();
-}
-window.addFieldItem=addFieldItem;
-window.openManualModal=function(date){
-  var p=projects[currentProjectId];
-  document.getElementById('manualSub').textContent=p.name;
-  var d=date||todayStr();
-  document.getElementById('manualDate').value=d;
-  var existing=(p.entries&&p.entries[d])||{};
-  document.getElementById('manualFields').innerHTML=(p.fields||[]).map(function(f,i){
-    return '<div class="fg"><label class="fl">'+esc(f)+'</label><input class="fi" type="number" min="0" id="mf_'+i+'" value="'+(parseInt(existing['f'+i]||0)||'')+'"></div>';
+  var existing=(p.entries&&p.entries[d])||null;
+  document.getElementById('entryFields').innerHTML=(p.fields||[]).map(function(f,i){
+    var v=existing?parseInt(existing['f'+i]||0):'';
+    return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
+      '<input class="efield-input'+(existing?' prefilled':'')+'" type="number" min="0" id="ef_'+i+'" value="'+(v!==''?v:'')+'" placeholder="0"></div>';
   }).join('');
-  document.getElementById('manualDate').onchange=function(){
-    var nd=this.value,ex=(p.entries&&p.entries[nd])||{};
-    (p.fields||[]).forEach(function(_,i){var el=document.getElementById('mf_'+i);if(el)el.value=parseInt(ex['f'+i]||0)||'';});
-  };
-  openModal('manualModal');
+  var sb=document.getElementById('statusBanner');
+  if(existing){sb.textContent='此日期已有填報數字，修改後可重新送出';sb.className='status-banner warn-text show';}
+  else{sb.className='status-banner';}
+  document.getElementById('submitBtn').disabled=false;
+}
+
+window.backToList=function(){showView('viewList');};
+
+window.handleSubmit=function(){
+  var date=document.getElementById('entryDate').value;
+  if(!date){toast('請選擇填報日期','err');return;}
+  var p=projects[currentProjectId];
+  var values=(p.fields||[]).map(function(f,i){return{label:f,value:parseInt(document.getElementById('ef_'+i).value)||0};});
+  var alreadyFilled=p.entries&&p.entries[date];
+  if(alreadyFilled){if(!confirm('該日期已填報過，確認是否重新填報？'))return;}
+  if(window._dbSet){window._dbSet(currentProjectId,date,values);}
+  else{toast('資料庫尚未就緒，請稍後','err');}
 };
-window.downloadCSV=function(){
-  var p=projects[currentProjectId];if(!p)return;
-  var fields=p.fields||[],entries=p.entries||{},dates=Object.keys(entries).sort();
-  if(!dates.length){toast('尚無數據可下載','err');return;}
-  var rows=dates.map(function(d){var e=entries[d]||{};return[d].concat(fields.map(function(_,i){return parseInt(e['f'+i]||0);}));});
-  var ct=fields.map(function(_,fi){return dates.reduce(function(s,d){return s+parseInt((entries[d]||{})['f'+fi]||0);},0);});
-  rows.push(['合計'].concat(ct));
-  var csv=[['日期'].concat(fields)].concat(rows).map(function(r){return r.join(',');}).join('\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download=p.name+'_數據.csv';a.click();URL.revokeObjectURL(url);
-};
-window.onDS=function(e){dragSrcEl=e.currentTarget;dragSrcEl.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dragSrcEl.dataset.id);};
-window.onDO=function(e){e.preventDefault();e.currentTarget.classList.add('drag-over');};
-window.onDL=function(e){e.currentTarget.classList.remove('drag-over');};
-window.onDE=function(e){e.currentTarget.classList.remove('dragging');};
-window.onDP=function(e){e.preventDefault();};
 
 (async function(){
   try{
     var fbApp=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    var fbAuth=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
     var fbDb=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
     var initializeApp=fbApp.initializeApp,getApps=fbApp.getApps;
-    var getAuth=fbAuth.getAuth,signInWithEmailAndPassword=fbAuth.signInWithEmailAndPassword,signOut=fbAuth.signOut,onAuthStateChanged=fbAuth.onAuthStateChanged;
-    var getDatabase=fbDb.getDatabase,ref=fbDb.ref,set=fbDb.set,update=fbDb.update,remove=fbDb.remove,onValue=fbDb.onValue,get=fbDb.get;
-    var DOMAIN='@bpl.com';
-    var app=getApps().length?getApps()[0]:initializeApp({
-      apiKey:'AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ',
-      authDomain:'project-1794474641398451810.firebaseapp.com',
-      databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app',
-      projectId:'project-1794474641398451810',
-      storageBucket:'project-1794474641398451810.firebasestorage.app',
-      messagingSenderId:'660717432614',
-      appId:'1:660717432614:web:5067d9a791339b6c275be7'
-    });
-    var auth=getAuth(app);
+    var getDatabase=fbDb.getDatabase,ref=fbDb.ref,set=fbDb.set,onValue=fbDb.onValue;
+    var app=getApps().length?getApps()[0]:initializeApp({databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/'});
     var db=getDatabase(app);
 
-    window.doLogin=async function(){
-      var user=document.getElementById('loginUser').value.trim();
-      var pass=document.getElementById('loginPass').value;
-      var errEl=document.getElementById('loginError');
-      errEl.style.display='none';
-      if(!user||!pass){errEl.style.display='block';return;}
-      var email=user+DOMAIN;
+    setSyncStatus('syncing','連線中...');
+    onValue(ref(db,'tracker'),function(snap){
+      var d=snap.val()||{};
+      projects=d.projects||{};
+      projectOrder=d.projectOrder||Object.keys(projects);
+      Object.keys(projects).forEach(function(k){if(projectOrder.indexOf(k)<0)projectOrder.push(k);});
+      projectOrder=projectOrder.filter(function(k){return!!projects[k];});
+      setSyncStatus('synced','已同步');
+      renderList();
+    },function(err){setSyncStatus('error','連線失敗');toast('連線失敗：'+err.message,'err');});
+
+    window._dbSet=async function(pid,date,values){
+      var obj={};values.forEach(function(v,i){obj['f'+i]=v.value;});
       try{
-        await signInWithEmailAndPassword(auth,email,pass);
-      }catch(e){
-        errEl.style.display='block';
-        document.getElementById('loginPass').value='';
-      }
+        await set(ref(db,'tracker/projects/'+pid+'/entries/'+date),obj);
+        values.forEach(function(_,i){var el=document.getElementById('ef_'+i);if(el){el.disabled=true;}});
+        var sb=document.getElementById('statusBanner');sb.textContent='數據已送出';sb.className='status-banner show';
+        document.getElementById('submitBtn').disabled=true;
+        toast('\u2705 數據已送出！','ok');
+      }catch(e){toast('送出失敗：'+e.message,'err');}
     };
-
-    window.doLogout=async function(){
-      await signOut(auth);
-    };
-
-    onAuthStateChanged(auth,function(user){
-      if(!user){
-        showView('viewLogin');
-        document.getElementById('userInfo').style.display='none';
-        setSyncStatus('','—');
-        return;
-      }
-      var displayName=user.email.replace(DOMAIN,'');
-      document.getElementById('userInfo').style.display='flex';
-      document.getElementById('userName').textContent=displayName;
-      setSyncStatus('syncing','連線中...');
-      onValue(ref(db,'tracker'),function(snap){
-        var d=snap.val()||{};
-        projects=d.projects||{};
-        projectOrder=d.projectOrder||Object.keys(projects);
-        Object.keys(projects).forEach(function(k){if(projectOrder.indexOf(k)<0)projectOrder.push(k);});
-        projectOrder=projectOrder.filter(function(k){return!!projects[k];});
-        setSyncStatus('synced','已同步');
-        if(document.getElementById('viewLogin').classList.contains('active')){
-          showView('viewEditor');
-        }
-        refreshView();
-      },function(err){setSyncStatus('error','連線失敗');});
-    });
-
-    window.saveProject=async function(){
-      var name=document.getElementById('fieldName').value.trim();
-      var start=document.getElementById('fieldStart').value;
-      var end=document.getElementById('fieldEnd').value;
-      var fields=Array.from(document.querySelectorAll('#fieldList .field-item .fi')).map(function(i){return i.value.trim();}).filter(Boolean);
-      var status=document.getElementById('statusToggle').checked?'active':'ended';
-      if(!name||!start||!end){toast('請填寫活動名稱與日期','err');return;}
-      if(!fields.length){toast('請至少新增一個登記項目','err');return;}
-      var isNew=!editingProjectId;
-      var id=editingProjectId||'p_'+Date.now();
-      setSyncStatus('syncing','儲存中...');
-      try{
-        await update(ref(db,'tracker/projects/'+id),{name:name,startDate:start,endDate:end,fields:fields,status:status});
-        if(isNew){
-          var snap=await get(ref(db,'tracker/projectOrder'));
-          var cur=snap.val();
-          if(!cur||!Array.isArray(cur))cur=projectOrder.slice();
-          if(cur.indexOf(id)<0)cur=cur.concat([id]);
-          await update(ref(db,'tracker'),{projectOrder:cur});
-        }
-        closeModal('projectModal');toast('\u2705 已儲存','ok');
-      }catch(e){toast('儲存失敗：'+e.message,'err');setSyncStatus('error','儲存失敗');}
-    };
-
-    window.deleteProject=async function(){
-      if(!editingProjectId)return;
-      var p=projects[editingProjectId];
-      if(!confirm('確定要刪除「'+(p?p.name:editingProjectId)+'」？此操作無法復原。'))return;
-      try{
-        await remove(ref(db,'tracker/projects/'+editingProjectId));
-        var newOrder=projectOrder.filter(function(k){return k!==editingProjectId;});
-        await update(ref(db,'tracker'),{projectOrder:newOrder});
-        closeModal('projectModal');
-        if(currentProjectId===editingProjectId){currentProjectId=null;showView('viewEditor');}
-        toast('專案已刪除');
-      }catch(e){toast('刪除失敗：'+e.message,'err');}
-    };
-
-    window.saveManualEntry=async function(){
-      var date=document.getElementById('manualDate').value;
-      if(!date){toast('請選擇日期','err');return;}
-      var p=projects[currentProjectId],obj={};
-      (p.fields||[]).forEach(function(_,i){obj['f'+i]=parseInt(document.getElementById('mf_'+i).value)||0;});
-      try{
-        await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date),obj);
-        closeModal('manualModal');toast('\u2705 數據已儲存','ok');
-      }catch(e){toast('儲存失敗：'+e.message,'err');}
-    };
-
-    window.onDP=function(e){
-      e.preventDefault();
-      var tgt=e.currentTarget;tgt.classList.remove('drag-over');
-      if(!dragSrcEl||dragSrcEl===tgt)return;
-      var si=projectOrder.indexOf(dragSrcEl.dataset.id),ti=projectOrder.indexOf(tgt.dataset.id);
-      if(si<0||ti<0)return;
-      projectOrder.splice(si,1);projectOrder.splice(ti,0,dragSrcEl.dataset.id);
-      update(ref(db,'tracker'),{projectOrder:projectOrder.slice()});
-    };
-
-  }catch(err){
-    setSyncStatus('error','初始化失敗');
-    toast('初始化失敗：'+err.message,'err');
-    console.error(err);
-  }
+  }catch(err){setSyncStatus('error','連線失敗');toast('初始化失敗：'+err.message,'err');}
 })();
 </script>
 </body>
