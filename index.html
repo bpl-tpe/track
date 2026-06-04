@@ -205,7 +205,7 @@ window.handleSubmit=function(){
       var obj={};values.forEach(function(v,i){obj['f'+i]=v.value;});
       try{
         await set(ref(db,'tracker/projects/'+pid+'/entries/'+date),obj);
-        (p.fields||[]).forEach(function(_,i){var el=document.getElementById('ef_'+i);if(el){el.disabled=true;}});
+        values.forEach(function(_,i){var el=document.getElementById('ef_'+i);if(el){el.disabled=true;}});
         var sb=document.getElementById('statusBanner');sb.textContent='數據已送出';sb.className='status-banner show';
         document.getElementById('submitBtn').disabled=true;
         toast('\u2705 數據已送出！','ok');
