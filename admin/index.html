@@ -28,7 +28,7 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .topbar-link{font-size:12px;color:var(--text3);text-decoration:none;border-bottom:1px solid var(--text3);padding-bottom:1px;transition:color .15s,border-color .15s;letter-spacing:.02em;}
 .topbar-link:hover{color:var(--accent);border-color:var(--accent);}
-.user-info{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);}
+.user-info{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);border:1px solid var(--line);padding:4px 10px;}
 .logout-btn{font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;border-bottom:1px solid var(--text3);line-height:1;transition:all .15s;}
 .logout-btn:hover{color:var(--danger);border-color:var(--danger);}
 .login-screen{min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center;padding:40px 20px;}
@@ -85,11 +85,11 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .table-header{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
 .filter-bar{
   overflow:hidden;max-height:0;opacity:0;
-  transition:max-height .3s ease, opacity .3s ease, padding .3s ease;
+  transition:max-height .35s ease, opacity .3s ease, padding .3s ease;
   display:flex;align-items:center;gap:8px;flex-wrap:wrap;
   border-bottom:1px solid var(--line-light);padding:0;
 }
-.filter-bar.open{max-height:60px;opacity:1;padding:8px 0;}
+.filter-bar.open{max-height:120px;opacity:1;padding:8px 0;}
 .filter-bar .fi{max-width:140px;padding:4px 0;font-size:13px;}
 .filter-bar-label{font-size:11px;color:var(--text3);letter-spacing:.03em;white-space:nowrap;}
 #filterBtn{transition:transform .3s ease;}
@@ -427,6 +427,15 @@ window.toggleFilterBar = function() {
     bar.classList.remove('open');
     btn.classList.remove('active');
   } else {
+    // 關閉編輯模式
+    if (tableEditMode) {
+      tableEditMode = false;
+      var editBtn = document.getElementById('editDataBtn');
+      editBtn.innerHTML = SVG_PENCIL;
+      editBtn.title = '編輯數據';
+      editBtn.classList.remove('editing');
+      renderDetail(currentProjectId);
+    }
     bar.classList.add('open');
     btn.classList.add('active');
     setTimeout(function(){ document.getElementById('filterFrom').focus(); }, 320);
@@ -458,8 +467,14 @@ window.toggleEditMode = function() {
   var btn = document.getElementById('editDataBtn');
   btn.innerHTML = SVG_PENCIL;
   btn.title = tableEditMode ? '完成編輯' : '編輯數據';
-  if (tableEditMode) btn.classList.add('editing');
-  else btn.classList.remove('editing');
+  if (tableEditMode) {
+    btn.classList.add('editing');
+    // 關閉查詢列
+    document.getElementById('filterBar').classList.remove('open');
+    document.getElementById('filterBtn').classList.remove('active');
+  } else {
+    btn.classList.remove('editing');
+  }
   renderDetail(currentProjectId);
 };
 
