@@ -197,13 +197,16 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 @media(min-width:600px){.overlay{align-items:center;padding:20px;}.modal{border-radius:2px;border:1px solid var(--line);}}
 .offline-banner{background:var(--danger);color:#fff;text-align:center;font-size:12px;padding:8px 20px;letter-spacing:.02em;display:none;}
 .offline-banner.show{display:block;}
-.log-wrap{margin-top:40px;padding-top:24px;border-top:1px solid var(--line);}
-.log-header-row{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0;user-select:none;}
-.log-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
-.log-item{display:flex;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line-light);font-size:12px;flex-wrap:wrap;}
-.log-ts{font-size:11px;color:var(--text3);flex-shrink:0;white-space:nowrap;}
-.log-who{color:var(--accent);flex-shrink:0;}
-.log-what{color:var(--text2);}
+.log-item{display:flex;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line-light);font-size:12px;flex-wrap:wrap;}
+.log-ts{font-size:11px;color:var(--text3);flex-shrink:0;white-space:nowrap;min-width:72px;}
+.log-who{color:var(--accent);flex-shrink:0;font-weight:500;}
+.log-action{color:var(--text);font-weight:500;flex-shrink:0;}
+.log-detail{color:var(--text3);font-size:11px;flex-basis:100%;padding-left:82px;margin-top:-4px;line-height:1.5;}
+.log-tag{display:inline-block;font-size:10px;font-weight:500;padding:1px 6px;border-radius:2px;letter-spacing:.03em;}
+.log-tag-add{background:rgba(26,138,90,.1);color:var(--success);}
+.log-tag-edit{background:rgba(82,111,189,.1);color:var(--accent);}
+.log-tag-del{background:rgba(203,119,88,.1);color:var(--danger);}
+.log-tag-sys{background:var(--line);color:var(--text3);}
 </style>
 </head>
 <body>
@@ -268,20 +271,13 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
       <div class="ph-row">
         <div class="ph-title">專案</div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-ghost btn-sm" onclick="downloadAllCSV()">匯出全部</button>
-          <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增</button>
+          <button class="btn btn-ghost btn-sm" onclick="openLogModal()">操作記錄</button>
+          <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增專案</button>
         </div>
       </div>
       <div class="ph-line"></div>
     </div>
     <div class="project-grid" id="editorGrid"></div>
-    <div class="log-wrap" id="logWrap" style="display:none">
-      <div class="log-header-row" onclick="toggleLogList()">
-        <span class="log-label">操作記錄</span>
-        <span id="logArrow" style="font-size:10px;color:var(--text3)">▾</span>
-      </div>
-      <div id="logList" style="display:none"></div>
-    </div>
   </div>
 </div>
 
@@ -370,6 +366,17 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('manualModal')">取消</button>
       <button class="btn btn-primary btn-sm" onclick="saveManualEntry()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="logModal">
+  <div class="modal" style="max-height:80vh;display:flex;flex-direction:column">
+    <div class="modal-handle"></div>
+    <div class="modal-title">操作記錄</div>
+    <div id="logList" style="overflow-y:auto;flex:1;padding-bottom:8px"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('logModal')">關閉</button>
     </div>
   </div>
 </div>
@@ -654,31 +661,7 @@ window.downloadCSV=function(){
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download=p.name+'_數據.csv';a.click();URL.revokeObjectURL(url);
 };
-var logOpen=false;
-window.toggleLogList=function(){
-  logOpen=!logOpen;
-  document.getElementById('logList').style.display=logOpen?'block':'none';
-  document.getElementById('logArrow').textContent=logOpen?'▴':'▾';
-};
-
-window.downloadAllCSV=function(){
-  var keys=projectOrder.filter(function(k){return!!projects[k];});
-  if(!keys.length){toast('尚無專案可匯出','err');return;}
-  var lines=[];
-  keys.forEach(function(k){
-    var p=projects[k],fields=p.fields||[],entries=p.entries||{},dates=Object.keys(entries).sort();
-    lines.push('活動：'+p.name+' ('+p.startDate+' ～ '+p.endDate+')');
-    lines.push(['日期'].concat(fields).join(','));
-    dates.forEach(function(d){var e=entries[d]||{};lines.push([d].concat(fields.map(function(_,i){return parseInt(e['f'+i]||0);})).join(','));});
-    var ct=fields.map(function(_,fi){return dates.reduce(function(s,d){return s+parseInt((entries[d]||{})['f'+fi]||0);},0);});
-    lines.push(['合計'].concat(ct).join(','));
-    lines.push('');
-  });
-  var blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8;'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download='全部活動數據_'+todayStr()+'.csv';a.click();
-  URL.revokeObjectURL(url);
-};
+window.openLogModal=function(){openModal('logModal');};
 
 window.onDS=function(e){dragSrcEl=e.currentTarget;dragSrcEl.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dragSrcEl.dataset.id);};
 window.onDO=function(e){e.preventDefault();e.currentTarget.classList.add('drag-over');};
@@ -764,17 +747,19 @@ window.onDP=function(e){e.preventDefault();};
         refreshView();
       },function(err){setSyncStatus('error','連線失敗');});
 
-      onValue(query(ref(db,'tracker/logs'),limitToLast(50)),function(snap){
+      onValue(query(ref(db,'tracker/logs'),limitToLast(200)),function(snap){
         var logs=snap.val()||{};
         var keys=Object.keys(logs).sort().reverse();
-        var wrap=document.getElementById('logWrap');
-        wrap.style.display=keys.length?'block':'none';
         var el=document.getElementById('logList');
-        if(!keys.length){el.innerHTML='';return;}
+        if(!keys.length){el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:16px 0;text-align:center">尚無記錄</div>';return;}
         el.innerHTML=keys.map(function(k){
           var l=logs[k],dt=new Date(parseInt(k));
-          var ts=(dt.getMonth()+1)+'/'+dt.getDate()+' '+dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
-          return '<div class="log-item"><span class="log-ts">'+ts+'</span><span class="log-who">'+esc(l.u||'?')+'</span><span class="log-what">'+esc(l.a||'')+(l.d?' · '+esc(l.d):'')+'</span></div>';
+          var ts=(dt.getMonth()+1)+'/'+(dt.getDate())+' '+dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
+          var a=l.a||'';
+          var tagClass=a.indexOf('新增')>=0?'log-tag-add':a.indexOf('刪除')>=0?'log-tag-del':a.indexOf('系統')>=0?'log-tag-sys':'log-tag-edit';
+          var tag='<span class="log-tag '+tagClass+'">'+esc(a)+'</span>';
+          var detail=l.d?'<div class="log-detail">'+esc(l.d)+'</div>':'';
+          return '<div class="log-item"><span class="log-ts">'+ts+'</span><span class="log-who">'+esc(l.u||'?')+'</span>'+tag+detail+'</div>';
         }).join('');
       },function(){});
     });
@@ -800,7 +785,7 @@ window.onDP=function(e){e.preventDefault();};
           await update(ref(db,'tracker'),{projectOrder:cur});
         }
         closeModal('projectModal');toast('\u2705 已儲存','ok');
-        writeLog(isNew?'新增專案':'編輯專案',name);
+        writeLog(isNew?'新增專案':'編輯專案',name+'｜'+start+'～'+end+'｜狀態:'+status+'｜項目:'+fields.join('、'));
       }catch(e){toast('儲存失敗：'+e.message,'err');setSyncStatus('error','儲存失敗');}
     };
 
@@ -831,7 +816,9 @@ window.onDP=function(e){e.preventDefault();};
       (p.fields||[]).forEach(function(_,i){obj['f'+i]=parseInt(document.getElementById('mf_'+i).value)||0;});
       try{
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date),obj);
-        writeLog('手動新增數據',date+' @ '+projects[currentProjectId].name);
+        var p2=projects[currentProjectId];
+        var vals=(p2.fields||[]).map(function(f,i){return f+':'+obj['f'+i];}).join('、');
+        writeLog('手動新增數據',date+' @ '+p2.name+'｜'+vals);
         closeModal('manualModal');toast('\u2705 數據已儲存','ok');
       }catch(e){toast('儲存失敗：'+e.message,'err');}
     };
@@ -842,7 +829,11 @@ window.onDP=function(e){e.preventDefault();};
         var el=document.getElementById('edit_'+date+'_'+i);
         obj['f'+i]=parseInt(el?el.value:0)||0;
       });
-      try{await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date),obj);}
+      try{
+        await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date),obj);
+        var vals=fields.map(function(f,i){return f+':'+obj['f'+i];}).join('、');
+        writeLog('編輯數據',date+' @ '+p.name+'｜'+vals);
+      }
       catch(e){toast('儲存失敗：'+e.message,'err');}
     };
 
@@ -850,7 +841,7 @@ window.onDP=function(e){e.preventDefault();};
       if(!confirm(date+' 的數據確定刪除？'))return;
       try{
         await remove(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date));
-        writeLog('刪除數據',date+' @ '+projects[currentProjectId].name);
+        writeLog('刪除數據',date+' @ '+(projects[currentProjectId]?projects[currentProjectId].name:currentProjectId));
         toast('已刪除 '+date);
       }catch(e){toast('刪除失敗：'+e.message,'err');}
     };
@@ -870,7 +861,9 @@ window.onDP=function(e){e.preventDefault();};
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+d),obj);
         dateEl.value='';
         fields.forEach(function(_,i){var el=document.getElementById('newRowVal_'+i);if(el)el.value='';});
-        writeLog('新增數據',d+' @ '+projects[currentProjectId].name);
+        var pn=projects[currentProjectId];
+        var vals2=fields.map(function(f,i){return f+':'+obj['f'+i];}).join('、');
+        writeLog('新增數據',d+' @ '+pn.name+'｜'+vals2);
         toast('\u2705 已新增 '+d,'ok');
       }catch(e){toast('新增失敗：'+e.message,'err');}
     };
