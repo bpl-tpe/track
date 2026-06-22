@@ -195,7 +195,15 @@ window.handleSubmit=function(){
     var fbDb=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
     var initializeApp=fbApp.initializeApp,getApps=fbApp.getApps;
     var getDatabase=fbDb.getDatabase,ref=fbDb.ref,set=fbDb.set,onValue=fbDb.onValue;
-    var app=getApps().length?getApps()[0]:initializeApp({databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/'});
+   var app=getApps().length?getApps()[0]:initializeApp({
+  apiKey:'AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ',
+  authDomain:'project-1794474641398451810.firebaseapp.com',
+  databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app',
+  projectId:'project-1794474641398451810',
+  storageBucket:'project-1794474641398451810.firebasestorage.app',
+  messagingSenderId:'660717432614',
+  appId:'1:660717432614:web:5067d9a791339b6c275be7'
+});
     var db=getDatabase(app);
 
     setSyncStatus('syncing','連線中...');
