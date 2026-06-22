@@ -206,7 +206,9 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 .log-tag-add{background:rgba(26,138,90,.1);color:var(--success);}
 .log-tag-edit{background:rgba(82,111,189,.1);color:var(--accent);}
 .log-tag-del{background:rgba(203,119,88,.1);color:var(--danger);}
+.log-tag-overwrite{background:rgba(203,119,88,.18);color:var(--danger);font-weight:600;}
 .log-tag-sys{background:var(--line);color:var(--text3);}
+.log-who-helper{color:var(--success);flex-shrink:0;font-weight:500;}
 </style>
 </head>
 <body>
@@ -756,10 +758,11 @@ window.onDP=function(e){e.preventDefault();};
           var l=logs[k],dt=new Date(parseInt(k));
           var ts=(dt.getMonth()+1)+'/'+(dt.getDate())+' '+dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
           var a=l.a||'';
-          var tagClass=a.indexOf('新增')>=0?'log-tag-add':a.indexOf('刪除')>=0?'log-tag-del':a.indexOf('系統')>=0?'log-tag-sys':'log-tag-edit';
+          var tagClass=a==='覆蓋填報'?'log-tag-overwrite':a.indexOf('填報')>=0||a.indexOf('新增')>=0?'log-tag-add':a.indexOf('刪除')>=0?'log-tag-del':a.indexOf('系統')>=0?'log-tag-sys':'log-tag-edit';
           var tag='<span class="log-tag '+tagClass+'">'+esc(a)+'</span>';
           var detail=l.d?'<div class="log-detail">'+esc(l.d)+'</div>':'';
-          return '<div class="log-item"><span class="log-ts">'+ts+'</span><span class="log-who">'+esc(l.u||'?')+'</span>'+tag+detail+'</div>';
+          var whoClass=l.u==='協助者'?'log-who-helper':'log-who';
+          return '<div class="log-item"><span class="log-ts">'+ts+'</span><span class="'+whoClass+'">'+esc(l.u||'?')+'</span>'+tag+detail+'</div>';
         }).join('');
       },function(){});
     });
