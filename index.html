@@ -217,13 +217,16 @@ window.handleSubmit=function(){
     },function(err){setSyncStatus('error','連線失敗');toast('連線失敗：'+err.message,'err');});
 
     window._dbSet=async function(pid,date,values){
-      var obj={};values.forEach(function(v,i){obj['f'+i]=v.value;});
+      var p=projects[pid],obj={};values.forEach(function(v,i){obj['f'+i]=v.value;});
       try{
         await set(ref(db,'tracker/projects/'+pid+'/entries/'+date),obj);
         values.forEach(function(_,i){var el=document.getElementById('ef_'+i);if(el){el.disabled=true;}});
         var sb=document.getElementById('statusBanner');sb.textContent='數據已送出';sb.className='status-banner show';
         document.getElementById('submitBtn').disabled=true;
         toast('\u2705 數據已送出！','ok');
+        var vals=(p&&p.fields?p.fields:[]).map(function(f,i){return f+':'+obj['f'+i];}).join('、');
+        var t=Date.now();
+        set(ref(db,'tracker/logs/'+t),{t:t,u:'協助者',a:'填報數據',d:date+' @ '+(p?p.name:pid)+'｜'+vals}).catch(function(){});
       }catch(e){toast('送出失敗：'+e.message,'err');}
     };
   }catch(err){setSyncStatus('error','連線失敗');toast('初始化失敗：'+err.message,'err');}
