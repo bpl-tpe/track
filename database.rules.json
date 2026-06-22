@@ -14,8 +14,10 @@
       },
       "projectOrder": {
         ".write": "auth != null"
+      },
+      "logs": {
+        ".write": "auth != null"
       }
     }
   }
 }
-Commit changes
