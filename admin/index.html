@@ -774,6 +774,7 @@ window.onDP=function(e){e.preventDefault();};
       if(!fields.length){toast('請至少新增一個登記項目','err');return;}
       var isNew=!editingProjectId;
       var id=editingProjectId||'p_'+Date.now();
+      var _old=isNew?null:(projects[id]?JSON.parse(JSON.stringify(projects[id])):null);
       setSyncStatus('syncing','儲存中...');
       try{
         await update(ref(db,'tracker/projects/'+id),{name:name,startDate:start,endDate:end,fields:fields,status:status});
@@ -785,7 +786,18 @@ window.onDP=function(e){e.preventDefault();};
           await update(ref(db,'tracker'),{projectOrder:cur});
         }
         closeModal('projectModal');toast('\u2705 已儲存','ok');
-        writeLog(isNew?'新增專案':'編輯專案',name+'｜'+start+'～'+end+'｜狀態:'+status+'｜項目:'+fields.join('、'));
+        if(isNew){
+          writeLog('新增專案',name+'｜'+start+'～'+end+'｜狀態:'+(status==='active'?'進行中':'已結束')+'｜登記項目:'+fields.join('、'));
+        }else{
+          var _chg=[];
+          if(_old&&_old.name!==name)_chg.push('名稱:'+_old.name+'→'+name);
+          if(_old&&(_old.startDate!==start||_old.endDate!==end))_chg.push('日期:'+_old.startDate+'～'+_old.endDate+'→'+start+'～'+end);
+          var _os=_old?(_old.status||'active'):'active';
+          if(_os!==status)_chg.push('狀態:'+(_os==='active'?'進行中':'已結束')+'→'+(status==='active'?'進行中':'已結束'));
+          var _of=_old?(_old.fields||[]).join('、'):'',_nf=fields.join('、');
+          if(_of!==_nf)_chg.push('登記項目變更:'+_nf);
+          writeLog('編輯專案',name+(_chg.length?'｜'+_chg.join('｜'):'（無異動）'));
+        }
       }catch(e){toast('儲存失敗：'+e.message,'err');setSyncStatus('error','儲存失敗');}
     };
 
@@ -825,14 +837,18 @@ window.onDP=function(e){e.preventDefault();};
 
     window.saveRowEdit=async function(date){
       var p=projects[currentProjectId],fields=p.fields||[],obj={};
+      var oldEntry=(p.entries&&p.entries[date])||{};
       fields.forEach(function(_,i){
         var el=document.getElementById('edit_'+date+'_'+i);
         obj['f'+i]=parseInt(el?el.value:0)||0;
       });
       try{
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+date),obj);
-        var vals=fields.map(function(f,i){return f+':'+obj['f'+i];}).join('、');
-        writeLog('編輯數據',date+' @ '+p.name+'｜'+vals);
+        var chg=fields.map(function(f,i){
+          var ov=parseInt(oldEntry['f'+i]||0),nv=obj['f'+i];
+          return ov!==nv?f+':'+ov+'→'+nv:null;
+        }).filter(Boolean);
+        writeLog('編輯數據',date+' @ '+p.name+'｜'+(chg.length?chg.join('、'):'（無異動）'));
       }
       catch(e){toast('儲存失敗：'+e.message,'err');}
     };
