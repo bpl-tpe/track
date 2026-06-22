@@ -16,7 +16,7 @@
         ".write": "auth != null"
       },
       "logs": {
-        ".write": "auth != null"
+        ".write": true
       }
     }
   }
