@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "tracker": {
+      ".read": true,
+      "projects": {
+        "$projectId": {
+          ".write": "auth != null",
+          "entries": {
+            "$date": {
+              ".write": true
+            }
+          }
+        }
+      },
+      "projectOrder": {
+        ".write": "auth != null"
+      }
+    }
+  }
+}
+Commit changes
