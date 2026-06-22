@@ -802,6 +802,7 @@ window.onDP=function(e){e.preventDefault();};
       var si=projectOrder.indexOf(dragSrcEl.dataset.id),ti=projectOrder.indexOf(tgt.dataset.id);
       if(si<0||ti<0)return;
       projectOrder.splice(si,1);projectOrder.splice(ti,0,dragSrcEl.dataset.id);
+      renderEditorProjects();
       update(ref(db,'tracker'),{projectOrder:projectOrder.slice()});
     };
 
