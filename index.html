@@ -44,19 +44,19 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .psel-date{font-size:12px;color:var(--text3);margin-top:3px;}
 .entry-section{margin-top:0;}
 .form-card{background:var(--surface);border:1.5px solid var(--line);border-radius:18px;padding:24px 22px 28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
-.form-card-header{margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--line-light);}
+.form-card-header{margin-bottom:22px;padding-bottom:16px;}
 .entry-title{font-size:17px;font-weight:500;letter-spacing:-.1px;margin-bottom:4px;color:var(--accent);}
 .entry-date-row{margin-bottom:20px;}
 .entry-date-label{font-size:12px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:7px;display:block;}
-.date-input{background:var(--bg);border:1.5px solid var(--line);border-radius:8px;font-size:16px;font-family:inherit;color:var(--text);padding:9px 12px;width:100%;outline:none;transition:border-color .15s,background .15s;}
-.date-input:focus{border-color:var(--accent);background:#fff;}
+.date-input{background:transparent;border:none;border-bottom:2px solid var(--line);border-radius:0;font-size:16px;font-family:inherit;color:var(--text);padding:4px 0;width:100%;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s;}
+.date-input:focus{border-bottom-color:var(--accent);}
 .entry-fields{display:flex;flex-direction:column;gap:0;margin-bottom:22px;}
 .efield-row{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--line-light);}
 .efield-row:first-child{border-top:none;}.efield-row:last-child{border-bottom:none;}
 .efield-label{font-size:14px;font-weight:500;color:var(--text);}
-.efield-input{width:90px;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;font-size:20px;font-weight:400;text-align:center;font-family:inherit;color:var(--text);padding:6px 8px;outline:none;transition:border-color .15s,background .15s;-moz-appearance:textfield;}
+.efield-input{width:80px;background:transparent;border:none;border-bottom:2px solid var(--line);font-size:22px;font-weight:400;text-align:right;font-family:inherit;color:var(--text);padding:4px 0;outline:none;transition:border-color .15s;-moz-appearance:textfield;}
 .efield-input::-webkit-outer-spin-button,.efield-input::-webkit-inner-spin-button{-webkit-appearance:none;}
-.efield-input:focus{border-color:var(--accent);background:#fff;}.efield-input:disabled{color:var(--text3);border-color:var(--line-light);}
+.efield-input:focus{border-color:var(--accent);}.efield-input:disabled{color:var(--text3);border-color:var(--line-light);}
 .efield-input.prefilled{color:var(--warn);}
 .status-banner{font-size:12px;padding:10px 14px;margin-bottom:16px;color:var(--text2);letter-spacing:.02em;display:none;border-radius:8px;}
 .status-banner.show{display:block;}
@@ -72,27 +72,32 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 ::-webkit-scrollbar-thumb{background:var(--line);}
 .offline-banner{background:var(--danger);color:#fff;text-align:center;font-size:12px;padding:8px 20px;letter-spacing:.02em;display:none;}
 .offline-banner.show{display:block;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.topbar-nav-btn{font-size:12px;color:var(--text2);text-decoration:none;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:5px 12px;letter-spacing:.02em;transition:all .18s;white-space:nowrap;}
+.topbar-nav-btn:hover{border-color:var(--text3);color:var(--text);}
 </style>
 </head>
 <body>
 <div class="offline-banner" id="offlineBanner">⚠ 目前離線，恢復連線後數據將自動同步</div>
 <div class="topbar">
-  <div class="brand">
-    <div class="brand-icon-wrap">
-      <svg width="14" height="14" viewBox="0 0 22 22" fill="none">
-        <rect x="2" y="14" width="4" height="6" fill="#fff" opacity=".5"/>
-        <rect x="9" y="9" width="4" height="11" fill="#fff" opacity=".75"/>
-        <rect x="16" y="4" width="4" height="16" fill="#fff"/>
-      </svg>
+  <div class="topbar-left">
+    <div class="brand">
+      <div class="brand-icon-wrap">
+        <svg width="14" height="14" viewBox="0 0 22 22" fill="none">
+          <rect x="2" y="14" width="4" height="6" fill="#fff" opacity=".5"/>
+          <rect x="9" y="9" width="4" height="11" fill="#fff" opacity=".75"/>
+          <rect x="16" y="4" width="4" height="16" fill="#fff"/>
+        </svg>
+      </div>
+      活動人次追蹤系統
     </div>
-    活動人次追蹤系統
+    <a href="./admin/index.html" class="topbar-nav-btn">編輯者後台</a>
   </div>
   <div class="topbar-right">
     <div class="sync-status">
       <div class="sdot" id="syncDot"></div>
       <span id="syncText">連線中</span>
     </div>
-    <a href="./admin/index.html" class="admin-link">編輯者後台</a>
   </div>
 </div>
 
