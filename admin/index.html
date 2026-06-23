@@ -190,11 +190,20 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 .log-tag-sys{background:var(--line);color:var(--text3);}
 .log-who-helper{color:var(--success);flex-shrink:0;font-weight:500;}
 @media(max-width:480px){
+/* Topbar */
 .brand-name{display:none;}
 .topbar-nav-btn{font-size:11px;padding:5px 9px;}
 #syncText{display:none;}
 #userName{display:none;}
 .user-info{gap:0;padding:4px 10px;}
+/* Modal date row: stack vertically */
+.date-row-2col{grid-template-columns:1fr !important;}
+/* Table action buttons: smaller */
+.tbl-btn{font-size:11px;padding:4px 8px;}
+/* Filter bar: full-width inputs */
+.filter-bar .fi{max-width:100%;flex:1;}
+/* ph-row: already flex-wrap, ensure gap */
+.ph-row{gap:8px;}
 }
 </style>
 </head>
@@ -321,7 +330,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     <div class="modal-title" id="projectModalTitle">新增專案</div>
     <div class="modal-sub">活動資訊與登記項目</div>
     <div class="fg"><label class="fl">活動名稱</label><input class="fi" id="fieldName" placeholder=""></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="date-row-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div class="fg"><label class="fl">開始日期</label><input class="fi" type="date" id="fieldStart"></div>
       <div class="fg"><label class="fl">結束日期</label><input class="fi" type="date" id="fieldEnd"></div>
     </div>
