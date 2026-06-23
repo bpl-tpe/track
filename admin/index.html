@@ -189,6 +189,13 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 .log-tag-overwrite{background:var(--danger-pale);color:var(--danger);font-weight:600;}
 .log-tag-sys{background:var(--line);color:var(--text3);}
 .log-who-helper{color:var(--success);flex-shrink:0;font-weight:500;}
+@media(max-width:480px){
+.brand-name{display:none;}
+.topbar-nav-btn{font-size:11px;padding:5px 9px;}
+#syncText{display:none;}
+#userName{display:none;}
+.user-info{gap:0;padding:4px 10px;}
+}
 </style>
 </head>
 <body>
@@ -205,7 +212,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
           <rect x="16" y="4" width="4" height="16" fill="#fff"/>
         </svg>
       </div>
-      活動人次追蹤系統
+      <span class="brand-name">活動人次追蹤系統</span>
     </div>
     <a href="../index.html" class="topbar-nav-btn">協助者頁面</a>
   </div>
