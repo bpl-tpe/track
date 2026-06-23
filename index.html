@@ -75,6 +75,11 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .topbar-left{display:flex;align-items:center;gap:10px;}
 .topbar-nav-btn{font-size:12px;color:var(--text2);text-decoration:none;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:5px 12px;letter-spacing:.02em;transition:all .18s;white-space:nowrap;}
 .topbar-nav-btn:hover{border-color:var(--text3);color:var(--text);}
+@media(max-width:480px){
+.brand-name{display:none;}
+.topbar-nav-btn{font-size:11px;padding:5px 9px;}
+#syncText{display:none;}
+}
 </style>
 </head>
 <body>
@@ -89,7 +94,7 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
           <rect x="16" y="4" width="4" height="16" fill="#fff"/>
         </svg>
       </div>
-      活動人次追蹤系統
+      <span class="brand-name">活動人次追蹤系統</span>
     </div>
     <a href="./admin/index.html" class="topbar-nav-btn">編輯者後台</a>
   </div>
