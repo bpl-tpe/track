@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>活動人次追蹤系統（測試版）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#F2F4F8;--surface:#ffffff;--line:#e4e7ed;--line-light:#eef0f4;
+  --text:#1a2130;--text2:#3d4a5c;--text3:#8d97a5;
+  --accent:#3D7EFF;--accent2:#6BA3FF;--accent-pale:#EBF2FF;
+  --success:#16a05a;--success-pale:#e8f7ef;
+  --danger:#e05c3a;--danger-pale:#fdf0ec;--warn:#e09a3a;
+}
+html{font-size:16px;}
+body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-weight:400;line-height:1.7;-webkit-font-smoothing:antialiased;}
+.view{display:none;}.view.active{display:block;}
+.topbar{height:56px;background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:200;box-shadow:0 1px 6px rgba(0,0,0,0.05);}
+.brand{font-size:14px;font-weight:500;color:var(--text);letter-spacing:.02em;display:flex;align-items:center;gap:8px;}.brand-icon-wrap{width:24px;height:24px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.sync-status{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);letter-spacing:.02em;}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .4s;}
+.sdot.synced{background:var(--success);box-shadow:0 0 0 2px var(--success-pale);}.sdot.syncing{background:var(--warn);animation:blink 1.2s infinite;}.sdot.error{background:var(--danger);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.wrap-sm{max-width:480px;margin:0 auto;padding:36px 20px 60px;}
+.ph{margin-bottom:32px;}.ph-title{font-size:20px;font-weight:500;letter-spacing:-.3px;color:var(--text);line-height:1.2;}
+.ph-sub{font-size:13px;color:var(--text3);margin-top:6px;}.ph-line{height:1px;background:var(--line);margin-top:18px;}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-bottom:28px;letter-spacing:.03em;transition:color .15s;}
+.back-btn:hover{color:var(--text);}.back-btn::before{content:"\2190";font-size:14px;}
+.psel-list{display:flex;flex-direction:column;gap:0;margin-top:0;padding-top:4px;}
+.psel-item{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-radius:12px;margin-bottom:8px;background:var(--surface);border:1.5px solid var(--line);cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
+.psel-item:hover{border-color:#b8c8e8;box-shadow:0 6px 18px rgba(61,126,255,0.10);transform:translateY(-1px);}
+.psel-name{font-size:17px;font-weight:500;color:var(--accent);}
+.psel-date{font-size:12px;color:var(--text3);margin-top:3px;}
+
+/* ── ① Toast 優化：底部 + 進度條 ── */
+.toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 40px);max-width:360px;}
+.toast{
+  background:var(--text);color:#fff;padding:12px 18px 12px 14px;
+  font-size:13px;width:100%;letter-spacing:.02em;
+  border-radius:10px;position:relative;overflow:hidden;
+  display:flex;align-items:center;gap:9px;
+  animation:tIn .2s ease;
+}
+.toast.ok{background:var(--success);}
+.toast.err{background:var(--danger);}
+.toast-icon{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.toast-msg{flex:1;}
+.toast-progress{position:absolute;bottom:0;left:0;height:3px;background:rgba(255,255,255,.35);border-radius:0 3px 3px 0;animation:tProgress 2.8s linear forwards;}
+@keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tProgress{from{width:100%}to{width:0%}}
+
+.empty{text-align:center;padding:60px 20px;color:var(--text3);}
+.empty-ico{font-size:32px;margin-bottom:12px;opacity:.4;}
+.empty p{font-size:13px;letter-spacing:.02em;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--line);}
+
+/* ── 離線橫幅 ── */
+.offline-banner{background:var(--danger);color:#fff;text-align:center;font-size:12px;padding:8px 20px;letter-spacing:.02em;display:none;}
+.offline-banner.show{display:block;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.topbar-nav-btn{font-size:12px;color:var(--text2);text-decoration:none;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:5px 12px;letter-spacing:.02em;transition:all .18s;white-space:nowrap;}
+.topbar-nav-btn:hover{border-color:var(--text3);color:var(--text);}
+
+/* Report view */
+.report-proj-name{font-size:20px;font-weight:500;color:var(--text);letter-spacing:-.2px;line-height:1.3;margin-bottom:3px;}
+.report-proj-dates{font-size:12px;color:var(--text3);margin-bottom:22px;letter-spacing:.02em;}
+.date-block{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.date-block-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;}
+.date-block-input{border:none;outline:none;background:transparent;font-size:16px;font-weight:500;font-family:inherit;color:var(--text);text-align:right;flex:1;min-width:0;-webkit-appearance:none;appearance:none;cursor:pointer;}
+
+/* Category section */
+.cat-section{margin-bottom:24px;}
+.cat-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.cat-header-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.cat-name{font-size:13px;font-weight:500;color:var(--text2);letter-spacing:.01em;}
+.cat-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;letter-spacing:.03em;line-height:1.4;}
+.cat-status.done{background:var(--success-pale);color:var(--success);}
+.cat-status.pending{background:var(--line-light);color:var(--text3);}
+.cat-status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.cat-divider{height:1px;background:var(--line);margin:4px 0 24px;}
+
+/* Field card grid */
+.field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:12px;}
+.field-card{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 12px 10px;display:flex;flex-direction:column;min-height:108px;box-shadow:0 1px 4px rgba(0,0,0,0.04);transition:border-color .15s;}
+.field-card:focus-within{border-color:var(--accent);}
+.field-card-name{font-size:12px;color:var(--text2);line-height:1.3;}
+.field-card-note{font-size:10px;color:var(--text3);line-height:1.4;margin-top:3px;}
+.field-card-spacer{flex:1;min-height:6px;}
+.field-card-input{border:none;outline:none;background:transparent;font-size:22px;font-weight:400;font-family:inherit;color:var(--text);width:100%;padding:0;padding-bottom:4px;font-variant-numeric:tabular-nums;letter-spacing:-.5px;border-bottom:2px solid var(--line);transition:border-color .15s,color .15s;-moz-appearance:textfield;text-align:center;}
+.field-card-input::-webkit-outer-spin-button,.field-card-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.field-card-input:focus{border-bottom-color:var(--accent);color:var(--accent);}
+
+/* ── ② 驗證錯誤狀態 ── */
+.field-card.has-error{border-color:var(--danger);background:var(--danger-pale);}
+.field-card.has-error .field-card-input{border-bottom-color:var(--danger);color:var(--danger);}
+.field-card.has-error .field-card-name{color:var(--danger);}
+.field-err-hint{font-size:9px;color:var(--danger);margin-top:3px;letter-spacing:.02em;}
+
+/* Submit button */
+.cat-submit-btn{flex-shrink:0;padding:5px 14px;font-size:12px;font-weight:500;font-family:inherit;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:20px;cursor:pointer;letter-spacing:.02em;box-shadow:0 2px 8px rgba(61,126,255,.22);transition:all .18s;white-space:nowrap;}
+.cat-submit-btn:hover{box-shadow:0 4px 12px rgba(61,126,255,.35);transform:translateY(-1px);}
+.cat-submit-btn:active{transform:scale(.98);box-shadow:none;}
+.cat-submit-btn.done{background:linear-gradient(135deg,var(--success),#22c575);box-shadow:0 2px 8px rgba(22,160,90,.22);}
+.cat-submit-btn.done:hover{box-shadow:0 4px 12px rgba(22,160,90,.35);transform:translateY(-1px);}
+
+/* ── ③ 網路錯誤橫幅 ── */
+.net-err-banner{
+  background:var(--danger-pale);border:1.5px solid var(--danger);border-radius:12px;
+  padding:12px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;
+}
+.net-err-content{flex:1;}
+.net-err-title{font-size:13px;font-weight:500;color:var(--danger);margin-bottom:2px;}
+.net-err-body{font-size:12px;color:var(--text2);line-height:1.5;}
+.net-retry-btn{
+  margin-top:8px;font-size:12px;font-weight:500;font-family:inherit;
+  color:#fff;background:var(--danger);border:none;
+  padding:6px 14px;border-radius:8px;cursor:pointer;
+  transition:all .15s;
+}
+.net-retry-btn:hover{background:#c04020;}
+
+.test-badge{position:fixed;top:62px;right:12px;background:var(--warn);color:#fff;font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.04em;z-index:300;pointer-events:none;}
+
+@media(max-width:480px){
+.brand-name{display:none;}
+.topbar-nav-btn{font-size:11px;padding:5px 9px;}
+#syncText{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="offline-banner" id="offlineBanner">⚠ 目前離線，恢復連線後數據將自動同步</div>
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="brand">
+      <div class="brand-icon-wrap">
+        <svg width="14" height="14" viewBox="0 0 22 22" fill="none">
+          <rect x="2" y="14" width="4" height="6" fill="#fff" opacity=".5"/>
+          <rect x="9" y="9" width="4" height="11" fill="#fff" opacity=".75"/>
+          <rect x="16" y="4" width="4" height="16" fill="#fff"/>
+        </svg>
+      </div>
+      <span class="brand-name">活動人次追蹤系統</span>
+    </div>
+    <a href="../admin/" class="topbar-nav-btn">編輯者後台</a>
+  </div>
+  <div class="topbar-right">
+    <div class="sync-status">
+      <div class="sdot" id="syncDot"></div>
+      <span id="syncText">連線中</span>
+    </div>
+  </div>
+</div>
+<div class="test-badge">測試版</div>
+
+<div class="view active" id="viewList">
+  <div class="wrap-sm">
+    <div class="ph">
+      <div class="ph-title">填報人次</div>
+      <div class="ph-sub">請選擇活動</div>
+      <div class="ph-line"></div>
+    </div>
+    <div id="listInner" class="psel-list"></div>
+  </div>
+</div>
+
+<div class="view" id="viewReport">
+  <div class="wrap-sm">
+    <button class="back-btn" id="reportBackBtn" onclick="backToList()">返回</button>
+    <div class="report-proj-name" id="reportName"></div>
+    <div class="report-proj-dates" id="reportDates"></div>
+    <div class="date-block">
+      <span class="date-block-label">填報日期</span>
+      <input type="date" class="date-block-input" id="reportDate" onchange="onReportDateChange()">
+    </div>
+    <div id="reportCats"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+var projects = {};
+var projectOrder = [];
+var currentProjectId = null;
+
+function setSyncStatus(s,t){document.getElementById('syncDot').className='sdot '+s;document.getElementById('syncText').textContent=t;}
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fname(f){return typeof f==='string'?f:(f&&f.name?f.name:'');}
+function fnote(f){return typeof f==='string'?'':(f&&f.note?f.note:'');}
+function showView(id){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.getElementById(id).classList.add('active');}
+
+/* ── ① 優化 Toast：顯示圖示 + 進度條 + 明確訊息 ── */
+function toast(msg, type) {
+  var w = document.getElementById('toastWrap');
+  var t = document.createElement('div');
+  t.className = 'toast' + (type==='err' ? ' err' : type==='ok' ? ' ok' : '');
+  var iconSvg = type==='ok'
+    ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    : type==='err'
+    ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+    : '';
+  t.innerHTML = '<div class="toast-icon">'+iconSvg+'</div><span class="toast-msg">'+esc(msg)+'</span><div class="toast-progress"></div>';
+  w.appendChild(t);
+  setTimeout(function(){if(t.parentNode)t.remove();}, 3000);
+}
+
+function renderList(){
+  var el=document.getElementById('listInner');
+  var active=projectOrder.filter(function(k){return projects[k]&&projects[k].status==='active';});
+  if(!active.length){
+    el.innerHTML='<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';
+    showView('viewList');return;
+  }
+  if(active.length===1){
+    document.getElementById('reportBackBtn').style.display='none';
+    selectProject(active[0]);return;
+  }
+  document.getElementById('reportBackBtn').style.display='';
+  showView('viewList');
+  el.innerHTML=active.map(function(k){
+    var p=projects[k];
+    return '<div class="psel-item" onclick="selectProject(\''+k+'\')">'+
+      '<div><div class="psel-name">'+esc(p.name)+'</div><div class="psel-date">'+p.startDate+' ～ '+p.endDate+'</div></div>'+
+      '<span style="color:var(--text3);font-size:16px">&#8250;</span></div>';
+  }).join('');
+}
+
+window.selectProject=function(id){
+  currentProjectId=id;
+  var p=projects[id];
+  document.getElementById('reportName').textContent=p.name;
+  document.getElementById('reportDates').textContent=p.startDate+' ～ '+p.endDate;
+  var today=todayStr();
+  var d=today;
+  if(p.startDate&&d<p.startDate)d=p.startDate;
+  if(p.endDate&&d>p.endDate)d=p.endDate;
+  var dateEl=document.getElementById('reportDate');
+  dateEl.value=d;dateEl.min=p.startDate||'';dateEl.max=p.endDate||'';
+  renderCatSections(id,d);
+  showView('viewReport');
+};
+
+window.backToList=function(){currentProjectId=null;showView('viewList');};
+window.onReportDateChange=function(){
+  if(!currentProjectId)return;
+  var d=document.getElementById('reportDate').value;
+  if(d)renderCatSections(currentProjectId,d);
+};
+
+function renderCatSections(pid,date){
+  var p=projects[pid];
+  var container=document.getElementById('reportCats');
+  container.innerHTML='';
+  var cats=p.categories&&p.categories.length?p.categories:null;
+  if(cats){
+    cats.forEach(function(cat,ci){
+      if(ci>0){var div=document.createElement('div');div.className='cat-divider';container.appendChild(div);}
+      container.appendChild(buildCatSection(pid,date,ci,cat.name,cat.fields||[]));
+    });
+  } else {
+    container.appendChild(buildCatSection(pid,date,null,null,p.fields||[]));
+  }
+}
+
+/* ── ② 驗證函式：整數 ≥ 0，非空 ── */
+function validateSection(fields, idPfx) {
+  var valid = true;
+  fields.forEach(function(f, fi) {
+    var inp = document.getElementById('cf_'+idPfx+'_'+fi);
+    if (!inp) return;
+    var val = inp.value.trim();
+    var num = parseFloat(val);
+    var isErr = val==='' || isNaN(num) || num < 0 || !Number.isInteger(num);
+    var card = inp.closest('.field-card');
+    card.classList.toggle('has-error', isErr);
+    var hint = card.querySelector('.field-err-hint');
+    if (isErr) {
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.className = 'field-err-hint';
+        hint.textContent = val==='' ? '請填入數值' : '需為整數 ≥ 0';
+        inp.parentNode.insertBefore(hint, inp.nextSibling);
+      }
+      valid = false;
+    } else {
+      if (hint) hint.remove();
+    }
+  });
+  return valid;
+}
+
+function buildCatSection(pid, date, catIndex, catLabel, fields) {
+  var entryKey = catIndex!==null ? 'cat'+catIndex+'_'+date : date;
+  var p = projects[pid];
+  var existing = (p.entries && p.entries[entryKey]) || null;
+  var idPfx = catIndex!==null ? catIndex : 'leg';
+
+  var section = document.createElement('div');
+  section.className = 'cat-section';
+
+  var btn = document.createElement('button');
+  btn.className = 'cat-submit-btn'+(existing?' done':'');
+  btn.textContent = existing ? '已填報' : '送出';
+
+  (function(ci,lbl,flds,key,isOw,sec,b){
+    b.onclick = function(){ doSubmit(pid,date,ci,lbl,flds,key,isOw,sec,b); };
+  })(catIndex,catLabel,fields,entryKey,!!existing,section,btn);
+
+  if(catLabel!==null){
+    var header=document.createElement('div');header.className='cat-header';
+    var left=document.createElement('div');left.className='cat-header-left';
+    var nameEl=document.createElement('span');nameEl.className='cat-name';nameEl.textContent=catLabel;
+    var badge=document.createElement('span');
+    badge.className='cat-status '+(existing?'done':'pending');
+    badge.innerHTML='<span class="cat-status-dot"></span>'+(existing?'今日已回報':'尚未回報');
+    left.appendChild(nameEl);left.appendChild(badge);
+    header.appendChild(left);header.appendChild(btn);
+    section.appendChild(header);
+  }
+
+  var grid=document.createElement('div');grid.className='field-grid';
+  fields.forEach(function(f,fi){
+    var card=document.createElement('div');card.className='field-card';
+    var nameDiv=document.createElement('div');nameDiv.className='field-card-name';nameDiv.textContent=fname(f);card.appendChild(nameDiv);
+    var note=fnote(f);
+    if(note){var noteDiv=document.createElement('div');noteDiv.className='field-card-note';noteDiv.textContent=note;card.appendChild(noteDiv);}
+    var spacer=document.createElement('div');spacer.className='field-card-spacer';card.appendChild(spacer);
+    var inp=document.createElement('input');
+    inp.type='number';inp.min='0';inp.placeholder='0';
+    inp.className='field-card-input';
+    inp.id='cf_'+idPfx+'_'+fi;
+    inp.inputMode='numeric';
+    if(existing)inp.value=parseInt(existing['f'+fi]||0);
+    /* ② 清除錯誤狀態 on input */
+    inp.addEventListener('input', function(){
+      card.classList.remove('has-error');
+      var hint=card.querySelector('.field-err-hint');
+      if(hint)hint.remove();
+    });
+    card.appendChild(inp);
+    grid.appendChild(card);
+  });
+  section.appendChild(grid);
+
+  if(catLabel===null) section.appendChild(btn);
+  return section;
+}
+
+function doSubmit(pid, date, catIndex, catLabel, fields, entryKey, isOverwrite, section, btn) {
+  var idPfx = catIndex!==null ? catIndex : 'leg';
+
+  /* ② 送出前驗證 */
+  if (!validateSection(fields, idPfx)) {
+    toast('請確認所有欄位填入有效數字', 'err');
+    return;
+  }
+
+  var values = fields.map(function(f,fi){
+    var el=document.getElementById('cf_'+idPfx+'_'+fi);
+    return {label:fname(f), value:parseInt(el?el.value:0)||0};
+  });
+  if(isOverwrite&&!confirm('該日期已填報過，確認覆蓋？'))return;
+  if(!window._dbSet){toast('資料庫尚未就緒，請稍後','err');return;}
+
+  /* ③ 先移除舊的錯誤橫幅 */
+  var oldBanner = section.querySelector('.net-err-banner');
+  if (oldBanner) oldBanner.remove();
+
+  window._dbSet(pid, entryKey, values, isOverwrite, catLabel, function(){
+    var badge=section.querySelector('.cat-status');
+    if(badge){badge.className='cat-status done';badge.innerHTML='<span class="cat-status-dot"></span>今日已回報';}
+    btn.className='cat-submit-btn done';
+    btn.textContent='已填報';
+    btn.onclick=function(){doSubmit(pid,date,catIndex,catLabel,fields,entryKey,true,section,btn);};
+  }, section);
+}
+
+/* ── ③ 網路錯誤：inline banner + retry ── */
+function showNetErrBanner(section, retryFn) {
+  var old = section.querySelector('.net-err-banner');
+  if(old) old.remove();
+  var banner = document.createElement('div');
+  banner.className = 'net-err-banner';
+  banner.innerHTML =
+    '<svg width="16" height="16" style="flex-shrink:0;color:var(--danger);margin-top:1px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'+
+    '<div class="net-err-content">'+
+      '<div class="net-err-title">送出失敗</div>'+
+      '<div class="net-err-body">網路無法連線，數據尚未儲存。<br>填報內容仍保留，請稍後重試。</div>'+
+      '<button class="net-retry-btn">重新送出</button>'+
+    '</div>';
+  banner.querySelector('.net-retry-btn').onclick = function(){
+    banner.remove();
+    retryFn();
+  };
+  var grid = section.querySelector('.field-grid');
+  if(grid) section.insertBefore(banner, grid);
+  else section.appendChild(banner);
+}
+
+(async function(){
+  try{
+    var fbApp=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    var fbDb=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+    var initializeApp=fbApp.initializeApp,getApps=fbApp.getApps;
+    var getDatabase=fbDb.getDatabase,ref=fbDb.ref,set=fbDb.set,onValue=fbDb.onValue;
+    var app=getApps().length?getApps()[0]:initializeApp({databaseURL:'https://project-1794474641398451810-default-rtdb.asia-southeast1.firebasedatabase.app/'});
+    var db=getDatabase(app);
+    window.addEventListener('online',function(){document.getElementById('offlineBanner').classList.remove('show');setSyncStatus('synced','已同步');});
+    window.addEventListener('offline',function(){document.getElementById('offlineBanner').classList.add('show');setSyncStatus('error','離線中');});
+    if(!navigator.onLine){document.getElementById('offlineBanner').classList.add('show');setSyncStatus('error','離線中');}
+
+    setSyncStatus('syncing','連線中...');
+    onValue(ref(db,'tracker'),function(snap){
+      var d=snap.val()||{};
+      projects=d.projects||{};
+      projectOrder=d.projectOrder||Object.keys(projects);
+      Object.keys(projects).forEach(function(k){if(projectOrder.indexOf(k)<0)projectOrder.push(k);});
+      projectOrder=projectOrder.filter(function(k){return!!projects[k];});
+      setSyncStatus('synced','已同步');
+      renderList();
+      if(currentProjectId&&document.getElementById('viewReport').classList.contains('active')){
+        var d2=document.getElementById('reportDate').value;
+        if(d2)renderCatSections(currentProjectId,d2);
+      }
+    },function(err){setSyncStatus('error','連線失敗');toast('連線失敗：'+err.message,'err');});
+
+    window._dbSet = async function(pid, entryKey, values, isOverwrite, catName, onSuccess, section) {
+      var p=projects[pid], obj={};
+      values.forEach(function(v,i){obj['f'+i]=v.value;});
+      try{
+        await set(ref(db,'tracker/projects/'+pid+'/entries/'+entryKey),obj);
+        /* ① 明確的成功 toast，含類別名稱 */
+        toast((catName||'數據') + ' 已成功送出', 'ok');
+        if(onSuccess) onSuccess();
+        var vals=values.map(function(v){return v.label+':'+v.value;}).join('、');
+        var action=isOverwrite?'覆蓋填報':'填報數據';
+        var t=Date.now();
+        var datePart=entryKey.replace(/^cat\d+_/,'');
+        var loc=(catName?catName+' @ ':'')+( p?p.name:pid);
+        set(ref(db,'tracker/logs/'+t),{t:t,u:'協助者',a:action,d:datePart+' @ '+loc+'｜'+vals}).catch(function(){});
+      } catch(e) {
+        /* ③ 網路失敗：inline banner + retry，不只 toast */
+        setSyncStatus('error','送出失敗');
+        if(section){
+          showNetErrBanner(section, function(){
+            window._dbSet(pid, entryKey, values, isOverwrite, catName, onSuccess, section);
+          });
+        } else {
+          toast('送出失敗：'+e.message, 'err');
+        }
+      }
+    };
+  }catch(err){setSyncStatus('error','連線失敗');toast('初始化失敗：'+err.message,'err');}
+})();
+</script>
+</body>
+</html>
