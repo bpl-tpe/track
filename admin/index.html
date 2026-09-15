@@ -601,10 +601,10 @@ function renderTable(p,fields,entries,prefix){
     var entryKey=prefix+d;
     if(tableEditMode){
       var inputCells=rv.map(function(v,i){
-        return '<td><input class="td-input" type="number" min="0" id="edit_'+d+'_'+i+'" value="'+v+'" onblur="saveRowEdit(''+entryKey+'')"></td>';
+        return '<td><input class="td-input" type="number" min="0" id="edit_'+d+'_'+i+'" value="'+v+'" onblur="saveRowEdit(\''+entryKey+'\')"></td>';
       }).join('');
       return '<tr><td style="padding-left:16px;font-weight:500;white-space:nowrap">'+formatDate(d)+'</td>'+inputCells+
-        '<td style="padding-right:16px"><button class="del-row-btn" onclick="deleteRow(''+entryKey+'')" title="刪除此日"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>';
+        '<td style="padding-right:16px"><button class="del-row-btn" onclick="deleteRow(\''+entryKey+'\')" title="刪除此日"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>';
     } else {
       return '<tr><td>'+formatDate(d)+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
     }
