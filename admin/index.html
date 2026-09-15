@@ -415,9 +415,22 @@ function renderEditorProjects(){
   var el=document.getElementById('editorGrid');
   if(!projectOrder.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128193;</div><p>尚無專案，點擊「新增」開始</p></div>';return;}
   el.innerHTML=projectOrder.filter(function(k){return!!projects[k];}).map(function(k){
-    var p=projects[k],fields=p.fields||[],entries=p.entries||{};
-    var ft=fields.map(function(_,fi){var t=0;Object.values(entries).forEach(function(e){t+=parseInt(e['f'+fi]||0);});return t;});
+    var p=projects[k],entries=p.entries||{};
     var on=p.status==='active';
+    var statHTML='';
+    if(p.categories&&p.categories.length){
+      var totalByDate={};
+      Object.values(entries).forEach(function(e){Object.keys(e||{}).forEach(function(fk){totalByDate[fk]=(totalByDate[fk]||0)+parseInt(e[fk]||0);});});
+      statHTML=p.categories.map(function(cat,ci){
+        var catEntries=Object.entries(entries).filter(function(kv){return kv[0].startsWith('cat'+ci+'_');});
+        var total=catEntries.reduce(function(s,kv){return s+Object.values(kv[1]||{}).reduce(function(a,v){return a+parseInt(v||0);},0);},0);
+        return '<div class="stat-item"><div class="stat-l">'+esc(cat.name)+'</div><div class="stat-n">'+total.toLocaleString()+'</div></div>';
+      }).join('');
+    } else {
+      var fields=p.fields||[];
+      var ft=fields.map(function(_,fi){var t=0;Object.values(entries).forEach(function(e){t+=parseInt(e['f'+fi]||0);});return t;});
+      statHTML=fields.length?fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(f)+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join(''):'<div class="stat-item"><div class="stat-n" style="color:var(--text3)">—</div></div>';
+    }
     return '<div class="pcard" draggable="true" data-id="'+k+'"'+
       ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
       ' onclick="openDetail(\''+k+'\')">'+
@@ -426,9 +439,7 @@ function renderEditorProjects(){
         '<div class="pcard-date">'+formatDate(p.startDate)+' ～<br>'+formatDate(p.endDate)+'</div></div>'+
         '<div class="pcard-badge-wrap"><span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
       '</div>'+
-      '<div class="pcard-right">'+
-      (fields.length?fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(f)+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join(''):'<div class="stat-item"><div class="stat-n" style="color:var(--text3)">—</div></div>')+
-      '</div></div>';
+      '<div class="pcard-right">'+statHTML+'</div></div>';
   }).join('');
 }
 
@@ -639,7 +650,7 @@ window.openNewProjectModal=function(){
   document.getElementById('fieldName').value='';
   document.getElementById('fieldStart').value='';
   document.getElementById('fieldEnd').value='';
-  document.getElementById('fieldList').innerHTML='';
+  document.getElementById('categoryList').innerHTML='';
   document.getElementById('statusToggle').checked=true;
   document.getElementById('deleteBtn').style.display='none';
   addCategoryItem();openModal('projectModal');
@@ -672,7 +683,7 @@ function addCategoryItem(catName,fields){
   }).join('');
   block.innerHTML='<div class="category-block-header">'+
     '<input class="fi cat-name-input" placeholder="類別名稱（如：人流回報）" value="'+esc(catName||'')+'">'+
-    '<button class="rm-btn" onclick="this.closest('.category-block').remove()">&#215;</button>'+
+    '<button class="rm-btn" onclick="this.closest(\'.category-block\').remove()">&#215;</button>'+
     '</div>'+
     '<div class="cat-field-list field-list">'+fieldItems+'</div>'+
     '<button class="add-field-btn" onclick="addFieldToCategory(this)">+ 新增項目</button>';
