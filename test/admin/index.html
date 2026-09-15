@@ -88,31 +88,6 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .pscard.days-card .pscard-n{color:var(--accent);}
 .pscard-l{font-size:11px;color:var(--text3);line-height:1.3;}
 
-/* ── ⑤ 月曆選擇器（可收放） ── */
-.cal-section{margin-bottom:18px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
-.cal-header{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;cursor:pointer;user-select:none;}
-.cal-header:hover{background:var(--bg);}
-.cal-title{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:.03em;display:flex;align-items:center;gap:6px;}
-.cal-title-badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;background:var(--accent-pale);color:var(--accent);letter-spacing:.02em;}
-.cal-chevron{color:var(--text3);transition:transform .2s;flex-shrink:0;}
-.cal-chevron.open{transform:rotate(180deg);}
-.cal-clear-btn{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px;transition:background .15s;}
-.cal-clear-btn:hover{background:var(--accent-pale);}
-.cal-clear-btn[hidden]{display:none!important;}
-.cal-body{overflow:hidden;max-height:0;transition:max-height .28s ease;}
-.cal-body.open{max-height:900px;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 10px 12px;gap:4px;}
-.cal-dow{font-size:10px;color:var(--text3);text-align:center;padding:4px 0;letter-spacing:.04em;}
-.cal-day{position:relative;display:flex;align-items:center;justify-content:center;height:32px;border-radius:8px;font-size:12px;color:var(--text2);cursor:default;}
-.cal-day.has-data{color:var(--text);cursor:pointer;font-weight:500;}
-.cal-day.has-data:hover{background:var(--accent-pale);color:var(--accent);}
-.cal-day.selected{background:var(--accent);color:#fff !important;}
-.cal-day.selected:hover{background:var(--accent);}
-.cal-day.empty{visibility:hidden;}
-.cal-dot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--success);}
-.cal-day.selected .cal-dot{background:rgba(255,255,255,.7);}
-.cal-filter-notice{font-size:11px;color:var(--accent);padding:0 16px 10px;letter-spacing:.02em;}
-.cal-filter-notice[hidden]{display:none!important;}
 
 .table-section{margin-bottom:10px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
 .table-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line-light);}
@@ -314,8 +289,6 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     <div id="catTabsRow"></div>
     <!-- ④ 期間統計 -->
     <div id="periodStatRow"></div>
-    <!-- ⑤ 月曆選擇器 -->
-    <div id="calendarRow"></div>
     <div class="table-section">
       <div class="table-header">
         <span class="table-label" style="color:var(--accent);font-weight:500;font-size:13px;">活動數據</span>
@@ -395,7 +368,6 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 
 <script>
 var projects={},projectOrder=[],currentProjectId=null,editingProjectId=null,dragSrcEl=null,detailCatIndex=0;
-var calendarFilterDate=null; // ⑤ selected day filter
 var tableSort='asc';
 var tableEditMode=false;
 
@@ -466,7 +438,7 @@ function renderCatTabs(p){
     return '<div class="cat-tab'+(i===detailCatIndex?' active':'')+'" onclick="setDetailCat('+i+')">'+esc(cat.name)+'</div>';
   }).join('')+'</div></div>';
 }
-window.setDetailCat=function(i){detailCatIndex=i;calendarFilterDate=null;calendarOpen=false;renderDetail(currentProjectId);};
+window.setDetailCat=function(i){detailCatIndex=i;renderDetail(currentProjectId);};
 
 /* ④ 期間統計 */
 function renderPeriodStat(fields, allCatEntries){
@@ -491,78 +463,6 @@ function renderPeriodStat(fields, allCatEntries){
   return html;
 }
 
-/* ⑤ 月曆選擇器（可收放） */
-var calendarOpen = false;
-function renderCalendar(p, datesWithData){
-  var start=p.startDate,end=p.endDate;
-  if(!start||!end)return'';
-  var sp=start.split('-'),ep=end.split('-');
-  var startYear=parseInt(sp[0]),startMonth=parseInt(sp[1])-1;
-  var endYear=parseInt(ep[0]),endMonth=parseInt(ep[1])-1;
-
-  var daysSet={};
-  datesWithData.forEach(function(d){daysSet[d]=true;});
-
-  var isOpen=calendarOpen||!!calendarFilterDate;
-  var chevron='<svg class="cal-chevron'+(isOpen?' open':'')+'" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-  var badge=calendarFilterDate?'<span class="cal-title-badge">'+calendarFilterDate+'</span>':'';
-
-  var html='<div class="cal-section">'+
-    '<div class="cal-header" onclick="toggleCalendar()">'+
-      '<span class="cal-title">日期篩選'+badge+'</span>'+
-      '<div style="display:flex;align-items:center;gap:8px;">'+
-        '<button class="cal-clear-btn" onclick="event.stopPropagation();clearCalFilter()"'+(calendarFilterDate?'':' hidden')+'>清除</button>'+
-        chevron+
-      '</div>'+
-    '</div>'+
-    '<div class="cal-body'+(isOpen?' open':'')+'" id="calBody">'+
-    '<div class="cal-filter-notice" id="calNotice"'+(calendarFilterDate?'':'  hidden')+'>'+
-      (calendarFilterDate?'顯示 '+calendarFilterDate+' 的數據':'')+
-    '</div>';
-
-  var y=startYear,m=startMonth;
-  while(y<endYear||(y===endYear&&m<=endMonth)){
-    var monthLabel=(y+'年'+(m+1)+'月');
-    html+='<div style="padding:0 10px 4px 16px;font-size:11px;color:var(--text3);letter-spacing:.04em;">'+monthLabel+'</div>';
-    html+='<div class="cal-grid">';
-    var DOW=['日','一','二','三','四','五','六'];
-    DOW.forEach(function(d){html+='<div class="cal-dow">'+d+'</div>';});
-    var firstDay=new Date(y,m,1).getDay();
-    for(var pad=0;pad<firstDay;pad++)html+='<div class="cal-day empty"></div>';
-    var daysInMonth=new Date(y,m+1,0).getDate();
-    for(var day=1;day<=daysInMonth;day++){
-      var dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
-      var inRange=dateStr>=start&&dateStr<=end;
-      var hasData=daysSet[dateStr];
-      var isSel=calendarFilterDate===dateStr;
-      var cls='cal-day';
-      if(!inRange){cls+=' empty';}
-      else if(hasData){cls+=' has-data';}
-      var dotHtml=hasData?'<span class="cal-dot"></span>':'';
-      if(isSel)cls+=' selected';
-      if(inRange&&hasData){
-        html+='<div class="'+cls+'" onclick="setCalFilter(\''+dateStr+'\')">'+day+dotHtml+'</div>';
-      } else if(inRange){
-        html+='<div class="'+cls+'">'+day+dotHtml+'</div>';
-      }
-    }
-    html+='</div>';
-    m++;if(m>11){m=0;y++;}
-  }
-  html+='</div></div>';
-  return html;
-}
-
-window.toggleCalendar=function(){
-  calendarOpen=!calendarOpen;
-  renderDetail(currentProjectId);
-};
-
-window.setCalFilter=function(date){
-  calendarFilterDate=(calendarFilterDate===date)?null:date;
-  renderDetail(currentProjectId);
-};
-window.clearCalFilter=function(){calendarFilterDate=null;renderDetail(currentProjectId);};
 
 function renderDetail(id){
   var p=projects[id];if(!p)return;
@@ -582,16 +482,12 @@ function renderDetail(id){
     document.getElementById('catTabsRow').innerHTML=renderCatTabs(p);
     // ④ period stats
     document.getElementById('periodStatRow').innerHTML=renderPeriodStat(fields,catEntries);
-    // ⑤ calendar
-    document.getElementById('calendarRow').innerHTML=renderCalendar(p,Object.keys(catEntries));
     renderTable(p,fields,catEntries,prefix);
   } else {
     var fields=p.fields||[];
     document.getElementById('catTabsRow').innerHTML='';
     // ④ period stats
     document.getElementById('periodStatRow').innerHTML=renderPeriodStat(fields,entries);
-    // ⑤ calendar
-    document.getElementById('calendarRow').innerHTML=renderCalendar(p,Object.keys(entries));
     renderTable(p,fields,entries,'');
   }
 }
@@ -599,10 +495,7 @@ function renderDetail(id){
 function renderTable(p,fields,entries,prefix){
   var allDates=Object.keys(entries).sort();
   if(tableSort==='desc')allDates=allDates.slice().reverse();
-  var dates=allDates.filter(function(d){
-    if(calendarFilterDate)return d===calendarFilterDate;
-    return true;
-  });
+  var dates=allDates.slice();
 
   var th=document.getElementById('tHead'),tb=document.getElementById('tBody');
   if(!allDates.length){
@@ -648,10 +541,7 @@ function renderTable(p,fields,entries,prefix){
       '<td style="padding-right:16px"><button class="add-row-btn" onclick="addNewRow()" title="新增此日數據"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></td></tr>';
   }
 
-  var showTotalRow=!calendarFilterDate;
-  tb.innerHTML=rows+(showTotalRow?
-    addRow+'<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+(tableEditMode?'<td></td>':'')+'</tr>'
-    :addRow);
+  tb.innerHTML=rows+addRow+'<tr class="total-row"><td>合計</td>'+ct.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+(tableEditMode?'<td></td>':'')+'</tr>';
 }
 
 function refreshView(){
@@ -663,7 +553,6 @@ window.openDetail=function(id){
   currentProjectId=id;
   detailCatIndex=0;
   tableSort='asc'; tableEditMode=false;
-  calendarFilterDate=null; calendarOpen=false;
   var btn=document.getElementById('editDataBtn');
   btn.innerHTML=SVG_PENCIL; btn.title='編輯數據'; btn.classList.remove('editing');
   showView('viewDetail');
