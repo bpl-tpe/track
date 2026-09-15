@@ -72,18 +72,15 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .cat-divider{height:1px;background:var(--line);margin:4px 0 24px;}
 
 /* Field card grid */
-.field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
-@media(max-width:380px){.field-grid{grid-template-columns:repeat(2,1fr);}}
+.field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:12px;}
 .field-card{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 12px 10px;display:flex;flex-direction:column;min-height:108px;box-shadow:0 1px 4px rgba(0,0,0,0.04);transition:border-color .15s;}
 .field-card:focus-within{border-color:var(--accent);}
-.field-card.filled{border-color:var(--success);background:var(--success-pale);}
 .field-card-name{font-size:12px;color:var(--text2);line-height:1.3;}
 .field-card-note{font-size:10px;color:var(--text3);line-height:1.4;margin-top:3px;}
 .field-card-spacer{flex:1;min-height:6px;}
 .field-card-input{border:none;outline:none;background:transparent;font-size:22px;font-weight:400;font-family:inherit;color:var(--text);width:100%;padding:0;padding-bottom:4px;font-variant-numeric:tabular-nums;letter-spacing:-.5px;border-bottom:2px solid var(--line);transition:border-color .15s,color .15s;-moz-appearance:textfield;}
 .field-card-input::-webkit-outer-spin-button,.field-card-input::-webkit-inner-spin-button{-webkit-appearance:none;}
 .field-card-input:focus{border-bottom-color:var(--accent);color:var(--accent);}
-.field-card.filled .field-card-input{border-bottom-color:var(--success);color:var(--success);}
 
 /* Submit button per category */
 .cat-submit-btn{width:100%;padding:13px;font-size:14px;font-weight:500;font-family:inherit;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;cursor:pointer;letter-spacing:.02em;box-shadow:0 3px 12px rgba(61,126,255,.25);transition:all .18s;}
@@ -138,7 +135,7 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 <!-- 回報頁（單頁式） -->
 <div class="view" id="viewReport">
   <div class="wrap-sm">
-    <button class="back-btn" onclick="backToList()">返回</button>
+    <button class="back-btn" id="reportBackBtn" onclick="backToList()">返回</button>
     <div class="report-proj-name" id="reportName"></div>
     <div class="report-proj-dates" id="reportDates"></div>
     <div class="date-block">
@@ -167,7 +164,18 @@ function showView(id){document.querySelectorAll('.view').forEach(function(v){v.c
 function renderList(){
   var el=document.getElementById('listInner');
   var active=projectOrder.filter(function(k){return projects[k]&&projects[k].status==='active';});
-  if(!active.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';return;}
+  if(!active.length){
+    el.innerHTML='<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';
+    showView('viewList');return;
+  }
+  if(active.length===1){
+    // Skip list, go directly to report; hide back button
+    document.getElementById('reportBackBtn').style.display='none';
+    selectProject(active[0]);return;
+  }
+  // Multiple active projects: show list with back button
+  document.getElementById('reportBackBtn').style.display='';
+  showView('viewList');
   el.innerHTML=active.map(function(k){
     var p=projects[k];
     return '<div class="psel-item" onclick="selectProject(\''+k+'\')">'+
@@ -239,7 +247,7 @@ function buildCatSection(pid,date,catIndex,catLabel,fields){
   // Field grid
   var grid=document.createElement('div');grid.className='field-grid';
   fields.forEach(function(f,fi){
-    var card=document.createElement('div');card.className='field-card'+(existing?' filled':'');
+    var card=document.createElement('div');card.className='field-card';
     var nameDiv=document.createElement('div');nameDiv.className='field-card-name';nameDiv.textContent=fname(f);card.appendChild(nameDiv);
     var note=fnote(f);
     if(note){var noteDiv=document.createElement('div');noteDiv.className='field-card-note';noteDiv.textContent=note;card.appendChild(noteDiv);}
@@ -278,11 +286,6 @@ function doSubmit(pid,date,catIndex,catLabel,fields,entryKey,isOverwrite,section
     // Update badge
     var badge=section.querySelector('.cat-status');
     if(badge){badge.className='cat-status done';badge.innerHTML='<span class="cat-status-dot"></span>今日已回報';}
-    // Update cards
-    var cards=section.querySelectorAll('.field-card');
-    cards.forEach(function(c){c.classList.add('filled');});
-    var inputs=section.querySelectorAll('.field-card-input');
-    inputs.forEach(function(i){i.style.borderBottomColor='var(--success)';i.style.color='var(--success)';});
     // Update button
     btn.className='cat-submit-btn done';
     btn.textContent='修改並重新送出';
