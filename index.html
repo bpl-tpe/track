@@ -52,8 +52,9 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .entry-fields{display:flex;flex-direction:column;gap:0;margin-bottom:22px;}
 .efield-row{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--line-light);}
 .efield-row:first-child{border-top:none;}.efield-row:last-child{border-bottom:none;}
+.efield-label-wrap{display:flex;flex-direction:column;gap:2px;}
 .efield-label{font-size:14px;font-weight:500;color:var(--text);}
-.efield-note{font-size:11px;color:var(--text3);margin-top:-2px;margin-bottom:4px;line-height:1.5;letter-spacing:.01em;}
+.efield-note{font-size:11px;color:var(--text3);line-height:1.5;letter-spacing:.01em;}
 .efield-input{width:80px;background:transparent;border:none;border-bottom:2px solid var(--line);font-size:22px;font-weight:400;text-align:right;font-family:inherit;color:var(--text);padding:4px 0;outline:none;transition:border-color .15s;-moz-appearance:textfield;}
 .efield-input::-webkit-outer-spin-button,.efield-input::-webkit-inner-spin-button{-webkit-appearance:none;}
 .efield-input:focus{border-color:var(--accent);}.efield-input:disabled{color:var(--text3);border-color:var(--line-light);}
@@ -250,7 +251,7 @@ function loadFields(d){
     var v=existing?parseInt(existing['f'+i]||0):'';
     var note=fnote(f);
     var noteHtml=note?'<div class="efield-note">'+esc(note)+'</div>':'';
-    return '<div class="efield-row"><div class="efield-label">'+esc(fname(f))+'</div>'+noteHtml+
+    return '<div class="efield-row"><div class="efield-label-wrap"><div class="efield-label">'+esc(fname(f))+'</div>'+noteHtml+'</div>'+
       '<input class="efield-input'+(existing?' prefilled':'')+'" type="number" min="0" id="ef_'+i+'" value="'+(v!==''?v:'')+'" placeholder="0"></div>';
   }).join('');
   var sb=document.getElementById('statusBanner');
