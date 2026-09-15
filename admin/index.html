@@ -68,21 +68,13 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .add-field-btn{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:12px;cursor:pointer;background:none;border:none;font-family:inherit;padding:6px 0;margin-top:6px;}
 .add-field-btn:hover{text-decoration:underline;}
 .project-grid{display:flex;flex-direction:column;gap:12px;}
-.pcard{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:20px 22px;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s;display:flex;align-items:stretch;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.pcard{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:18px 22px;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s;display:flex;flex-direction:column;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
 .pcard:hover{border-color:#b8c8e8;box-shadow:0 8px 24px rgba(61,126,255,0.10);transform:translateY(-2px);}
 .pcard.dragging{opacity:.35;}.pcard.drag-over{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);}
-.pcard-left{width:60%;display:flex;flex-direction:column;justify-content:space-between;padding-right:18px;border-right:1.5px solid var(--line-light);}
-.pcard-title{font-size:17px;font-weight:500;color:var(--accent);margin-bottom:5px;line-height:1.4;}
-.pcard-date{font-size:12px;color:var(--text3);}.pcard-badge-wrap{margin-top:14px;}
+.pcard-title{font-size:17px;font-weight:500;color:var(--accent);line-height:1.4;}
+.pcard-date{font-size:12px;color:var(--text3);margin-top:2px;}
 .badge{font-size:10px;font-weight:500;padding:3px 10px;letter-spacing:.04em;border-radius:20px;display:inline-block;}
 .badge-on{background:var(--success-pale);color:var(--success);}.badge-off{background:#f0f1f4;color:var(--text3);}
-.pcard-right{display:flex;align-items:center;padding-left:18px;border-left:1px solid var(--line-light);margin-left:auto;flex-shrink:0;}
-.pcard-meta-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.pcard-meta-item{font-size:12px;color:var(--text3);}
-.pcard-meta-sep{font-size:12px;color:var(--line);}
-.stat-cat-label{font-size:10px;font-weight:500;color:var(--accent);letter-spacing:.04em;text-transform:uppercase;}
-.stat-l{font-size:11px;color:var(--text3);line-height:1;letter-spacing:.02em;}
-.stat-n{font-size:24px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1.1;}
 .summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:24px;}
 .scard{padding:18px 16px;border-radius:14px;text-align:center;background:var(--surface);border:1.5px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,0.04);}
 .scard-n{font-size:26px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1;margin-bottom:4px;}
@@ -433,19 +425,13 @@ function renderEditorProjects(){
   el.innerHTML=projectOrder.filter(function(k){return!!projects[k];}).map(function(k){
     var p=projects[k],entries=p.entries||{};
     var on=p.status==='active';
-    var cats=p.categories&&p.categories.length?p.categories:[];
-    var catCount=cats.length||((p.fields&&p.fields.length)?1:0);
-    var fieldCount=cats.length?cats.reduce(function(s,c){return s+(c.fields||[]).length;},0):(p.fields||[]).length;
-    var statHTML='<div class="pcard-meta-row"><span class="pcard-meta-item">'+catCount+' 個類別</span><span class="pcard-meta-sep">·</span><span class="pcard-meta-item">'+fieldCount+' 個項目</span></div>';
     return '<div class="pcard" draggable="true" data-id="'+k+'"'+
       ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
       ' onclick="openDetail(\''+k+'\')">'+
-      '<div class="pcard-left">'+
-        '<div><div class="pcard-title">'+esc(p.name)+'</div>'+
-        '<div class="pcard-date">'+formatDate(p.startDate)+' ～<br>'+formatDate(p.endDate)+'</div></div>'+
-        '<div class="pcard-badge-wrap"><span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
-      '</div>'+
-      '<div class="pcard-right">'+statHTML+'</div></div>';
+      '<div class="pcard-title">'+esc(p.name)+'</div>'+
+      '<div class="pcard-date">'+formatDate(p.startDate)+' ～ '+formatDate(p.endDate)+'</div>'+
+      '<div><span class="badge '+(on?'badge-on':'badge-off')+'">'+(on?'進行中':'已結束')+'</span></div>'+
+      '</div>';
   }).join('');
 }
 
