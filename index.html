@@ -23,8 +23,6 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .topbar{height:56px;background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:200;box-shadow:0 1px 6px rgba(0,0,0,0.05);}
 .brand{font-size:14px;font-weight:500;color:var(--text);letter-spacing:.02em;display:flex;align-items:center;gap:8px;}.brand-icon-wrap{width:24px;height:24px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .topbar-right{display:flex;align-items:center;gap:14px;}
-.admin-link{font-size:12px;color:var(--text3);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px;transition:color .15s,border-color .15s;letter-spacing:.02em;}
-.admin-link:hover{color:var(--accent);border-color:var(--accent);}
 .sync-status{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);letter-spacing:.02em;}
 .sdot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .4s;}
 .sdot.synced{background:var(--success);box-shadow:0 0 0 2px var(--success-pale);}.sdot.syncing{background:var(--warn);animation:blink 1.2s infinite;}.sdot.error{background:var(--danger);}
@@ -46,6 +44,7 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .form-card{background:var(--surface);border:1.5px solid var(--line);border-radius:18px;padding:24px 22px 28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
 .form-card-header{margin-bottom:22px;padding-bottom:16px;}
 .entry-title{font-size:17px;font-weight:500;letter-spacing:-.1px;margin-bottom:4px;color:var(--accent);}
+.entry-cat-badge{display:inline-block;font-size:11px;color:var(--text3);margin-bottom:4px;letter-spacing:.03em;}
 .entry-date-row{margin-bottom:20px;}
 .entry-date-label{font-size:12px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:7px;display:block;}
 .date-input{background:transparent;border:none;border-bottom:2px solid var(--line);border-radius:0;font-size:16px;font-family:inherit;color:var(--text);padding:4px 0;width:100%;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s;}
@@ -106,6 +105,7 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
   </div>
 </div>
 
+<!-- 專案列表 -->
 <div class="view active" id="viewList">
   <div class="wrap-sm">
     <div class="ph">
@@ -117,11 +117,26 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
   </div>
 </div>
 
-<div class="view" id="viewForm">
+<!-- 類別選擇 -->
+<div class="view" id="viewCats">
   <div class="wrap-sm">
     <button class="back-btn" onclick="backToList()">返回</button>
+    <div class="ph">
+      <div class="ph-title" id="catsProjectName"></div>
+      <div class="ph-sub">請選擇填報類別</div>
+      <div class="ph-line"></div>
+    </div>
+    <div id="catsList" class="psel-list"></div>
+  </div>
+</div>
+
+<!-- 填報表單 -->
+<div class="view" id="viewForm">
+  <div class="wrap-sm">
+    <button class="back-btn" onclick="backFromForm()">返回</button>
     <div class="form-card">
       <div class="form-card-header">
+        <div class="entry-cat-badge" id="entryCatBadge" style="display:none"></div>
         <div class="entry-title" id="entryName"></div>
         <div style="margin-top:16px;">
           <span class="entry-date-label">填報日期</span>
@@ -141,6 +156,7 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 var projects = {};
 var projectOrder = [];
 var currentProjectId = null;
+var currentCategoryIndex = null;
 
 function setSyncStatus(s,t){document.getElementById('syncDot').className='sdot '+s;document.getElementById('syncText').textContent=t;}
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -163,11 +179,47 @@ function renderList(){
 window.selectProject=function(id){
   currentProjectId=id;
   var p=projects[id];
-  document.getElementById('entryName').textContent=p.name;
+  if(p.categories && p.categories.length){
+    // Two-layer: show category selection
+    document.getElementById('catsProjectName').textContent=p.name;
+    renderCats(p);
+    showView('viewCats');
+  } else {
+    // Legacy: go directly to form
+    currentCategoryIndex=null;
+    document.getElementById('entryCatBadge').style.display='none';
+    document.getElementById('entryName').textContent=p.name;
+    setupForm(p, null);
+    showView('viewForm');
+  }
+};
+
+function renderCats(p){
+  var el=document.getElementById('catsList');
+  el.innerHTML=(p.categories||[]).map(function(cat,i){
+    return '<div class="psel-item" onclick="selectCategory('+i+')">'+
+      '<div><div class="psel-name">'+esc(cat.name)+'</div>'+
+      '<div class="psel-date">'+((cat.fields||[]).length)+'個填報項目</div></div>'+
+      '<span style="color:var(--text3);font-size:16px">&#8250;</span></div>';
+  }).join('');
+}
+
+window.selectCategory=function(i){
+  currentCategoryIndex=i;
+  var p=projects[currentProjectId];
+  var cat=p.categories[i];
+  var badge=document.getElementById('entryCatBadge');
+  badge.textContent=p.name;
+  badge.style.display='';
+  document.getElementById('entryName').textContent=cat.name;
   document.getElementById('statusBanner').className='status-banner';
   document.getElementById('submitBtn').disabled=false;
+  setupForm(p, i);
+  showView('viewForm');
+};
+
+function setupForm(p, catIdx){
   var today=todayStr();
-  // clamp today to project date range
   var d=today;
   if(p.startDate && d < p.startDate) d=p.startDate;
   if(p.endDate   && d > p.endDate)   d=p.endDate;
@@ -177,13 +229,21 @@ window.selectProject=function(id){
   dateEl.max=p.endDate||'';
   loadFields(d);
   dateEl.onchange=function(){loadFields(this.value);};
-  showView('viewForm');
-};
+}
 
 function loadFields(d){
   var p=projects[currentProjectId];
-  var existing=(p.entries&&p.entries[d])||null;
-  document.getElementById('entryFields').innerHTML=(p.fields||[]).map(function(f,i){
+  var fields, entryKey;
+  if(currentCategoryIndex!==null && p.categories){
+    var cat=p.categories[currentCategoryIndex];
+    fields=cat.fields||[];
+    entryKey='cat'+currentCategoryIndex+'_'+d;
+  } else {
+    fields=p.fields||[];
+    entryKey=d;
+  }
+  var existing=(p.entries&&p.entries[entryKey])||null;
+  document.getElementById('entryFields').innerHTML=fields.map(function(f,i){
     var v=existing?parseInt(existing['f'+i]||0):'';
     return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
       '<input class="efield-input'+(existing?' prefilled':'')+'" type="number" min="0" id="ef_'+i+'" value="'+(v!==''?v:'')+'" placeholder="0"></div>';
@@ -195,15 +255,35 @@ function loadFields(d){
 }
 
 window.backToList=function(){showView('viewList');};
+window.backFromForm=function(){
+  if(currentCategoryIndex!==null){
+    var p=projects[currentProjectId];
+    renderCats(p);
+    showView('viewCats');
+  } else {
+    showView('viewList');
+  }
+};
 
 window.handleSubmit=function(){
   var date=document.getElementById('entryDate').value;
   if(!date){toast('請選擇填報日期','err');return;}
   var p=projects[currentProjectId];
-  var values=(p.fields||[]).map(function(f,i){return{label:f,value:parseInt(document.getElementById('ef_'+i).value)||0};});
-  var alreadyFilled=p.entries&&p.entries[date];
+  var fields, entryKey, catName;
+  if(currentCategoryIndex!==null && p.categories){
+    var cat=p.categories[currentCategoryIndex];
+    fields=cat.fields||[];
+    entryKey='cat'+currentCategoryIndex+'_'+date;
+    catName=cat.name;
+  } else {
+    fields=p.fields||[];
+    entryKey=date;
+    catName=null;
+  }
+  var values=fields.map(function(f,i){return{label:f,value:parseInt(document.getElementById('ef_'+i).value)||0};});
+  var alreadyFilled=p.entries&&p.entries[entryKey];
   if(alreadyFilled){if(!confirm('該日期已填報過，確認是否重新填報？'))return;}
-  if(window._dbSet){window._dbSet(currentProjectId,date,values,!!alreadyFilled);}
+  if(window._dbSet){window._dbSet(currentProjectId,entryKey,values,!!alreadyFilled,catName);}
   else{toast('資料庫尚未就緒，請稍後','err');}
 };
 
@@ -231,18 +311,20 @@ window.handleSubmit=function(){
       renderList();
     },function(err){setSyncStatus('error','連線失敗');toast('連線失敗：'+err.message,'err');});
 
-    window._dbSet=async function(pid,date,values,isOverwrite){
+    window._dbSet=async function(pid,entryKey,values,isOverwrite,catName){
       var p=projects[pid],obj={};values.forEach(function(v,i){obj['f'+i]=v.value;});
       try{
-        await set(ref(db,'tracker/projects/'+pid+'/entries/'+date),obj);
+        await set(ref(db,'tracker/projects/'+pid+'/entries/'+entryKey),obj);
         values.forEach(function(_,i){var el=document.getElementById('ef_'+i);if(el){el.disabled=true;}});
         var sb=document.getElementById('statusBanner');sb.textContent='數據已送出';sb.className='status-banner show';
         document.getElementById('submitBtn').disabled=true;
-        toast('\u2705 數據已送出！','ok');
+        toast('✅ 數據已送出！','ok');
         var vals=values.map(function(v){return v.label+':'+v.value;}).join('、');
         var action=isOverwrite?'覆蓋填報':'填報數據';
         var t=Date.now();
-        set(ref(db,'tracker/logs/'+t),{t:t,u:'協助者',a:action,d:date+' @ '+(p?p.name:pid)+'｜'+vals}).catch(function(){});
+        var datePart=entryKey.replace(/^cat\d+_/,'');
+        var loc=(catName?catName+' @ ':'')+( p?p.name:pid);
+        set(ref(db,'tracker/logs/'+t),{t:t,u:'協助者',a:action,d:datePart+' @ '+loc+'｜'+vals}).catch(function(){});
       }catch(e){toast('送出失敗：'+e.message,'err');}
     };
   }catch(err){setSyncStatus('error','連線失敗');toast('初始化失敗：'+err.message,'err');}
