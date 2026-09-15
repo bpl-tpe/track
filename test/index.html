@@ -270,7 +270,7 @@ function renderCatSections(pid,date){
   }
 }
 
-/* ── ② 驗證函式：整數 ≥ 0，非空 ── */
+/* ── ② 驗證函式：整數 ≥ 0（空白視為 0，允許送出） ── */
 function validateSection(fields, idPfx) {
   var valid = true;
   fields.forEach(function(f, fi) {
@@ -278,7 +278,8 @@ function validateSection(fields, idPfx) {
     if (!inp) return;
     var val = inp.value.trim();
     var num = parseFloat(val);
-    var isErr = val==='' || isNaN(num) || num < 0 || !Number.isInteger(num);
+    // 空白 → 視為 0，不報錯；只擋負數或非整數
+    var isErr = val !== '' && (isNaN(num) || num < 0 || !Number.isInteger(num));
     var card = inp.closest('.field-card');
     card.classList.toggle('has-error', isErr);
     var hint = card.querySelector('.field-err-hint');
@@ -286,7 +287,7 @@ function validateSection(fields, idPfx) {
       if (!hint) {
         hint = document.createElement('div');
         hint.className = 'field-err-hint';
-        hint.textContent = val==='' ? '請填入數值' : '需為整數 ≥ 0';
+        hint.textContent = '需為整數 ≥ 0';
         inp.parentNode.insertBefore(hint, inp.nextSibling);
       }
       valid = false;
@@ -359,7 +360,7 @@ function doSubmit(pid, date, catIndex, catLabel, fields, entryKey, isOverwrite, 
 
   /* ② 送出前驗證 */
   if (!validateSection(fields, idPfx)) {
-    toast('請確認所有欄位填入有效數字', 'err');
+    toast('數值不可為負數或小數', 'err');
     return;
   }
 
