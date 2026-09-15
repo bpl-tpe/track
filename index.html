@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<script>if(location.pathname.endsWith('/index.html'))history.replaceState(null,'',location.pathname.replace(/\/index\.html$/,'/')+location.search+location.hash);</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>活動人次追蹤系統</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'><rect x='2' y='14' width='4' height='6' fill='%23526FBD' opacity='0.35'/><rect x='9' y='9' width='4' height='11' fill='%23526FBD' opacity='0.65'/><rect x='16' y='4' width='4' height='16' fill='%23526FBD'/><polyline points='4,13 11,8 18,3' stroke='%23526FBD' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='18' cy='3' r='1.5' fill='%23526FBD'/></svg>">
@@ -111,7 +112,7 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
       </div>
       <span class="brand-name">活動人次追蹤系統</span>
     </div>
-    <a href="./admin/index.html" class="topbar-nav-btn">編輯者後台</a>
+    <a href="./admin/" class="topbar-nav-btn">編輯者後台</a>
   </div>
   <div class="topbar-right">
     <div class="sync-status">
