@@ -53,6 +53,7 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .efield-row{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--line-light);}
 .efield-row:first-child{border-top:none;}.efield-row:last-child{border-bottom:none;}
 .efield-label{font-size:14px;font-weight:500;color:var(--text);}
+.efield-note{font-size:11px;color:var(--text3);margin-top:-2px;margin-bottom:4px;line-height:1.5;letter-spacing:.01em;}
 .efield-input{width:80px;background:transparent;border:none;border-bottom:2px solid var(--line);font-size:22px;font-weight:400;text-align:right;font-family:inherit;color:var(--text);padding:4px 0;outline:none;transition:border-color .15s;-moz-appearance:textfield;}
 .efield-input::-webkit-outer-spin-button,.efield-input::-webkit-inner-spin-button{-webkit-appearance:none;}
 .efield-input:focus{border-color:var(--accent);}.efield-input:disabled{color:var(--text3);border-color:var(--line-light);}
@@ -161,6 +162,8 @@ var currentCategoryIndex = null;
 function setSyncStatus(s,t){document.getElementById('syncDot').className='sdot '+s;document.getElementById('syncText').textContent=t;}
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fname(f){return typeof f==='string'?f:(f&&f.name?f.name:'');}
+function fnote(f){return typeof f==='string'?'':(f&&f.note?f.note:'');}
 function toast(msg,type){var w=document.getElementById('toastWrap');var t=document.createElement('div');t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');t.textContent=msg;w.appendChild(t);setTimeout(function(){t.remove();},3000);}
 function showView(id){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.getElementById(id).classList.add('active');}
 
@@ -245,7 +248,9 @@ function loadFields(d){
   var existing=(p.entries&&p.entries[entryKey])||null;
   document.getElementById('entryFields').innerHTML=fields.map(function(f,i){
     var v=existing?parseInt(existing['f'+i]||0):'';
-    return '<div class="efield-row"><div class="efield-label">'+esc(f)+'</div>'+
+    var note=fnote(f);
+    var noteHtml=note?'<div class="efield-note">'+esc(note)+'</div>':'';
+    return '<div class="efield-row"><div class="efield-label">'+esc(fname(f))+'</div>'+noteHtml+
       '<input class="efield-input'+(existing?' prefilled':'')+'" type="number" min="0" id="ef_'+i+'" value="'+(v!==''?v:'')+'" placeholder="0"></div>';
   }).join('');
   var sb=document.getElementById('statusBanner');

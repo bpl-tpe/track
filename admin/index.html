@@ -159,10 +159,17 @@ tbody tr:hover td{background:var(--accent-pale);}
 .field-item{display:flex;gap:8px;align-items:center;}.field-item .fi{flex:1;}
 .rm-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px;line-height:1;transition:color .15s;flex-shrink:0;}
 .rm-btn:hover{color:var(--danger);}
-.category-block{background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px;}
-.category-block-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-.category-block-header .fi{flex:1;}
-.cat-field-list{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
+.category-block{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:14px 14px 10px;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+.category-block-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.category-block-header .fi{flex:1;font-weight:500;}
+.cat-field-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;padding-left:14px;border-left:2px solid var(--line);margin-left:2px;}
+.field-item-wrap{display:flex;flex-direction:column;gap:3px;}
+.note-btn{background:none;border:1px solid var(--line);color:var(--text3);cursor:pointer;font-size:10px;padding:2px 7px;line-height:1.4;transition:all .15s;flex-shrink:0;border-radius:4px;letter-spacing:.02em;font-family:inherit;}
+.note-btn:hover{border-color:var(--accent);color:var(--accent);}
+.note-btn.has-note{color:var(--accent);background:var(--accent-pale);border-color:var(--accent);}
+.note-area{display:none;width:100%;padding:7px 10px;border:1px dashed var(--line);border-radius:6px;font-size:12px;font-family:inherit;color:var(--text2);background:var(--bg);outline:none;resize:none;transition:border-color .15s;line-height:1.6;min-height:52px;}
+.note-area:focus{border-color:var(--accent);background:#fff;}
+.note-area.open{display:block;}
 .cat-tabs-wrap{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;}
 .cat-tabs-label{font-size:11px;color:var(--text3);letter-spacing:.04em;white-space:nowrap;flex-shrink:0;}
 .cat-tabs{display:flex;gap:6px;flex-wrap:wrap;}
@@ -407,6 +414,8 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 window.openModal=openModal;window.closeModal=closeModal;
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fname(f){return typeof f==='string'?f:(f&&f.name?f.name:'');}
+function fnote(f){return typeof f==='string'?'':(f&&f.note?f.note:'');}
 function toast(msg,type){var w=document.getElementById('toastWrap');var t=document.createElement('div');t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');t.textContent=msg;w.appendChild(t);setTimeout(function(){t.remove();},3000);}
 document.querySelectorAll('.overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});});
 
@@ -434,13 +443,13 @@ function renderEditorProjects(){
         var ft=fields.map(function(_,fi){return catEntries.reduce(function(s,kv){return s+parseInt((kv[1]||{})['f'+fi]||0);},0);});
         return '<div class="stat-cat-group">'+
           '<div class="stat-cat-label">'+esc(cat.name)+'</div>'+
-          fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(f)+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join('')+
+          fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(fname(f))+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join('')+
         '</div>';
       }).join('');
     } else {
       var fields=p.fields||[];
       var ft=fields.map(function(_,fi){var t=0;Object.values(entries).forEach(function(e){t+=parseInt(e['f'+fi]||0);});return t;});
-      statHTML=fields.length?fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(f)+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join(''):'<div class="stat-item"><div class="stat-n" style="color:var(--text3)">—</div></div>';
+      statHTML=fields.length?fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(fname(f))+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join(''):'<div class="stat-item"><div class="stat-n" style="color:var(--text3)">—</div></div>';
     }
     return '<div class="pcard" draggable="true" data-id="'+k+'"'+
       ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
@@ -563,7 +572,7 @@ function renderDetail(id){
     });
     document.getElementById('catTabsRow').innerHTML=renderCatTabs(p);
     document.getElementById('summaryRow').innerHTML=
-      fields.map(function(f,i){return '<div class="scard"><div class="scard-l">'+esc(f)+'</div><div class="scard-n">'+ft[i].toLocaleString()+'</div></div>';}).join('');
+      fields.map(function(f,i){return '<div class="scard"><div class="scard-l">'+esc(fname(f))+'</div><div class="scard-n">'+ft[i].toLocaleString()+'</div></div>';}).join('');
     var catEntries={};
     Object.keys(entries).forEach(function(k){
       if(k.indexOf(prefix)===0){catEntries[k.slice(prefix.length)]=entries[k];}
@@ -574,7 +583,7 @@ function renderDetail(id){
     var ft=fields.map(function(_,fi){var t=0;Object.values(entries).forEach(function(e){t+=parseInt(e['f'+fi]||0);});return t;});
     document.getElementById('catTabsRow').innerHTML='';
     document.getElementById('summaryRow').innerHTML=fields.map(function(f,i){
-      return '<div class="scard"><div class="scard-l">'+esc(f)+'</div><div class="scard-n">'+ft[i].toLocaleString()+'</div></div>';
+      return '<div class="scard"><div class="scard-l">'+esc(fname(f))+'</div><div class="scard-n">'+ft[i].toLocaleString()+'</div></div>';
     }).join('');
     renderTable(p,fields,entries,'');
   }
@@ -599,7 +608,7 @@ function renderTable(p,fields,entries,prefix){
   var sortIcon=tableSort==='asc'?SVG_ASC:SVG_DESC;
   var editCol=tableEditMode?'<th style="width:32px"></th>':'';
   th.innerHTML='<tr><th style="cursor:pointer;user-select:none;" onclick="toggleSort()">日期 <span style="vertical-align:middle;opacity:.6">'+sortIcon+'</span></th>'+
-    fields.map(function(f){return '<th>'+esc(f)+'</th>';}).join('')+editCol+'</tr>';
+    fields.map(function(f){return '<th>'+esc(fname(f))+'</th>';}).join('')+editCol+'</tr>';
 
   if(!dates.length){
     tb.innerHTML='<tr><td colspan="99" style="text-align:center;padding:24px;color:var(--text3)">此日期無數據</td></tr>';
@@ -688,29 +697,45 @@ window.openEditModal=function(){
   }
   openModal('projectModal');
 };
+function createFieldItem(nameVal,noteVal){
+  var wrap=document.createElement('div');wrap.className='field-item-wrap';
+  var row=document.createElement('div');row.className='field-item';
+  var inp=document.createElement('input');inp.className='fi';inp.placeholder='輸入項目名稱';inp.value=nameVal||'';
+  var noteBtn=document.createElement('button');noteBtn.type='button';noteBtn.className='note-btn'+(noteVal?' has-note':'');noteBtn.textContent='備註';
+  var rmBtn=document.createElement('button');rmBtn.type='button';rmBtn.className='rm-btn';rmBtn.innerHTML='&#215;';
+  rmBtn.onclick=function(){wrap.remove();};
+  var noteArea=document.createElement('textarea');noteArea.className='note-area'+(noteVal?' open':'');noteArea.placeholder='在此輸入給協助者的備註說明…';noteArea.rows=2;noteArea.value=noteVal||'';
+  noteBtn.onclick=function(){
+    var open=noteArea.classList.toggle('open');
+    noteBtn.classList.toggle('has-note',open||noteArea.value.trim()!=='');
+    if(open)noteArea.focus();
+  };
+  noteArea.oninput=function(){noteBtn.classList.toggle('has-note',noteArea.value.trim()!=='');};
+  row.appendChild(inp);row.appendChild(noteBtn);row.appendChild(rmBtn);
+  wrap.appendChild(row);wrap.appendChild(noteArea);
+  return wrap;
+}
 function addCategoryItem(catName,fields){
   var cl=document.getElementById('categoryList');
   var block=document.createElement('div');block.className='category-block';
-  var fieldItems=(fields||[]).map(function(f){
-    return '<div class="field-item"><input class="fi" placeholder="輸入項目名稱" value="'+esc(f||'')+'"><button class="rm-btn" onclick="this.parentElement.remove()">&#215;</button></div>';
-  }).join('');
-  block.innerHTML='<div class="category-block-header">'+
-    '<input class="fi cat-name-input" placeholder="類別名稱（如：人流回報）" value="'+esc(catName||'')+'">'+
-    '<button class="rm-btn" onclick="this.closest(\'.category-block\').remove()">&#215;</button>'+
-    '</div>'+
-    '<div class="cat-field-list field-list">'+fieldItems+'</div>'+
-    '<button class="add-field-btn" onclick="addFieldToCategory(this)">+ 新增項目</button>';
+  var header=document.createElement('div');header.className='category-block-header';
+  var nameInp=document.createElement('input');nameInp.className='fi cat-name-input';nameInp.placeholder='類別名稱（如：人流回報）';nameInp.value=catName||'';
+  var rmCat=document.createElement('button');rmCat.type='button';rmCat.className='rm-btn';rmCat.innerHTML='&#215;';rmCat.onclick=function(){block.remove();};
+  header.appendChild(nameInp);header.appendChild(rmCat);
+  var fl=document.createElement('div');fl.className='cat-field-list field-list';
+  (fields||[]).forEach(function(f){fl.appendChild(createFieldItem(fname(f),fnote(f)));});
+  var addBtn=document.createElement('button');addBtn.type='button';addBtn.className='add-field-btn';addBtn.textContent='+ 新增項目';
+  addBtn.onclick=function(){
+    var item=createFieldItem('','');fl.appendChild(item);item.querySelector('input').focus();
+  };
+  block.appendChild(header);block.appendChild(fl);block.appendChild(addBtn);
   cl.appendChild(block);
-  if(!catName){block.querySelector('.cat-name-input').focus();}
+  if(!catName)nameInp.focus();
 }
 window.addCategoryItem=addCategoryItem;
 function addFieldToCategory(btn){
   var fl=btn.previousElementSibling;
-  var div=document.createElement('div');div.className='field-item';
-  div.innerHTML='<input class="fi" placeholder="輸入項目名稱"><button class="rm-btn" onclick="this.parentElement.remove()">&#215;</button>';
-  fl.appendChild(div);
-  var inputs=fl.querySelectorAll('.field-item input');
-  if(inputs.length) inputs[inputs.length-1].focus();
+  var item=createFieldItem('','');fl.appendChild(item);item.querySelector('input').focus();
 }
 window.addFieldToCategory=addFieldToCategory;
 window.openManualModal=function(date){
@@ -728,7 +753,7 @@ window.openManualModal=function(date){
   dateEl.max=p.endDate||'';
   var existing=(p.entries&&p.entries[prefix+d])||{};
   document.getElementById('manualFields').innerHTML=fields.map(function(f,i){
-    return '<div class="fg"><label class="fl">'+esc(f)+'</label><input class="fi" type="number" min="0" id="mf_'+i+'" value="'+(parseInt(existing['f'+i]||0)||'')+'"></div>';
+    return '<div class="fg"><label class="fl">'+esc(fname(f))+'</label><input class="fi" type="number" min="0" id="mf_'+i+'" value="'+(parseInt(existing['f'+i]||0)||'')+'"></div>';
   }).join('');
   dateEl.onchange=function(){
     var nd=this.value,ex=(p.entries&&p.entries[prefix+nd])||{};
@@ -744,27 +769,27 @@ window.downloadCSV=function(){
     var cat=p.categories[detailCatIndex];
     var fields=cat?cat.fields||[]:[];
     var prefix='cat'+detailCatIndex+'_';
-    headerCols=['日期'].concat(fields);
+    headerCols=['日期'].concat(fields.map(fname));
     var dates=Object.keys(entries).filter(function(k){return k.indexOf(prefix)===0;}).map(function(k){return k.slice(prefix.length);}).sort();
     if(!dates.length){toast('尚無數據可下載','err');return;}
     allRows=dates.map(function(d){var e=entries[prefix+d]||{};return[d].concat(fields.map(function(_,i){return parseInt(e['f'+i]||0);}));});
     var ct=fields.map(function(_,fi){return dates.reduce(function(s,d){return s+parseInt((entries[prefix+d]||{})['f'+fi]||0);},0);});
     allRows.push(['合計'].concat(ct));
-    var fname=p.name+'_'+cat.name+'_數據.csv';
+    var csvFname=p.name+'_'+cat.name+'_數據.csv';
   } else {
     var fields=p.fields||[];
-    headerCols=['日期'].concat(fields);
+    headerCols=['日期'].concat(fields.map(fname));
     var dates=Object.keys(entries).sort();
     if(!dates.length){toast('尚無數據可下載','err');return;}
     allRows=dates.map(function(d){var e=entries[d]||{};return[d].concat(fields.map(function(_,i){return parseInt(e['f'+i]||0);}));});
     var ct=fields.map(function(_,fi){return dates.reduce(function(s,d){return s+parseInt((entries[d]||{})['f'+fi]||0);},0);});
     allRows.push(['合計'].concat(ct));
-    var fname=p.name+'_數據.csv';
+    var csvFname=p.name+'_數據.csv';
   }
   var csv=[headerCols].concat(allRows).map(function(r){return r.join(',');}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download=fname;a.click();URL.revokeObjectURL(url);
+  var a=document.createElement('a');a.href=url;a.download=csvFname;a.click();URL.revokeObjectURL(url);
 };
 window.openLogModal=function(){openModal('logModal');};
 
@@ -876,7 +901,12 @@ window.onDP=function(e){e.preventDefault();};
       var end=document.getElementById('fieldEnd').value;
       var categories=Array.from(document.querySelectorAll('#categoryList .category-block')).map(function(block){
         var catName=block.querySelector('.cat-name-input').value.trim();
-        var fields=Array.from(block.querySelectorAll('.cat-field-list .field-item .fi')).map(function(i){return i.value.trim();}).filter(Boolean);
+        var fields=Array.from(block.querySelectorAll('.cat-field-list .field-item-wrap')).map(function(wrap){
+          var n=(wrap.querySelector('.fi')||{}).value||'';n=n.trim();
+          var note=(wrap.querySelector('.note-area')||{}).value||'';note=note.trim();
+          if(!n)return null;
+          return note?{name:n,note:note}:n;
+        }).filter(Boolean);
         return {name:catName,fields:fields};
       }).filter(function(c){return c.name&&c.fields.length;});
       var status=document.getElementById('statusToggle').checked?'active':'ended';
@@ -944,7 +974,7 @@ window.onDP=function(e){e.preventDefault();};
       try{
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey),obj);
         var p2=projects[currentProjectId];
-        var vals=fields.map(function(f,i){return f+':'+obj['f'+i];}).join('、');
+        var vals=fields.map(function(f,i){return fname(f)+':'+obj['f'+i];}).join('、');
         writeLog('手動新增數據',date+' @ '+p2.name+'｜'+vals);
         closeModal('manualModal');toast('\u2705 數據已儲存','ok');
       }catch(e){toast('儲存失敗：'+e.message,'err');}
@@ -965,7 +995,7 @@ window.onDP=function(e){e.preventDefault();};
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey),obj);
         var chg=fields.map(function(f,i){
           var ov=parseInt(oldEntry['f'+i]||0),nv=obj['f'+i];
-          return ov!==nv?f+':'+ov+'→'+nv:null;
+          return ov!==nv?fname(f)+':'+ov+'→'+nv:null;
         }).filter(Boolean);
         writeLog('編輯數據',dateStr+' @ '+p.name+'｜'+(chg.length?chg.join('、'):'（無異動）'));
       }
@@ -1002,7 +1032,7 @@ window.onDP=function(e){e.preventDefault();};
         dateEl.value='';
         fields.forEach(function(_,i){var el=document.getElementById('newRowVal_'+i);if(el)el.value='';});
         var pn=projects[currentProjectId];
-        var vals2=fields.map(function(f,i){return f+':'+obj['f'+i];}).join('、');
+        var vals2=fields.map(function(f,i){return fname(f)+':'+obj['f'+i];}).join('、');
         writeLog('新增數據',d+' @ '+pn.name+'｜'+vals2);
         toast('\u2705 已新增 '+d,'ok');
       }catch(e){toast('新增失敗：'+e.message,'err');}
