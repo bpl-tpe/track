@@ -76,10 +76,10 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .pcard-date{font-size:12px;color:var(--text3);}.pcard-badge-wrap{margin-top:14px;}
 .badge{font-size:10px;font-weight:500;padding:3px 10px;letter-spacing:.04em;border-radius:20px;display:inline-block;}
 .badge-on{background:var(--success-pale);color:var(--success);}.badge-off{background:#f0f1f4;color:var(--text3);}
-.pcard-right{width:40%;display:flex;flex-direction:column;gap:12px;padding-left:18px;justify-content:center;}
-.stat-item{display:flex;flex-direction:column;gap:4px;}
-.stat-cat-group{display:flex;flex-direction:column;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line-light);}
-.stat-cat-group:last-child{border-bottom:none;padding-bottom:0;}
+.pcard-right{display:flex;align-items:center;padding-left:18px;border-left:1px solid var(--line-light);margin-left:auto;flex-shrink:0;}
+.pcard-meta-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.pcard-meta-item{font-size:12px;color:var(--text3);}
+.pcard-meta-sep{font-size:12px;color:var(--line);}
 .stat-cat-label{font-size:10px;font-weight:500;color:var(--accent);letter-spacing:.04em;text-transform:uppercase;}
 .stat-l{font-size:11px;color:var(--text3);line-height:1;letter-spacing:.02em;}
 .stat-n{font-size:24px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1.1;}
@@ -170,7 +170,7 @@ tbody tr:hover td{background:var(--accent-pale);}
 .note-area{display:none;width:100%;padding:7px 10px;border:1px dashed var(--line);border-radius:6px;font-size:12px;font-family:inherit;color:var(--text2);background:var(--bg);outline:none;resize:none;transition:border-color .15s;line-height:1.6;min-height:52px;}
 .note-area:focus{border-color:var(--accent);background:#fff;}
 .note-area.open{display:block;}
-.cat-tabs-wrap{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;}
+.cat-tabs-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;}
 .cat-tabs-label{font-size:11px;color:var(--text3);letter-spacing:.04em;white-space:nowrap;flex-shrink:0;}
 .cat-tabs{display:flex;gap:6px;flex-wrap:wrap;}
 .cat-tab{font-size:12px;padding:5px 16px;border:1.5px solid var(--line);border-radius:20px;background:var(--bg);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;}
@@ -433,24 +433,10 @@ function renderEditorProjects(){
   el.innerHTML=projectOrder.filter(function(k){return!!projects[k];}).map(function(k){
     var p=projects[k],entries=p.entries||{};
     var on=p.status==='active';
-    var statHTML='';
-    if(p.categories&&p.categories.length){
-      var totalByDate={};
-      Object.values(entries).forEach(function(e){Object.keys(e||{}).forEach(function(fk){totalByDate[fk]=(totalByDate[fk]||0)+parseInt(e[fk]||0);});});
-      statHTML=p.categories.map(function(cat,ci){
-        var catEntries=Object.entries(entries).filter(function(kv){return kv[0].startsWith('cat'+ci+'_');});
-        var fields=cat.fields||[];
-        var ft=fields.map(function(_,fi){return catEntries.reduce(function(s,kv){return s+parseInt((kv[1]||{})['f'+fi]||0);},0);});
-        return '<div class="stat-cat-group">'+
-          '<div class="stat-cat-label">'+esc(cat.name)+'</div>'+
-          fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(fname(f))+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join('')+
-        '</div>';
-      }).join('');
-    } else {
-      var fields=p.fields||[];
-      var ft=fields.map(function(_,fi){var t=0;Object.values(entries).forEach(function(e){t+=parseInt(e['f'+fi]||0);});return t;});
-      statHTML=fields.length?fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(fname(f))+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join(''):'<div class="stat-item"><div class="stat-n" style="color:var(--text3)">—</div></div>';
-    }
+    var cats=p.categories&&p.categories.length?p.categories:[];
+    var catCount=cats.length||((p.fields&&p.fields.length)?1:0);
+    var fieldCount=cats.length?cats.reduce(function(s,c){return s+(c.fields||[]).length;},0):(p.fields||[]).length;
+    var statHTML='<div class="pcard-meta-row"><span class="pcard-meta-item">'+catCount+' 個類別</span><span class="pcard-meta-sep">·</span><span class="pcard-meta-item">'+fieldCount+' 個項目</span></div>';
     return '<div class="pcard" draggable="true" data-id="'+k+'"'+
       ' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragleave="onDL(event)" ondragend="onDE(event)"'+
       ' onclick="openDetail(\''+k+'\')">'+
