@@ -78,6 +78,9 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .badge-on{background:var(--success-pale);color:var(--success);}.badge-off{background:#f0f1f4;color:var(--text3);}
 .pcard-right{width:40%;display:flex;flex-direction:column;gap:12px;padding-left:18px;justify-content:center;}
 .stat-item{display:flex;flex-direction:column;gap:4px;}
+.stat-cat-group{display:flex;flex-direction:column;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line-light);}
+.stat-cat-group:last-child{border-bottom:none;padding-bottom:0;}
+.stat-cat-label{font-size:10px;font-weight:500;color:var(--accent);letter-spacing:.04em;text-transform:uppercase;}
 .stat-l{font-size:11px;color:var(--text3);line-height:1;letter-spacing:.02em;}
 .stat-n{font-size:24px;font-weight:400;color:var(--text);letter-spacing:-.5px;line-height:1.1;}
 .summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:24px;}
@@ -423,8 +426,12 @@ function renderEditorProjects(){
       Object.values(entries).forEach(function(e){Object.keys(e||{}).forEach(function(fk){totalByDate[fk]=(totalByDate[fk]||0)+parseInt(e[fk]||0);});});
       statHTML=p.categories.map(function(cat,ci){
         var catEntries=Object.entries(entries).filter(function(kv){return kv[0].startsWith('cat'+ci+'_');});
-        var total=catEntries.reduce(function(s,kv){return s+Object.values(kv[1]||{}).reduce(function(a,v){return a+parseInt(v||0);},0);},0);
-        return '<div class="stat-item"><div class="stat-l">'+esc(cat.name)+'</div><div class="stat-n">'+total.toLocaleString()+'</div></div>';
+        var fields=cat.fields||[];
+        var ft=fields.map(function(_,fi){return catEntries.reduce(function(s,kv){return s+parseInt((kv[1]||{})['f'+fi]||0);},0);});
+        return '<div class="stat-cat-group">'+
+          '<div class="stat-cat-label">'+esc(cat.name)+'</div>'+
+          fields.map(function(f,i){return '<div class="stat-item"><div class="stat-l">'+esc(f)+'</div><div class="stat-n">'+ft[i].toLocaleString()+'</div></div>';}).join('')+
+        '</div>';
       }).join('');
     } else {
       var fields=p.fields||[];
@@ -528,7 +535,8 @@ window.toggleEditMode = function() {
 function renderCatTabs(p){
   var cats=p.categories||[];
   if(!cats.length)return'';
-  return '<div class="cat-tabs">'+cats.map(function(cat,i){
+  return '<div style="margin-bottom:6px;font-size:11px;color:var(--text3);letter-spacing:.04em;">選擇要檢視的項目</div>'+
+    '<div class="cat-tabs">'+cats.map(function(cat,i){
     return '<div class="cat-tab'+(i===detailCatIndex?' active':'')+'" onclick="setDetailCat('+i+')">'+esc(cat.name)+'</div>';
   }).join('')+'</div>';
 }
