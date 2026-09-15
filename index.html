@@ -32,36 +32,11 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .ph-sub{font-size:13px;color:var(--text3);margin-top:6px;}.ph-line{height:1px;background:var(--line);margin-top:18px;}
 .back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-bottom:28px;letter-spacing:.03em;transition:color .15s;}
 .back-btn:hover{color:var(--text);}.back-btn::before{content:"\2190";font-size:14px;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:400;cursor:pointer;font-family:inherit;line-height:1;transition:all .15s;border:none;padding:11px 22px;letter-spacing:.02em;}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:10px;box-shadow:0 3px 12px rgba(61,126,255,0.28);}.btn-primary:hover{box-shadow:0 5px 18px rgba(61,126,255,0.38);transform:translateY(-1px);}.btn-primary:active{transform:scale(.98);box-shadow:none;}
-.btn-full{width:100%;padding:14px;border-radius:10px;}
 .psel-list{display:flex;flex-direction:column;gap:0;margin-top:0;padding-top:4px;}
 .psel-item{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-radius:12px;margin-bottom:8px;background:var(--surface);border:1.5px solid var(--line);cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
 .psel-item:hover{border-color:#b8c8e8;box-shadow:0 6px 18px rgba(61,126,255,0.10);transform:translateY(-1px);}
 .psel-name{font-size:17px;font-weight:500;color:var(--accent);}
 .psel-date{font-size:12px;color:var(--text3);margin-top:3px;}
-.entry-section{margin-top:0;}
-.form-card{background:var(--surface);border:1.5px solid var(--line);border-radius:18px;padding:24px 22px 28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
-.form-card-header{margin-bottom:22px;padding-bottom:16px;}
-.entry-title{font-size:17px;font-weight:500;letter-spacing:-.1px;margin-bottom:4px;color:var(--accent);}
-.entry-cat-badge{display:inline-block;font-size:11px;color:var(--text3);margin-bottom:4px;letter-spacing:.03em;}
-.entry-date-row{margin-bottom:20px;}
-.entry-date-label{font-size:12px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:7px;display:block;}
-.date-input{background:transparent;border:none;border-bottom:2px solid var(--line);border-radius:0;font-size:16px;font-family:inherit;color:var(--text);padding:4px 0;width:100%;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s;}
-.date-input:focus{border-bottom-color:var(--accent);}
-.entry-fields{display:flex;flex-direction:column;gap:0;margin-bottom:22px;}
-.efield-row{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--line-light);}
-.efield-row:first-child{border-top:none;}.efield-row:last-child{border-bottom:none;}
-.efield-label-wrap{display:flex;flex-direction:column;gap:2px;}
-.efield-label{font-size:14px;font-weight:500;color:var(--text);}
-.efield-note{font-size:11px;color:var(--text3);line-height:1.5;letter-spacing:.01em;}
-.efield-input{width:80px;background:transparent;border:none;border-bottom:2px solid var(--line);font-size:22px;font-weight:400;text-align:right;font-family:inherit;color:var(--text);padding:4px 0;outline:none;transition:border-color .15s;-moz-appearance:textfield;}
-.efield-input::-webkit-outer-spin-button,.efield-input::-webkit-inner-spin-button{-webkit-appearance:none;}
-.efield-input:focus{border-color:var(--accent);}.efield-input:disabled{color:var(--text3);border-color:var(--line-light);}
-.efield-input.prefilled{color:var(--warn);}
-.status-banner{font-size:12px;padding:10px 14px;margin-bottom:16px;color:var(--text2);letter-spacing:.02em;display:none;border-radius:8px;}
-.status-banner.show{display:block;}
-.status-banner.warn-text{color:var(--danger);border:1px solid var(--danger);background:var(--danger-pale);}
 .toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 40px);max-width:360px;}
 .toast{background:var(--text);color:#fff;padding:12px 18px;font-size:13px;width:100%;text-align:center;letter-spacing:.02em;animation:tIn .2s ease;border-radius:10px;}
 .toast.ok{background:var(--success);}.toast.err{background:var(--danger);}
@@ -76,6 +51,47 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .topbar-left{display:flex;align-items:center;gap:10px;}
 .topbar-nav-btn{font-size:12px;color:var(--text2);text-decoration:none;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:5px 12px;letter-spacing:.02em;transition:all .18s;white-space:nowrap;}
 .topbar-nav-btn:hover{border-color:var(--text3);color:var(--text);}
+
+/* Report view */
+.report-proj-name{font-size:20px;font-weight:500;color:var(--text);letter-spacing:-.2px;line-height:1.3;margin-bottom:3px;}
+.report-proj-dates{font-size:12px;color:var(--text3);margin-bottom:22px;letter-spacing:.02em;}
+
+/* Date block */
+.date-block{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.date-block-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;}
+.date-block-input{border:none;outline:none;background:transparent;font-size:16px;font-weight:500;font-family:inherit;color:var(--text);text-align:right;flex:1;min-width:0;-webkit-appearance:none;appearance:none;cursor:pointer;}
+
+/* Category section */
+.cat-section{margin-bottom:24px;}
+.cat-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.cat-name{font-size:13px;font-weight:500;color:var(--text2);letter-spacing:.01em;}
+.cat-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;letter-spacing:.03em;line-height:1.4;}
+.cat-status.done{background:var(--success-pale);color:var(--success);}
+.cat-status.pending{background:var(--line-light);color:var(--text3);}
+.cat-status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.cat-divider{height:1px;background:var(--line);margin:4px 0 24px;}
+
+/* Field card grid */
+.field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+@media(max-width:380px){.field-grid{grid-template-columns:repeat(2,1fr);}}
+.field-card{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 12px 10px;display:flex;flex-direction:column;min-height:108px;box-shadow:0 1px 4px rgba(0,0,0,0.04);transition:border-color .15s;}
+.field-card:focus-within{border-color:var(--accent);}
+.field-card.filled{border-color:var(--success);background:var(--success-pale);}
+.field-card-name{font-size:12px;color:var(--text2);line-height:1.3;}
+.field-card-note{font-size:10px;color:var(--text3);line-height:1.4;margin-top:3px;}
+.field-card-spacer{flex:1;min-height:6px;}
+.field-card-input{border:none;outline:none;background:transparent;font-size:22px;font-weight:400;font-family:inherit;color:var(--text);width:100%;padding:0;padding-bottom:4px;font-variant-numeric:tabular-nums;letter-spacing:-.5px;border-bottom:2px solid var(--line);transition:border-color .15s,color .15s;-moz-appearance:textfield;}
+.field-card-input::-webkit-outer-spin-button,.field-card-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.field-card-input:focus{border-bottom-color:var(--accent);color:var(--accent);}
+.field-card.filled .field-card-input{border-bottom-color:var(--success);color:var(--success);}
+
+/* Submit button per category */
+.cat-submit-btn{width:100%;padding:13px;font-size:14px;font-weight:500;font-family:inherit;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;cursor:pointer;letter-spacing:.02em;box-shadow:0 3px 12px rgba(61,126,255,.25);transition:all .18s;}
+.cat-submit-btn:hover{box-shadow:0 5px 18px rgba(61,126,255,.38);transform:translateY(-1px);}
+.cat-submit-btn:active{transform:scale(.98);box-shadow:none;}
+.cat-submit-btn.done{background:linear-gradient(135deg,var(--success),#22c575);box-shadow:0 3px 12px rgba(22,160,90,.2);}
+.cat-submit-btn.done:hover{box-shadow:0 5px 18px rgba(22,160,90,.32);transform:translateY(-1px);}
+
 @media(max-width:480px){
 .brand-name{display:none;}
 .topbar-nav-btn{font-size:11px;padding:5px 9px;}
@@ -119,36 +135,17 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
   </div>
 </div>
 
-<!-- 類別選擇 -->
-<div class="view" id="viewCats">
+<!-- 回報頁（單頁式） -->
+<div class="view" id="viewReport">
   <div class="wrap-sm">
     <button class="back-btn" onclick="backToList()">返回</button>
-    <div class="ph">
-      <div class="ph-title" id="catsProjectName"></div>
-      <div class="ph-sub">請選擇填報類別</div>
-      <div class="ph-line"></div>
+    <div class="report-proj-name" id="reportName"></div>
+    <div class="report-proj-dates" id="reportDates"></div>
+    <div class="date-block">
+      <span class="date-block-label">填報日期</span>
+      <input type="date" class="date-block-input" id="reportDate" onchange="onReportDateChange()">
     </div>
-    <div id="catsList" class="psel-list"></div>
-  </div>
-</div>
-
-<!-- 填報表單 -->
-<div class="view" id="viewForm">
-  <div class="wrap-sm">
-    <button class="back-btn" onclick="backFromForm()">返回</button>
-    <div class="form-card">
-      <div class="form-card-header">
-        <div class="entry-cat-badge" id="entryCatBadge" style="display:none"></div>
-        <div class="entry-title" id="entryName"></div>
-        <div style="margin-top:16px;">
-          <span class="entry-date-label">填報日期</span>
-          <input type="date" class="date-input" id="entryDate">
-        </div>
-      </div>
-      <div id="statusBanner" class="status-banner"></div>
-      <div id="entryFields" class="entry-fields"></div>
-      <button class="btn btn-primary btn-full" id="submitBtn" onclick="handleSubmit()">送出</button>
-    </div>
+    <div id="reportCats"></div>
   </div>
 </div>
 
@@ -158,7 +155,6 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 var projects = {};
 var projectOrder = [];
 var currentProjectId = null;
-var currentCategoryIndex = null;
 
 function setSyncStatus(s,t){document.getElementById('syncDot').className='sdot '+s;document.getElementById('syncText').textContent=t;}
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -183,115 +179,116 @@ function renderList(){
 window.selectProject=function(id){
   currentProjectId=id;
   var p=projects[id];
-  if(p.categories && p.categories.length){
-    // Two-layer: show category selection
-    document.getElementById('catsProjectName').textContent=p.name;
-    renderCats(p);
-    showView('viewCats');
-  } else {
-    // Legacy: go directly to form
-    currentCategoryIndex=null;
-    document.getElementById('entryCatBadge').style.display='none';
-    document.getElementById('entryName').textContent=p.name;
-    setupForm(p, null);
-    showView('viewForm');
-  }
-};
-
-function renderCats(p){
-  var el=document.getElementById('catsList');
-  el.innerHTML=(p.categories||[]).map(function(cat,i){
-    return '<div class="psel-item" onclick="selectCategory('+i+')">'+
-      '<div><div class="psel-name">'+esc(cat.name)+'</div>'+
-      '<div class="psel-date">'+((cat.fields||[]).length)+'個填報項目</div></div>'+
-      '<span style="color:var(--text3);font-size:16px">&#8250;</span></div>';
-  }).join('');
-}
-
-window.selectCategory=function(i){
-  currentCategoryIndex=i;
-  var p=projects[currentProjectId];
-  var cat=p.categories[i];
-  var badge=document.getElementById('entryCatBadge');
-  badge.textContent=p.name;
-  badge.style.display='';
-  document.getElementById('entryName').textContent=cat.name;
-  document.getElementById('statusBanner').className='status-banner';
-  document.getElementById('submitBtn').disabled=false;
-  setupForm(p, i);
-  showView('viewForm');
-};
-
-function setupForm(p, catIdx){
+  document.getElementById('reportName').textContent=p.name;
+  document.getElementById('reportDates').textContent=p.startDate+' ～ '+p.endDate;
   var today=todayStr();
   var d=today;
-  if(p.startDate && d < p.startDate) d=p.startDate;
-  if(p.endDate   && d > p.endDate)   d=p.endDate;
-  var dateEl=document.getElementById('entryDate');
+  if(p.startDate&&d<p.startDate)d=p.startDate;
+  if(p.endDate&&d>p.endDate)d=p.endDate;
+  var dateEl=document.getElementById('reportDate');
   dateEl.value=d;
   dateEl.min=p.startDate||'';
   dateEl.max=p.endDate||'';
-  loadFields(d);
-  dateEl.onchange=function(){loadFields(this.value);};
+  renderCatSections(id,d);
+  showView('viewReport');
+};
+
+window.backToList=function(){currentProjectId=null;showView('viewList');};
+
+window.onReportDateChange=function(){
+  if(!currentProjectId)return;
+  var d=document.getElementById('reportDate').value;
+  if(d)renderCatSections(currentProjectId,d);
+};
+
+function renderCatSections(pid,date){
+  var p=projects[pid];
+  var container=document.getElementById('reportCats');
+  container.innerHTML='';
+  var cats=p.categories&&p.categories.length?p.categories:null;
+  if(cats){
+    cats.forEach(function(cat,ci){
+      if(ci>0){var div=document.createElement('div');div.className='cat-divider';container.appendChild(div);}
+      container.appendChild(buildCatSection(pid,date,ci,cat.name,cat.fields||[]));
+    });
+  } else {
+    container.appendChild(buildCatSection(pid,date,null,null,p.fields||[]));
+  }
 }
 
-function loadFields(d){
-  var p=projects[currentProjectId];
-  var fields, entryKey;
-  if(currentCategoryIndex!==null && p.categories){
-    var cat=p.categories[currentCategoryIndex];
-    fields=cat.fields||[];
-    entryKey='cat'+currentCategoryIndex+'_'+d;
-  } else {
-    fields=p.fields||[];
-    entryKey=d;
-  }
+function buildCatSection(pid,date,catIndex,catLabel,fields){
+  var entryKey=catIndex!==null?'cat'+catIndex+'_'+date:date;
+  var p=projects[pid];
   var existing=(p.entries&&p.entries[entryKey])||null;
-  document.getElementById('entryFields').innerHTML=fields.map(function(f,i){
-    var v=existing?parseInt(existing['f'+i]||0):'';
+  var idPfx=catIndex!==null?catIndex:'leg';
+
+  var section=document.createElement('div');
+  section.className='cat-section';
+
+  // Header (only for multi-category projects)
+  if(catLabel!==null){
+    var header=document.createElement('div');header.className='cat-header';
+    var nameEl=document.createElement('span');nameEl.className='cat-name';nameEl.textContent=catLabel;
+    var badge=document.createElement('span');
+    badge.className='cat-status '+(existing?'done':'pending');
+    badge.innerHTML='<span class="cat-status-dot"></span>'+(existing?'今日已回報':'尚未回報');
+    header.appendChild(nameEl);header.appendChild(badge);
+    section.appendChild(header);
+  }
+
+  // Field grid
+  var grid=document.createElement('div');grid.className='field-grid';
+  fields.forEach(function(f,fi){
+    var card=document.createElement('div');card.className='field-card'+(existing?' filled':'');
+    var nameDiv=document.createElement('div');nameDiv.className='field-card-name';nameDiv.textContent=fname(f);card.appendChild(nameDiv);
     var note=fnote(f);
-    var noteHtml=note?'<div class="efield-note">'+esc(note)+'</div>':'';
-    return '<div class="efield-row"><div class="efield-label-wrap"><div class="efield-label">'+esc(fname(f))+'</div>'+noteHtml+'</div>'+
-      '<input class="efield-input'+(existing?' prefilled':'')+'" type="number" min="0" id="ef_'+i+'" value="'+(v!==''?v:'')+'" placeholder="0"></div>';
-  }).join('');
-  var sb=document.getElementById('statusBanner');
-  if(existing){sb.textContent='此日期已有填報數字，修改後可重新送出';sb.className='status-banner warn-text show';}
-  else{sb.className='status-banner';}
-  document.getElementById('submitBtn').disabled=false;
+    if(note){var noteDiv=document.createElement('div');noteDiv.className='field-card-note';noteDiv.textContent=note;card.appendChild(noteDiv);}
+    var spacer=document.createElement('div');spacer.className='field-card-spacer';card.appendChild(spacer);
+    var inp=document.createElement('input');
+    inp.type='number';inp.min='0';inp.placeholder='0';
+    inp.className='field-card-input';
+    inp.id='cf_'+idPfx+'_'+fi;
+    if(existing)inp.value=parseInt(existing['f'+fi]||0);
+    card.appendChild(inp);
+    grid.appendChild(card);
+  });
+  section.appendChild(grid);
+
+  // Submit button
+  var btn=document.createElement('button');
+  btn.className='cat-submit-btn'+(existing?' done':'');
+  btn.textContent=existing?'修改並重新送出':'送出';
+  (function(ci,lbl,flds,key,isOw,sec,b){
+    b.onclick=function(){doSubmit(pid,date,ci,lbl,flds,key,isOw,sec,b);};
+  })(catIndex,catLabel,fields,entryKey,!!existing,section,btn);
+  section.appendChild(btn);
+
+  return section;
 }
 
-window.backToList=function(){showView('viewList');};
-window.backFromForm=function(){
-  if(currentCategoryIndex!==null){
-    var p=projects[currentProjectId];
-    renderCats(p);
-    showView('viewCats');
-  } else {
-    showView('viewList');
-  }
-};
-
-window.handleSubmit=function(){
-  var date=document.getElementById('entryDate').value;
-  if(!date){toast('請選擇填報日期','err');return;}
-  var p=projects[currentProjectId];
-  var fields, entryKey, catName;
-  if(currentCategoryIndex!==null && p.categories){
-    var cat=p.categories[currentCategoryIndex];
-    fields=cat.fields||[];
-    entryKey='cat'+currentCategoryIndex+'_'+date;
-    catName=cat.name;
-  } else {
-    fields=p.fields||[];
-    entryKey=date;
-    catName=null;
-  }
-  var values=fields.map(function(f,i){return{label:f,value:parseInt(document.getElementById('ef_'+i).value)||0};});
-  var alreadyFilled=p.entries&&p.entries[entryKey];
-  if(alreadyFilled){if(!confirm('該日期已填報過，確認是否重新填報？'))return;}
-  if(window._dbSet){window._dbSet(currentProjectId,entryKey,values,!!alreadyFilled,catName);}
-  else{toast('資料庫尚未就緒，請稍後','err');}
-};
+function doSubmit(pid,date,catIndex,catLabel,fields,entryKey,isOverwrite,section,btn){
+  var idPfx=catIndex!==null?catIndex:'leg';
+  var values=fields.map(function(f,fi){
+    var el=document.getElementById('cf_'+idPfx+'_'+fi);
+    return{label:fname(f),value:parseInt(el?el.value:0)||0};
+  });
+  if(isOverwrite&&!confirm('該日期已填報過，確認覆蓋？'))return;
+  if(!window._dbSet){toast('資料庫尚未就緒，請稍後','err');return;}
+  window._dbSet(pid,entryKey,values,isOverwrite,catLabel,function(){
+    // Update badge
+    var badge=section.querySelector('.cat-status');
+    if(badge){badge.className='cat-status done';badge.innerHTML='<span class="cat-status-dot"></span>今日已回報';}
+    // Update cards
+    var cards=section.querySelectorAll('.field-card');
+    cards.forEach(function(c){c.classList.add('filled');});
+    var inputs=section.querySelectorAll('.field-card-input');
+    inputs.forEach(function(i){i.style.borderBottomColor='var(--success)';i.style.color='var(--success)';});
+    // Update button
+    btn.className='cat-submit-btn done';
+    btn.textContent='修改並重新送出';
+    btn.onclick=function(){doSubmit(pid,date,catIndex,catLabel,fields,entryKey,true,section,btn);};
+  });
+}
 
 (async function(){
   try{
@@ -315,16 +312,20 @@ window.handleSubmit=function(){
       projectOrder=projectOrder.filter(function(k){return!!projects[k];});
       setSyncStatus('synced','已同步');
       renderList();
+      // Refresh report view if open
+      if(currentProjectId&&document.getElementById('viewReport').classList.contains('active')){
+        var d2=document.getElementById('reportDate').value;
+        if(d2)renderCatSections(currentProjectId,d2);
+      }
     },function(err){setSyncStatus('error','連線失敗');toast('連線失敗：'+err.message,'err');});
 
-    window._dbSet=async function(pid,entryKey,values,isOverwrite,catName){
-      var p=projects[pid],obj={};values.forEach(function(v,i){obj['f'+i]=v.value;});
+    window._dbSet=async function(pid,entryKey,values,isOverwrite,catName,onSuccess){
+      var p=projects[pid],obj={};
+      values.forEach(function(v,i){obj['f'+i]=v.value;});
       try{
         await set(ref(db,'tracker/projects/'+pid+'/entries/'+entryKey),obj);
-        values.forEach(function(_,i){var el=document.getElementById('ef_'+i);if(el){el.disabled=true;}});
-        var sb=document.getElementById('statusBanner');sb.textContent='數據已送出';sb.className='status-banner show';
-        document.getElementById('submitBtn').disabled=true;
         toast('✅ 數據已送出！','ok');
+        if(onSuccess)onSuccess();
         var vals=values.map(function(v){return v.label+':'+v.value;}).join('、');
         var action=isOverwrite?'覆蓋填報':'填報數據';
         var t=Date.now();
