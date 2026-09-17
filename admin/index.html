@@ -345,7 +345,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     <div class="modal-foot modal-foot-space">
       <button class="btn-danger-txt" id="deleteBtn" onclick="deleteProject()" style="display:none">刪除此專案</button>
       <div style="display:flex;gap:10px">
-        <button class="btn btn-ghost" onclick="closeModal('projectModal')">取消</button>
+        <button class="btn btn-ghost" onclick="closeProjectModal()">取消</button>
         <button class="btn btn-primary btn-sm" onclick="saveProject()">儲存</button>
       </div>
     </div>
@@ -393,7 +393,21 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function fname(f){return typeof f==='string'?f:(f&&f.name?f.name:'');}
 function fnote(f){return typeof f==='string'?'':(f&&f.note?f.note:'');}
 function toast(msg,type){var w=document.getElementById('toastWrap');var t=document.createElement('div');t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');t.textContent=msg;w.appendChild(t);setTimeout(function(){t.remove();},3000);}
-document.querySelectorAll('.overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});});
+var modalDirty=false;
+function closeProjectModal(){
+  if(modalDirty&&!confirm('設定尚未儲存，確定要關閉嗎？'))return;
+  modalDirty=false;closeModal('projectModal');
+}
+window.closeProjectModal=closeProjectModal;
+document.querySelectorAll('.overlay').forEach(function(o){
+  o.addEventListener('click',function(e){
+    if(e.target!==o)return;
+    if(o.id==='projectModal'){closeProjectModal();}
+    else{o.classList.remove('open');}
+  });
+});
+document.getElementById('projectModal').addEventListener('input',function(){modalDirty=true;});
+document.getElementById('projectModal').addEventListener('change',function(){modalDirty=true;});
 
 window.togglePw=function(id,btn){
   var el=document.getElementById(id);
@@ -572,7 +586,7 @@ window.openDetail=function(id){
 };
 window.backToEditor=function(){currentProjectId=null;showView('viewEditor');renderEditorProjects();};
 window.openNewProjectModal=function(){
-  editingProjectId=null;
+  editingProjectId=null;modalDirty=false;
   document.getElementById('projectModalTitle').textContent='新增專案';
   document.getElementById('fieldName').value='';
   document.getElementById('fieldStart').value='';
@@ -584,7 +598,7 @@ window.openNewProjectModal=function(){
 };
 window.openEditModal=function(){
   if(!currentProjectId)return;
-  editingProjectId=currentProjectId;
+  editingProjectId=currentProjectId;modalDirty=false;
   var p=projects[currentProjectId];
   document.getElementById('projectModalTitle').textContent='編輯設定';
   document.getElementById('fieldName').value=p.name;
@@ -609,11 +623,14 @@ function createFieldItem(nameVal,noteVal){
   var noteBtn=document.createElement('button');noteBtn.type='button';noteBtn.className='note-btn'+(noteVal?' has-note':'');noteBtn.textContent='備註';
   var rmBtn=document.createElement('button');rmBtn.type='button';rmBtn.className='rm-btn';rmBtn.innerHTML='&#215;';
   rmBtn.onclick=function(){wrap.remove();};
-  var noteArea=document.createElement('textarea');noteArea.className='note-area'+(noteVal?' open':'');noteArea.placeholder='在此輸入給協助者的備註說明…';noteArea.rows=2;noteArea.value=noteVal||'';
+  var noteArea=document.createElement('textarea');noteArea.className='note-area'+(noteVal?' open':'');noteArea.rows=2;noteArea.value=noteVal||'';
+  function updateNotePlaceholder(){noteArea.placeholder='給協助者關於「'+(inp.value.trim()||'此欄位')+'」的備註說明…';}
+  updateNotePlaceholder();
+  inp.addEventListener('input',updateNotePlaceholder);
   noteBtn.onclick=function(){
     var open=noteArea.classList.toggle('open');
     noteBtn.classList.toggle('has-note',open||noteArea.value.trim()!=='');
-    if(open)noteArea.focus();
+    if(open){updateNotePlaceholder();noteArea.focus();}
   };
   noteArea.oninput=function(){noteBtn.classList.toggle('has-note',noteArea.value.trim()!=='');};
   row.appendChild(inp);row.appendChild(noteBtn);row.appendChild(rmBtn);
@@ -822,6 +839,16 @@ window.onDP=function(e){e.preventDefault();};
       var status=document.getElementById('statusToggle').checked?'active':'ended';
       if(!name||!start||!end){toast('請填寫活動名稱與日期','err');return;}
       if(!categories.length){toast('請至少新增一個類別與填報項目','err');return;}
+      // Duplicate category name check
+      var catNames=categories.map(function(c){return c.name;});
+      var dupCat=catNames.find(function(n,i){return catNames.indexOf(n)!==i;});
+      if(dupCat){toast('類別名稱「'+dupCat+'」重複，請修改','err');return;}
+      // Duplicate field name within each category
+      for(var _ci=0;_ci<categories.length;_ci++){
+        var _fn=categories[_ci].fields.map(fname);
+        var _df=_fn.find(function(n,i){return _fn.indexOf(n)!==i;});
+        if(_df){toast('「'+categories[_ci].name+'」中的項目「'+_df+'」重複，請修改','err');return;}
+      }
       var isNew=!editingProjectId;
       var id=editingProjectId||'p_'+Date.now();
       var _old=isNew?null:(projects[id]?JSON.parse(JSON.stringify(projects[id])):null);
@@ -835,7 +862,7 @@ window.onDP=function(e){e.preventDefault();};
           if(cur.indexOf(id)<0)cur=cur.concat([id]);
           await update(ref(db,'tracker'),{projectOrder:cur});
         }
-        closeModal('projectModal');toast('\u2705 已儲存','ok');
+        modalDirty=false;closeModal('projectModal');toast('2705 已儲存','ok');
         if(isNew){
           var catSummary=categories.map(function(c){return c.name+'['+c.fields.join('、')+']';}).join('；');
           writeLog('新增專案',name+'｜'+start+'～'+end+'｜狀態:'+(status==='active'?'進行中':'已結束')+'｜類別:'+catSummary);

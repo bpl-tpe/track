@@ -219,14 +219,15 @@ function renderList(){
     el.innerHTML='<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';
     showView('viewList');return;
   }
+  var onReport=document.getElementById('viewReport').classList.contains('active');
   if(active.length===1){
-    // Skip list, go directly to report; hide back button
     document.getElementById('reportBackBtn').style.display='none';
-    selectProject(active[0]);return;
+    if(!onReport)selectProject(active[0]);
+    return;
   }
-  // Multiple active projects: show list with back button
+  // Multiple active projects: show list with back button only if not already on a report
   document.getElementById('reportBackBtn').style.display='';
-  showView('viewList');
+  if(!onReport)showView('viewList');
   el.innerHTML=active.map(function(k){
     var p=projects[k];
     return '<div class="psel-item" onclick="selectProject(\''+k+'\')">'+
