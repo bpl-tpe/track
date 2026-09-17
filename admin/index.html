@@ -159,11 +159,10 @@ tbody tr:hover td{background:var(--accent-pale);}
 .note-btn{background:none;border:none;border-left:1px solid var(--line);color:var(--text3);cursor:pointer;font-size:11px;padding:0 10px;height:100%;min-height:40px;line-height:1.4;transition:all .15s;flex-shrink:0;letter-spacing:.02em;font-family:inherit;}
 .note-btn:hover{color:var(--accent);background:var(--accent-pale);}
 .note-btn.has-note{color:var(--accent);background:var(--accent-pale);}
-.note-panel{display:none;border-top:1.5px solid var(--accent);background:#fff;}
+.note-panel{display:none;border-top:1px solid var(--accent-pale);background:var(--accent-pale);}
 .note-panel.open{display:block;}
-.note-panel-header{font-size:10px;font-weight:500;color:var(--accent);letter-spacing:.05em;padding:6px 10px 0;display:flex;align-items:center;gap:5px;}
-.note-panel-header::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;}
-.note-area{width:100%;padding:4px 10px 8px;border:none;font-size:12px;font-family:inherit;color:var(--text2);background:transparent;outline:none;resize:none;line-height:1.6;min-height:48px;}
+.note-panel-header{font-size:10px;color:var(--accent);letter-spacing:.03em;padding:5px 10px 0;opacity:.7;}
+.note-area{width:100%;padding:3px 10px 6px;border:none;font-size:12px;font-family:inherit;color:var(--text2);background:transparent;outline:none;resize:none;line-height:1.5;min-height:36px;}
 .note-area:focus{color:var(--text);}
 .cat-tabs-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;}
 .cat-tabs-label{font-size:11px;color:var(--text3);letter-spacing:.04em;white-space:nowrap;flex-shrink:0;}
@@ -634,7 +633,7 @@ function createFieldItem(nameVal,noteVal){
   var panel=document.createElement('div');panel.className='note-panel'+(noteVal?' open':'');
   var panelHeader=document.createElement('div');panelHeader.className='note-panel-header';
   var noteArea=document.createElement('textarea');noteArea.className='note-area';noteArea.rows=2;noteArea.value=noteVal||'';
-  function updateHeader(){panelHeader.innerHTML='';var dot=document.createElement('span');dot.style.cssText='display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;';var lbl=document.createElement('span');lbl.textContent='「'+(inp.value.trim()||'此欄位')+'」的備註';panelHeader.appendChild(dot);panelHeader.appendChild(lbl);}
+  function updateHeader(){panelHeader.textContent='「'+(inp.value.trim()||'此欄位')+'」的備註';}
   function updatePlaceholder(){noteArea.placeholder='給協助者關於「'+(inp.value.trim()||'此欄位')+'」的提示說明…';}
   updateHeader();updatePlaceholder();
   inp.addEventListener('input',function(){updateHeader();updatePlaceholder();});
