@@ -623,14 +623,14 @@ window.openEditModal=function(){
   openModal('projectModal');
 };
 function createFieldItem(nameVal,noteVal){
-  var wrap=document.createElement('div');wrap.className='field-item-wrap'+(noteVal?' note-open':'');
+  var wrap=document.createElement('div');wrap.className='field-item-wrap';
   var row=document.createElement('div');row.className='field-item';
   var inp=document.createElement('input');inp.className='fi';inp.placeholder='輸入項目名稱';inp.value=nameVal||'';
   var noteBtn=document.createElement('button');noteBtn.type='button';noteBtn.className='note-btn'+(noteVal?' has-note':'');noteBtn.textContent='備註';
   var rmBtn=document.createElement('button');rmBtn.type='button';rmBtn.className='rm-btn';rmBtn.style.cssText='flex-shrink:0;padding:0 8px;';rmBtn.innerHTML='&#215;';
   rmBtn.onclick=function(){wrap.remove();};
   // Note panel
-  var panel=document.createElement('div');panel.className='note-panel'+(noteVal?' open':'');
+  var panel=document.createElement('div');panel.className='note-panel';
   var panelHeader=document.createElement('div');panelHeader.className='note-panel-header';
   var noteArea=document.createElement('textarea');noteArea.className='note-area';noteArea.rows=1;noteArea.value=noteVal||'';
   function updateHeader(){panelHeader.textContent='「'+(inp.value.trim()||'此欄位')+'」的備註';}
