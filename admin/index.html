@@ -311,7 +311,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
           <button class="tbl-btn" id="editDataBtn" onclick="toggleEditMode()" title="編輯數據" style="padding:5px 8px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="tbl-btn" onclick="downloadCSV()">下載 CSV</button>
+          <button class="tbl-btn" onclick="downloadCSV()">匯出數據</button>
         </div>
       </div>
       <div class="table-wrap">
@@ -671,16 +671,21 @@ window.downloadCSV=function(){
   var entries=p.entries||{};
   var allRows=[];var headerCols=['日期'];
   if(p.categories&&p.categories.length){
-    var cat=p.categories[detailCatIndex];
-    var fields=cat?cat.fields||[]:[];
-    var prefix='cat'+detailCatIndex+'_';
-    headerCols=['日期'].concat(fields.map(fname));
-    var dates=Object.keys(entries).filter(function(k){return k.indexOf(prefix)===0;}).map(function(k){return k.slice(prefix.length);}).sort();
+    var allDatesSet={};
+    p.categories.forEach(function(_,ci){var prefix='cat'+ci+'_';Object.keys(entries).forEach(function(k){if(k.indexOf(prefix)===0)allDatesSet[k.slice(prefix.length)]=1;});});
+    var dates=Object.keys(allDatesSet).sort();
     if(!dates.length){toast('尚無數據可下載','err');return;}
-    allRows=dates.map(function(d){var e=entries[prefix+d]||{};return[d].concat(fields.map(function(_,i){return parseInt(e['f'+i]||0);}));});
-    var ct=fields.map(function(_,fi){return dates.reduce(function(s,d){return s+parseInt((entries[prefix+d]||{})['f'+fi]||0);},0);});
+    headerCols=['日期'];
+    p.categories.forEach(function(cat){(cat.fields||[]).forEach(function(f){headerCols.push(cat.name+'_'+fname(f));});});
+    allRows=dates.map(function(d){
+      var row=[d];
+      p.categories.forEach(function(cat,ci){var e=entries['cat'+ci+'_'+d]||{};(cat.fields||[]).forEach(function(_,i){row.push(parseInt(e['f'+i]||0));});});
+      return row;
+    });
+    var ct=[];
+    p.categories.forEach(function(cat,ci){(cat.fields||[]).forEach(function(_,fi){ct.push(dates.reduce(function(s,d){return s+parseInt((entries['cat'+ci+'_'+d]||{})['f'+fi]||0);},0));});});
     allRows.push(['合計'].concat(ct));
-    var csvFname=p.name+'_'+cat.name+'_數據.csv';
+    var csvFname=p.name+'_數據.csv';
   } else {
     var fields=p.fields||[];
     headerCols=['日期'].concat(fields.map(fname));
