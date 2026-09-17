@@ -632,7 +632,7 @@ function createFieldItem(nameVal,noteVal){
   // Note panel
   var panel=document.createElement('div');panel.className='note-panel'+(noteVal?' open':'');
   var panelHeader=document.createElement('div');panelHeader.className='note-panel-header';
-  var noteArea=document.createElement('textarea');noteArea.className='note-area';noteArea.rows=2;noteArea.value=noteVal||'';
+  var noteArea=document.createElement('textarea');noteArea.className='note-area';noteArea.rows=1;noteArea.value=noteVal||'';
   function updateHeader(){panelHeader.textContent='「'+(inp.value.trim()||'此欄位')+'」的備註';}
   function updatePlaceholder(){noteArea.placeholder='給協助者關於「'+(inp.value.trim()||'此欄位')+'」的提示說明…';}
   updateHeader();updatePlaceholder();
