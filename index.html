@@ -288,7 +288,7 @@ function buildCatSection(pid,date,catIndex,catLabel,fields){
   // Submit button (created first so header can reference it)
   var btn=document.createElement('button');
   btn.className='cat-submit-btn'+(existing?' done':'');
-  btn.textContent=existing?'已填報':'送出';
+  btn.textContent='送出';
   (function(ci,lbl,flds,key,isOw,sec,b){
     b.onclick=function(){doSubmit(pid,date,ci,lbl,flds,key,isOw,sec,b);};
   })(catIndex,catLabel,fields,entryKey,!!existing,section,btn);
@@ -345,7 +345,7 @@ function doSubmit(pid,date,catIndex,catLabel,fields,entryKey,isOverwrite,section
     var badge=section.querySelector('.cat-status');
     if(badge){badge.className='cat-status done';badge.innerHTML='<span class="cat-status-dot"></span>今日已回報';}
     btn.className='cat-submit-btn done';
-    btn.textContent='已填報';
+    btn.textContent='送出';
     btn.onclick=function(){doSubmit(pid,date,catIndex,catLabel,fields,entryKey,true,section,btn);};
   },section);
 }
