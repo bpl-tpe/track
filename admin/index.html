@@ -623,18 +623,22 @@ function createFieldItem(nameVal,noteVal){
   var noteBtn=document.createElement('button');noteBtn.type='button';noteBtn.className='note-btn'+(noteVal?' has-note':'');noteBtn.textContent='備註';
   var rmBtn=document.createElement('button');rmBtn.type='button';rmBtn.className='rm-btn';rmBtn.innerHTML='&#215;';
   rmBtn.onclick=function(){wrap.remove();};
+  var noteLabel=document.createElement('div');noteLabel.className='note-field-label';
+  noteLabel.style.cssText='display:none;font-size:10px;color:var(--accent);font-weight:500;letter-spacing:.04em;margin-top:6px;margin-bottom:3px;';
+  function updateNoteLabel(){var n=inp.value.trim()||'此欄位';noteLabel.textContent='「'+n+'」的備註說明';noteArea.placeholder='給協助者關於「'+n+'」的補充說明…';}
+  updateNoteLabel();
+  inp.addEventListener('input',updateNoteLabel);
   var noteArea=document.createElement('textarea');noteArea.className='note-area'+(noteVal?' open':'');noteArea.rows=2;noteArea.value=noteVal||'';
-  function updateNotePlaceholder(){noteArea.placeholder='給協助者關於「'+(inp.value.trim()||'此欄位')+'」的備註說明…';}
-  updateNotePlaceholder();
-  inp.addEventListener('input',updateNotePlaceholder);
+  if(noteVal)noteLabel.style.display='block';
   noteBtn.onclick=function(){
     var open=noteArea.classList.toggle('open');
+    noteLabel.style.display=open?'block':'none';
     noteBtn.classList.toggle('has-note',open||noteArea.value.trim()!=='');
-    if(open){updateNotePlaceholder();noteArea.focus();}
+    if(open){updateNoteLabel();noteArea.focus();}
   };
   noteArea.oninput=function(){noteBtn.classList.toggle('has-note',noteArea.value.trim()!=='');};
   row.appendChild(inp);row.appendChild(noteBtn);row.appendChild(rmBtn);
-  wrap.appendChild(row);wrap.appendChild(noteArea);
+  wrap.appendChild(row);wrap.appendChild(noteLabel);wrap.appendChild(noteArea);
   return wrap;
 }
 function addCategoryItem(catName,fields){
