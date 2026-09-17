@@ -39,9 +39,23 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .psel-name{font-size:17px;font-weight:500;color:var(--accent);}
 .psel-date{font-size:12px;color:var(--text3);margin-top:3px;}
 .toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 40px);max-width:360px;}
-.toast{background:var(--text);color:#fff;padding:12px 18px;font-size:13px;width:100%;text-align:center;letter-spacing:.02em;animation:tIn .2s ease;border-radius:10px;}
+.toast{background:var(--text);color:#fff;padding:12px 18px 12px 14px;font-size:13px;width:100%;letter-spacing:.02em;border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center;gap:9px;animation:tIn .2s ease;}
 .toast.ok{background:var(--success);}.toast.err{background:var(--danger);}
+.toast-icon{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.toast-msg{flex:1;}
+.toast-progress{position:absolute;bottom:0;left:0;height:3px;background:rgba(255,255,255,.35);border-radius:0 3px 3px 0;animation:tProgress 2.8s linear forwards;}
+@keyframes tProgress{from{width:100%}to{width:0%}}
 @keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.field-card.has-error{border-color:var(--danger);background:var(--danger-pale);}
+.field-card.has-error .field-card-input{border-bottom-color:var(--danger);color:var(--danger);}
+.field-card.has-error .field-card-name{color:var(--danger);}
+.field-err-hint{font-size:9px;color:var(--danger);margin-top:3px;letter-spacing:.02em;}
+.net-err-banner{background:var(--danger-pale);border:1.5px solid var(--danger);border-radius:12px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;}
+.net-err-content{flex:1;}
+.net-err-title{font-size:13px;font-weight:500;color:var(--danger);margin-bottom:2px;}
+.net-err-body{font-size:12px;color:var(--text2);line-height:1.5;}
+.net-retry-btn{margin-top:8px;font-size:12px;font-weight:500;font-family:inherit;color:#fff;background:var(--danger);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all .15s;}
+.net-retry-btn:hover{background:#c04020;}
 .empty{text-align:center;padding:60px 20px;color:var(--text3);}
 .empty-ico{font-size:32px;margin-bottom:12px;opacity:.4;}
 .empty p{font-size:13px;letter-spacing:.02em;}
@@ -160,7 +174,42 @@ function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMont
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fname(f){return typeof f==='string'?f:(f&&f.name?f.name:'');}
 function fnote(f){return typeof f==='string'?'':(f&&f.note?f.note:'');}
-function toast(msg,type){var w=document.getElementById('toastWrap');var t=document.createElement('div');t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');t.textContent=msg;w.appendChild(t);setTimeout(function(){t.remove();},3000);}
+function toast(msg,type){
+  var w=document.getElementById('toastWrap');
+  var t=document.createElement('div');
+  t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');
+  var iconSvg=type==='ok'
+    ?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    :type==='err'
+    ?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+    :'';
+  t.innerHTML='<div class="toast-icon">'+iconSvg+'</div><span class="toast-msg">'+esc(msg)+'</span><div class="toast-progress"></div>';
+  w.appendChild(t);setTimeout(function(){if(t.parentNode)t.remove();},3000);
+}
+function showNetErrBanner(section,retryFn){
+  var old=section.querySelector('.net-err-banner');if(old)old.remove();
+  var banner=document.createElement('div');banner.className='net-err-banner';
+  banner.innerHTML='<svg width="16" height="16" style="flex-shrink:0;color:var(--danger);margin-top:1px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'+
+    '<div class="net-err-content"><div class="net-err-title">送出失敗</div>'+
+    '<div class="net-err-body">網路無法連線，數據尚未儲存。<br>填報內容仍保留，請稍後重試。</div>'+
+    '<button class="net-retry-btn">重新送出</button></div>';
+  banner.querySelector('.net-retry-btn').onclick=function(){banner.remove();retryFn();};
+  var grid=section.querySelector('.field-grid');
+  if(grid)section.insertBefore(banner,grid);else section.appendChild(banner);
+}
+function validateSection(fields,idPfx){
+  var valid=true;
+  fields.forEach(function(f,fi){
+    var inp=document.getElementById('cf_'+idPfx+'_'+fi);if(!inp)return;
+    var val=inp.value.trim(),num=parseFloat(val);
+    var isErr=val!==''&&(isNaN(num)||num<0||!Number.isInteger(num));
+    var card=inp.closest('.field-card');card.classList.toggle('has-error',isErr);
+    var hint=card.querySelector('.field-err-hint');
+    if(isErr){if(!hint){hint=document.createElement('div');hint.className='field-err-hint';hint.textContent='需為整數 ≥ 0';inp.parentNode.insertBefore(hint,inp.nextSibling);}valid=false;}
+    else{if(hint)hint.remove();}
+  });
+  return valid;
+}
 function showView(id){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.getElementById(id).classList.add('active');}
 
 function renderList(){
@@ -269,6 +318,7 @@ function buildCatSection(pid,date,catIndex,catLabel,fields){
     inp.className='field-card-input';
     inp.id='cf_'+idPfx+'_'+fi;
     if(existing)inp.value=parseInt(existing['f'+fi]||0);
+    inp.addEventListener('input',function(){card.classList.remove('has-error');var hint=card.querySelector('.field-err-hint');if(hint)hint.remove();});
     card.appendChild(inp);
     grid.appendChild(card);
   });
@@ -282,21 +332,21 @@ function buildCatSection(pid,date,catIndex,catLabel,fields){
 
 function doSubmit(pid,date,catIndex,catLabel,fields,entryKey,isOverwrite,section,btn){
   var idPfx=catIndex!==null?catIndex:'leg';
+  if(!validateSection(fields,idPfx)){toast('數值不可為負數或小數','err');return;}
   var values=fields.map(function(f,fi){
     var el=document.getElementById('cf_'+idPfx+'_'+fi);
     return{label:fname(f),value:parseInt(el?el.value:0)||0};
   });
   if(isOverwrite&&!confirm('該日期已填報過，確認覆蓋？'))return;
   if(!window._dbSet){toast('資料庫尚未就緒，請稍後','err');return;}
+  var oldBanner=section.querySelector('.net-err-banner');if(oldBanner)oldBanner.remove();
   window._dbSet(pid,entryKey,values,isOverwrite,catLabel,function(){
-    // Update badge
     var badge=section.querySelector('.cat-status');
     if(badge){badge.className='cat-status done';badge.innerHTML='<span class="cat-status-dot"></span>今日已回報';}
-    // Update button
     btn.className='cat-submit-btn done';
     btn.textContent='已填報';
     btn.onclick=function(){doSubmit(pid,date,catIndex,catLabel,fields,entryKey,true,section,btn);};
-  });
+  },section);
 }
 
 (async function(){
@@ -328,12 +378,12 @@ function doSubmit(pid,date,catIndex,catLabel,fields,entryKey,isOverwrite,section
       }
     },function(err){setSyncStatus('error','連線失敗');toast('連線失敗：'+err.message,'err');});
 
-    window._dbSet=async function(pid,entryKey,values,isOverwrite,catName,onSuccess){
+    window._dbSet=async function(pid,entryKey,values,isOverwrite,catName,onSuccess,section){
       var p=projects[pid],obj={};
       values.forEach(function(v,i){obj['f'+i]=v.value;});
       try{
         await set(ref(db,'tracker/projects/'+pid+'/entries/'+entryKey),obj);
-        toast('✅ 數據已送出！','ok');
+        toast((catName||'數據')+' 已成功送出','ok');
         if(onSuccess)onSuccess();
         var vals=values.map(function(v){return v.label+':'+v.value;}).join('、');
         var action=isOverwrite?'覆蓋填報':'填報數據';
@@ -341,7 +391,11 @@ function doSubmit(pid,date,catIndex,catLabel,fields,entryKey,isOverwrite,section
         var datePart=entryKey.replace(/^cat\d+_/,'');
         var loc=(catName?catName+' @ ':'')+( p?p.name:pid);
         set(ref(db,'tracker/logs/'+t),{t:t,u:'協助者',a:action,d:datePart+' @ '+loc+'｜'+vals}).catch(function(){});
-      }catch(e){toast('送出失敗：'+e.message,'err');}
+      }catch(e){
+        setSyncStatus('error','送出失敗');
+        if(section){showNetErrBanner(section,function(){window._dbSet(pid,entryKey,values,isOverwrite,catName,onSuccess,section);});}
+        else{toast('送出失敗：'+e.message,'err');}
+      }
     };
   }catch(err){setSyncStatus('error','連線失敗');toast('初始化失敗：'+err.message,'err');}
 })();
