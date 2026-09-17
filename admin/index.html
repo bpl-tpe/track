@@ -151,13 +151,20 @@ tbody tr:hover td{background:var(--accent-pale);}
 .category-block-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
 .category-block-header .fi{flex:1;font-weight:500;}
 .cat-field-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;padding-left:14px;border-left:2px solid var(--line);margin-left:2px;}
-.field-item-wrap{display:flex;flex-direction:column;gap:3px;}
-.note-btn{background:none;border:1px solid var(--line);color:var(--text3);cursor:pointer;font-size:10px;padding:2px 7px;line-height:1.4;transition:all .15s;flex-shrink:0;border-radius:4px;letter-spacing:.02em;font-family:inherit;}
-.note-btn:hover{border-color:var(--accent);color:var(--accent);}
-.note-btn.has-note{color:var(--accent);background:var(--accent-pale);border-color:var(--accent);}
-.note-area{display:none;width:100%;padding:7px 10px;border:1px dashed var(--line);border-radius:6px;font-size:12px;font-family:inherit;color:var(--text2);background:var(--bg);outline:none;resize:none;transition:border-color .15s;line-height:1.6;min-height:52px;}
-.note-area:focus{border-color:var(--accent);background:#fff;}
-.note-area.open{display:block;}
+.field-item-wrap{display:flex;flex-direction:column;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg);transition:border-color .2s,box-shadow .2s;}
+.field-item-wrap.note-open{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);}
+.field-item-wrap .field-item{display:flex;align-items:center;gap:8px;padding:0 6px 0 0;}
+.field-item-wrap .field-item .fi{flex:1;border:none;background:transparent;border-radius:8px 8px 0 0;font-size:14px;}
+.field-item-wrap .field-item .fi:focus{background:#fff;border-bottom:2px solid var(--accent);}
+.note-btn{background:none;border:none;border-left:1px solid var(--line);color:var(--text3);cursor:pointer;font-size:11px;padding:0 10px;height:100%;min-height:40px;line-height:1.4;transition:all .15s;flex-shrink:0;letter-spacing:.02em;font-family:inherit;}
+.note-btn:hover{color:var(--accent);background:var(--accent-pale);}
+.note-btn.has-note{color:var(--accent);background:var(--accent-pale);}
+.note-panel{display:none;border-top:1.5px solid var(--accent);background:#fff;}
+.note-panel.open{display:block;}
+.note-panel-header{font-size:10px;font-weight:500;color:var(--accent);letter-spacing:.05em;padding:6px 10px 0;display:flex;align-items:center;gap:5px;}
+.note-panel-header::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.note-area{width:100%;padding:4px 10px 8px;border:none;font-size:12px;font-family:inherit;color:var(--text2);background:transparent;outline:none;resize:none;line-height:1.6;min-height:48px;}
+.note-area:focus{color:var(--text);}
 .cat-tabs-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;}
 .cat-tabs-label{font-size:11px;color:var(--text3);letter-spacing:.04em;white-space:nowrap;flex-shrink:0;}
 .cat-tabs{display:flex;gap:6px;flex-wrap:wrap;}
@@ -617,28 +624,30 @@ window.openEditModal=function(){
   openModal('projectModal');
 };
 function createFieldItem(nameVal,noteVal){
-  var wrap=document.createElement('div');wrap.className='field-item-wrap';
+  var wrap=document.createElement('div');wrap.className='field-item-wrap'+(noteVal?' note-open':'');
   var row=document.createElement('div');row.className='field-item';
   var inp=document.createElement('input');inp.className='fi';inp.placeholder='輸入項目名稱';inp.value=nameVal||'';
   var noteBtn=document.createElement('button');noteBtn.type='button';noteBtn.className='note-btn'+(noteVal?' has-note':'');noteBtn.textContent='備註';
-  var rmBtn=document.createElement('button');rmBtn.type='button';rmBtn.className='rm-btn';rmBtn.innerHTML='&#215;';
+  var rmBtn=document.createElement('button');rmBtn.type='button';rmBtn.className='rm-btn';rmBtn.style.cssText='flex-shrink:0;padding:0 8px;';rmBtn.innerHTML='&#215;';
   rmBtn.onclick=function(){wrap.remove();};
-  var noteLabel=document.createElement('div');noteLabel.className='note-field-label';
-  noteLabel.style.cssText='display:none;font-size:10px;color:var(--accent);font-weight:500;letter-spacing:.04em;margin-top:6px;margin-bottom:3px;';
-  function updateNoteLabel(){var n=inp.value.trim()||'此欄位';noteLabel.textContent='「'+n+'」的備註說明';noteArea.placeholder='給協助者關於「'+n+'」的補充說明…';}
-  updateNoteLabel();
-  inp.addEventListener('input',updateNoteLabel);
-  var noteArea=document.createElement('textarea');noteArea.className='note-area'+(noteVal?' open':'');noteArea.rows=2;noteArea.value=noteVal||'';
-  if(noteVal)noteLabel.style.display='block';
+  // Note panel
+  var panel=document.createElement('div');panel.className='note-panel'+(noteVal?' open':'');
+  var panelHeader=document.createElement('div');panelHeader.className='note-panel-header';
+  var noteArea=document.createElement('textarea');noteArea.className='note-area';noteArea.rows=2;noteArea.value=noteVal||'';
+  function updateHeader(){panelHeader.innerHTML='';var dot=document.createElement('span');dot.style.cssText='display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;';var lbl=document.createElement('span');lbl.textContent='「'+(inp.value.trim()||'此欄位')+'」的備註';panelHeader.appendChild(dot);panelHeader.appendChild(lbl);}
+  function updatePlaceholder(){noteArea.placeholder='給協助者關於「'+(inp.value.trim()||'此欄位')+'」的提示說明…';}
+  updateHeader();updatePlaceholder();
+  inp.addEventListener('input',function(){updateHeader();updatePlaceholder();});
+  panel.appendChild(panelHeader);panel.appendChild(noteArea);
   noteBtn.onclick=function(){
-    var open=noteArea.classList.toggle('open');
-    noteLabel.style.display=open?'block':'none';
+    var open=panel.classList.toggle('open');
+    wrap.classList.toggle('note-open',open);
     noteBtn.classList.toggle('has-note',open||noteArea.value.trim()!=='');
-    if(open){updateNoteLabel();noteArea.focus();}
+    if(open){updateHeader();updatePlaceholder();noteArea.focus();}
   };
   noteArea.oninput=function(){noteBtn.classList.toggle('has-note',noteArea.value.trim()!=='');};
   row.appendChild(inp);row.appendChild(noteBtn);row.appendChild(rmBtn);
-  wrap.appendChild(row);wrap.appendChild(noteLabel);wrap.appendChild(noteArea);
+  wrap.appendChild(row);wrap.appendChild(panel);
   return wrap;
 }
 function addCategoryItem(catName,fields){
