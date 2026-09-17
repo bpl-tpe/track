@@ -143,7 +143,7 @@ input[type="date"].fi{min-width:0;width:100%;}
 .modal-foot-space{justify-content:space-between;}
 .fg{margin-bottom:18px;}
 .fl{display:block;font-size:11px;font-weight:500;color:var(--text3);margin-bottom:7px;letter-spacing:.06em;text-transform:uppercase;}
-.fi{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:15px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s,background .15s;}
+.fi{width:100%;max-width:100%;min-width:0;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:16px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s,background .15s;}
 .fi:focus{border-color:var(--accent);background:#fff;}
 .field-list{display:flex;flex-direction:column;gap:8px;}
 .field-item{display:flex;gap:8px;align-items:center;}.field-item .fi{flex:1;}
@@ -336,9 +336,9 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     <div class="modal-title" id="projectModalTitle">新增專案</div>
     <div class="modal-sub">活動資訊與登記項目</div>
     <div class="fg"><label class="fl">活動名稱</label><input class="fi" id="fieldName" placeholder=""></div>
-    <div class="date-row-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="fg"><label class="fl">開始日期</label><input class="fi" type="date" id="fieldStart"></div>
-      <div class="fg"><label class="fl">結束日期</label><input class="fi" type="date" id="fieldEnd"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:4px">
+      <div class="fg" style="flex:1;min-width:180px"><label class="fl">開始日期</label><input class="fi" type="date" id="fieldStart"></div>
+      <div class="fg" style="flex:1;min-width:180px"><label class="fl">結束日期</label><input class="fi" type="date" id="fieldEnd"></div>
     </div>
     <div class="fg">
       <label class="fl">登記類別與項目</label>
