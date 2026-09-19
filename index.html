@@ -315,7 +315,7 @@ function buildCatSection(pid,date,catIndex,catLabel,fields){
     if(note){var noteDiv=document.createElement('div');noteDiv.className='field-card-note';noteDiv.textContent=note;card.appendChild(noteDiv);}
     var spacer=document.createElement('div');spacer.className='field-card-spacer';card.appendChild(spacer);
     var inp=document.createElement('input');
-    inp.type='number';inp.min='0';inp.placeholder='0';
+    inp.type='number';inp.min='0';inp.placeholder='0';inp.inputMode='numeric';
     inp.className='field-card-input';
     inp.id='cf_'+idPfx+'_'+fi;
     if(existing)inp.value=parseInt(existing['f'+fi]||0);
