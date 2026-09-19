@@ -57,8 +57,8 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .ph{margin-bottom:32px;}.ph-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 .ph-title{font-size:21px;font-weight:500;letter-spacing:-.3px;color:var(--text);line-height:1.2;}
 .ph-sub{font-size:13px;color:var(--text3);margin-top:6px;}.ph-line{height:1px;background:var(--line);margin-top:18px;}
-.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-family:inherit;padding:6px 12px;margin-bottom:28px;letter-spacing:.03em;transition:all .18s;box-shadow:0 1px 4px rgba(0,0,0,0.05);}
-.back-btn:hover{border-color:var(--text3);color:var(--text);}.back-btn::before{content:"\2190";font-size:13px;}
+.back-btn{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--text2);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-bottom:28px;letter-spacing:.02em;transition:color .15s;}
+.back-btn:hover{color:var(--text);}.back-btn::before{content:"\2190";font-size:14px;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:400;cursor:pointer;font-family:inherit;line-height:1;transition:all .18s;border:none;padding:9px 20px;border-radius:10px;letter-spacing:.02em;}
 .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 3px 12px rgba(61,126,255,0.28);}.btn-primary:hover{box-shadow:0 5px 18px rgba(61,126,255,0.38);transform:translateY(-1px);}.btn-primary:active{transform:scale(.98);box-shadow:none;}
 .btn-outline{background:var(--surface);color:var(--text);border:1.5px solid var(--line);border-radius:10px;}.btn-outline:hover{border-color:var(--text3);}
@@ -299,7 +299,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 <!-- 編輯者：專案詳情 -->
 <div class="view" id="viewDetail">
   <div class="wrap">
-    <button class="back-btn" onclick="backToEditor()">返回</button>
+    <button class="back-btn" onclick="backToEditor()">返回專案列表</button>
     <div class="ph">
       <div class="ph-row">
         <div>
