@@ -840,7 +840,7 @@ window.onDP=function(e){e.preventDefault();};
       var name=document.getElementById('fieldName').value.trim();
       var start=document.getElementById('fieldStart').value;
       var end=document.getElementById('fieldEnd').value;
-      var categories=Array.from(document.querySelectorAll('#categoryList .category-block')).map(function(block){
+      var _allCats=Array.from(document.querySelectorAll('#categoryList .category-block')).map(function(block){
         var catName=block.querySelector('.cat-name-input').value.trim();
         var fields=Array.from(block.querySelectorAll('.cat-field-list .field-item-wrap')).map(function(wrap){
           var n=(wrap.querySelector('.fi')||{}).value||'';n=n.trim();
@@ -849,7 +849,10 @@ window.onDP=function(e){e.preventDefault();};
           return note?{name:n,note:note}:n;
         }).filter(Boolean);
         return {name:catName,fields:fields};
-      }).filter(function(c){return c.name&&c.fields.length;});
+      }).filter(function(c){return c.name;});
+      var _emptycat=_allCats.find(function(c){return !c.fields.length;});
+      if(_emptycat){toast('類別「'+_emptycat.name+'」尚未新增任何項目，請至少新增一個項目','err');return;}
+      var categories=_allCats;
       var status=document.getElementById('statusToggle').checked?'active':'ended';
       if(!name||!start||!end){toast('請填寫活動名稱與日期','err');return;}
       if(!categories.length){toast('請至少新增一個類別與填報項目','err');return;}
@@ -882,7 +885,9 @@ window.onDP=function(e){e.preventDefault();};
           if(cur.indexOf(id)<0)cur=cur.concat([id]);
           await update(ref(db,'tracker'),{projectOrder:cur});
         }
-        modalDirty=false;closeModal('projectModal');toast('2705 已儲存','ok');
+        modalDirty=false;closeModal('projectModal');
+        var _catList=categories.map(function(c){return c.name;}).join('、');
+        toast((isNew?'已新增專案，類別：':'已更新專案，類別：')+_catList,'ok');
         if(isNew){
           var catSummary=categories.map(function(c){return c.name+'['+c.fields.join('、')+']';}).join('；');
           writeLog('新增專案',name+'｜'+start+'～'+end+'｜狀態:'+(status==='active'?'進行中':'已結束')+'｜類別:'+catSummary);
