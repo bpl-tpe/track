@@ -102,8 +102,6 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 .cat-submit-btn{flex-shrink:0;padding:5px 14px;font-size:12px;font-weight:500;font-family:inherit;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:20px;cursor:pointer;letter-spacing:.02em;box-shadow:0 2px 8px rgba(61,126,255,.22);transition:all .18s;white-space:nowrap;}
 .cat-submit-btn:hover{box-shadow:0 4px 12px rgba(61,126,255,.35);transform:translateY(-1px);}
 .cat-submit-btn:active{transform:scale(.98);box-shadow:none;}
-.cat-submit-btn.done{background:linear-gradient(135deg,var(--success),#22c575);box-shadow:0 2px 8px rgba(22,160,90,.22);}
-.cat-submit-btn.done:hover{box-shadow:0 4px 12px rgba(22,160,90,.35);transform:translateY(-1px);}
 
 @media(max-width:480px){
 .brand-name{display:none;}
@@ -323,7 +321,7 @@ function buildCatSection(pid,date,catIndex,catLabel,fields){
     inp.type='number';inp.min='0';inp.placeholder='0';inp.inputMode='numeric';
     inp.className='field-card-input';
     inp.id='cf_'+idPfx+'_'+fi;
-    if(existing)inp.value=parseInt(existing['f'+fi]||0);
+    if(existing)inp.value=parseInt(existing['f'+fi]!=null?existing['f'+fi]:0);
     inp.addEventListener('input',function(){card.classList.remove('has-error');var hint=card.querySelector('.field-err-hint');if(hint)hint.remove();});
     card.appendChild(inp);
     grid.appendChild(card);

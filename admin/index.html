@@ -555,7 +555,7 @@ function renderTable(p,fields,entries,prefix){
     var entryKey=prefix+d;
     if(tableEditMode){
       var inputCells=rv.map(function(v,i){
-        return '<td><input class="td-input" type="number" min="0" id="edit_'+d+'_'+i+'" value="'+v+'" onblur="saveRowEdit(\''+entryKey+'\')"></td>';
+        return '<td><input class="td-input" type="number" min="0" inputmode="numeric" id="edit_'+d+'_'+i+'" value="'+v+'" onblur="saveRowEdit(\''+entryKey+'\')"></td>';
       }).join('');
       return '<tr><td style="padding-left:16px;font-weight:500;white-space:nowrap">'+formatDate(d)+'</td>'+inputCells+
         '<td style="padding-right:16px"><button class="del-row-btn" onclick="deleteRow(\''+entryKey+'\')" title="刪除此日"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>';
@@ -689,11 +689,14 @@ window.openManualModal=function(date){
   dateEl.max=p.endDate||'';
   var existing=(p.entries&&p.entries[prefix+d])||{};
   document.getElementById('manualFields').innerHTML=fields.map(function(f,i){
-    return '<div class="fg"><label class="fl">'+esc(fname(f))+'</label><input class="fi" type="number" min="0" id="mf_'+i+'" value="'+(parseInt(existing['f'+i]||0)||'')+'"></div>';
+    return '<div class="fg"><label class="fl">'+esc(fname(f))+'</label><input class="fi" type="number" min="0" inputmode="numeric" id="mf_'+i+'" value="'+(existing['f'+i]!=null?parseInt(existing['f'+i]):'')+'"></div>';
   }).join('');
   dateEl.onchange=function(){
-    var nd=this.value,ex=(p.entries&&p.entries[prefix+nd])||{};
-    fields.forEach(function(_,i){var el=document.getElementById('mf_'+i);if(el)el.value=parseInt(ex['f'+i]||0)||'';});
+    var nd=this.value;
+    if(p.startDate&&nd<p.startDate){this.value=p.startDate;nd=p.startDate;toast('只能選擇活動期間（'+p.startDate+'～'+p.endDate+'）的日期','err');}
+    else if(p.endDate&&nd>p.endDate){this.value=p.endDate;nd=p.endDate;toast('只能選擇活動期間（'+p.startDate+'～'+p.endDate+'）的日期','err');}
+    var ex=(p.entries&&p.entries[prefix+nd])||{};
+    fields.forEach(function(_,i){var el=document.getElementById('mf_'+i);if(el)el.value=ex['f'+i]!=null?parseInt(ex['f'+i]):'';});
   };
   openModal('manualModal');
 };
@@ -716,7 +719,6 @@ window.downloadCSV=function(){
     var ct=[];
     p.categories.forEach(function(cat,ci){(cat.fields||[]).forEach(function(_,fi){ct.push(dates.reduce(function(s,d){return s+parseInt((entries['cat'+ci+'_'+d]||{})['f'+fi]||0);},0));});});
     allRows.push(['合計'].concat(ct));
-    var csvFname=p.name+'_數據.csv';
   } else {
     var fields=p.fields||[];
     headerCols=['日期'].concat(fields.map(fname));
@@ -725,8 +727,8 @@ window.downloadCSV=function(){
     allRows=dates.map(function(d){var e=entries[d]||{};return[d].concat(fields.map(function(_,i){return parseInt(e['f'+i]||0);}));});
     var ct=fields.map(function(_,fi){return dates.reduce(function(s,d){return s+parseInt((entries[d]||{})['f'+fi]||0);},0);});
     allRows.push(['合計'].concat(ct));
-    var csvFname=p.name+'_數據.csv';
   }
+  var csvFname=p.name+'_數據.csv';
   var csv=[headerCols].concat(allRows).map(function(r){return r.join(',');}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob);
