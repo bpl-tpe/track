@@ -689,7 +689,7 @@ window.openManualModal=function(date){
   dateEl.max=p.endDate||'';
   var existing=(p.entries&&p.entries[prefix+d])||{};
   document.getElementById('manualFields').innerHTML=fields.map(function(f,i){
-    return '<div class="fg"><label class="fl">'+esc(fname(f))+'</label><input class="fi" type="number" min="0" inputmode="numeric" id="mf_'+i+'" value="'+(existing['f'+i]!=null?parseInt(existing['f'+i]):'')+'"></div>';
+    return '<div class="fg"><label class="fl">'+esc(fname(f))+'</label><input class="fi" type="text" inputmode="numeric" pattern="[0-9]*" id="mf_'+i+'" value="'+(existing['f'+i]!=null?parseInt(existing['f'+i]):'')+'"></div>';
   }).join('');
   dateEl.onchange=function(){
     var nd=this.value;
@@ -931,6 +931,9 @@ window.onDP=function(e){e.preventDefault();};
       var date=document.getElementById('manualDate').value;
       if(!date){toast('請選擇日期','err');return;}
       var p=projects[currentProjectId];
+      if(p.startDate&&date<p.startDate||p.endDate&&date>p.endDate){
+        toast('日期必須在活動期間（'+p.startDate+'～'+p.endDate+'）內','err');return;
+      }
       var prefix=p.categories&&p.categories.length?('cat'+detailCatIndex+'_'):'';
       var fields=p.categories&&p.categories.length?((p.categories[detailCatIndex]||{}).fields||[]):(p.fields||[]);
       var entryKey=prefix+date;
