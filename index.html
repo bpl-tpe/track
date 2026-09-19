@@ -257,8 +257,13 @@ window.backToList=function(){currentProjectId=null;showView('viewList');};
 
 window.onReportDateChange=function(){
   if(!currentProjectId)return;
-  var d=document.getElementById('reportDate').value;
-  if(d)renderCatSections(currentProjectId,d);
+  var el=document.getElementById('reportDate');
+  var d=el.value;
+  if(!d)return;
+  var p=projects[currentProjectId];
+  if(p.startDate&&d<p.startDate){el.value=p.startDate;d=p.startDate;toast('只能選擇活動期間（'+p.startDate+'～'+p.endDate+'）的日期','err');}
+  else if(p.endDate&&d>p.endDate){el.value=p.endDate;d=p.endDate;toast('只能選擇活動期間（'+p.startDate+'～'+p.endDate+'）的日期','err');}
+  renderCatSections(currentProjectId,d);
 };
 
 function renderCatSections(pid,date){
