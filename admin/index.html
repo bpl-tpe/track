@@ -324,11 +324,8 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
         <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
       </div>
     </div>
-    <div id="changelogSection" style="margin-top:32px;margin-bottom:40px">
-      <button onclick="toggleChangelog()" id="changelogToggleBtn" style="display:block;width:100%;text-align:center;font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:8px;letter-spacing:.04em;">
-        ▸ 查看數據變動紀錄
-      </button>
-      <div id="changelogRow" style="display:none;margin-top:8px"></div>
+    <div style="margin-top:32px;margin-bottom:40px;text-align:center">
+      <button onclick="openChangelogModal()" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:8px;letter-spacing:.04em;">數據變動紀錄</button>
     </div>
   </div>
 </div>
@@ -365,6 +362,17 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 </div>
 
 <!-- MODAL: 編輯數據 -->
+<div class="overlay" id="changelogModal">
+  <div class="modal" style="max-height:80vh;display:flex;flex-direction:column">
+    <div class="modal-handle"></div>
+    <div class="modal-title">數據變動紀錄</div>
+    <div id="changelogModalBody" style="overflow-y:auto;flex:1;padding-bottom:8px"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('changelogModal')">關閉</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="manualModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -486,13 +494,7 @@ function renderCatTabs(p){
   }).join('')+'</div></div>';
 }
 window.setDetailCat=function(i){detailCatIndex=i;renderDetail(currentProjectId);};
-window.toggleChangelog=function(){
-  var row=document.getElementById('changelogRow');
-  var btn=document.getElementById('changelogToggleBtn');
-  var open=row.style.display==='none';
-  row.style.display=open?'':'none';
-  btn.textContent=(open?'▾':'▸')+' 查看數據變動紀錄';
-};
+window.openChangelogModal=function(){openModal('changelogModal');};
 
 function renderDetail(id){
   var p=projects[id];if(!p)return;
@@ -521,15 +523,11 @@ function renderDetail(id){
     document.getElementById('periodStatRow').innerHTML=renderPeriodStat(fields,entries);
     renderTable(p,fields,entries,'');
   }
-  var clRow=document.getElementById('changelogRow');
-  if(clRow)clRow.style.display='none';
-  var clBtn=document.getElementById('changelogToggleBtn');
-  if(clBtn)clBtn.textContent='▸ 查看數據變動紀錄';
   renderChangelog(p.changelog||{});
 }
 
 function renderChangelog(changelog){
-  var el=document.getElementById('changelogRow');
+  var el=document.getElementById('changelogModalBody');
   if(!el)return;
   var keys=Object.keys(changelog).sort().reverse();
   if(!keys.length){el.innerHTML='';return;}
@@ -549,7 +547,7 @@ function renderChangelog(changelog){
       return '<div class="cl-item"><div class="cl-time">'+ts+'</div><div><div class="cl-device">'+esc(c.device||'未知裝置')+badge+cat+'</div><div class="cl-changes">'+chgHtml+'</div></div></div>';
     }).join('');
   }
-  el.innerHTML='<div class="changelog-section">'+body+'</div>';
+  el.innerHTML=body;
 }
 
 function renderTable(p,fields,entries,prefix){
