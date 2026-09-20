@@ -213,9 +213,18 @@ function validateSection(fields,idPfx){
 }
 function showView(id){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.getElementById(id).classList.add('active');}
 
+function projDateDist(p,today){
+  var s=p.startDate||'',e=p.endDate||'';
+  if(today>=s&&today<=e)return 0; // active now
+  var ds=Math.abs(new Date(s)-new Date(today));
+  var de=Math.abs(new Date(e)-new Date(today));
+  return Math.min(ds,de);
+}
 function renderList(){
   var el=document.getElementById('listInner');
+  var today=todayStr();
   var active=projectOrder.filter(function(k){return projects[k]&&projects[k].status==='active';});
+  active.sort(function(a,b){return projDateDist(projects[a],today)-projDateDist(projects[b],today);});
   if(!active.length){
     el.innerHTML='<div class="empty"><div class="empty-ico">&#128237;</div><p>目前沒有進行中的活動</p></div>';
     showView('viewList');return;

@@ -427,10 +427,23 @@ window.togglePw=function(id,btn){
   else{el.type='password';btn.innerHTML=eyeOpen;}
 };
 
+function projDateDist(p,today){
+  var s=p.startDate||'',e=p.endDate||'';
+  if(today>=s&&today<=e)return 0;
+  var ds=Math.abs(new Date(s)-new Date(today));
+  var de=Math.abs(new Date(e)-new Date(today));
+  return Math.min(ds,de);
+}
 function renderEditorProjects(){
   var el=document.getElementById('editorGrid');
   if(!projectOrder.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128193;</div><p>尚無專案，點擊「新增」開始</p></div>';return;}
-  el.innerHTML=projectOrder.filter(function(k){return!!projects[k];}).map(function(k){
+  var today=(new Date()).toISOString().slice(0,10);
+  var active=projectOrder.filter(function(k){return projects[k]&&projects[k].status==='active';});
+  var inactive=projectOrder.filter(function(k){return projects[k]&&projects[k].status!=='active';});
+  active.sort(function(a,b){return projDateDist(projects[a],today)-projDateDist(projects[b],today);});
+  inactive.sort(function(a,b){return projDateDist(projects[a],today)-projDateDist(projects[b],today);});
+  var sorted=active.concat(inactive);
+  el.innerHTML=sorted.filter(function(k){return!!projects[k];}).map(function(k){
     var p=projects[k],entries=p.entries||{};
     var on=p.status==='active';
     return '<div class="pcard" draggable="true" data-id="'+k+'"'+
