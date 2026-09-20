@@ -478,11 +478,9 @@ window.toggleEditMode = function() {
 
 function renderPeriodStat(fields,allCatEntries){
   var totals=fields.map(function(_,fi){return Object.values(allCatEntries).reduce(function(s,e){return s+parseInt((e||{})['f'+fi]||0);},0);});
-  var dayCount=Object.keys(allCatEntries).length;
   return '<div class="period-stat-section">'+
     '<div class="period-stat-label">期間統計</div>'+
     '<div class="period-stat-grid">'+
-    '<div class="pscard days-card"><div class="pscard-n">'+dayCount+'</div><div class="pscard-l">天有回報</div></div>'+
     fields.map(function(f,i){return '<div class="pscard"><div class="pscard-n">'+totals[i].toLocaleString()+'</div><div class="pscard-l">'+esc(fname(f))+'</div></div>';}).join('')+
     '</div></div>';
 }
