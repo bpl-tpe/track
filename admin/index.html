@@ -853,7 +853,6 @@ window.doLogin=async function(){
       document.getElementById('userInfo').style.display='flex';
       document.getElementById('userName').textContent=displayName;
       setSyncStatus('syncing','連線中...');
-      remove(ref(db,'tracker/logs')).catch(function(){});
       onValue(ref(db,'tracker'),function(snap){
         var d=snap.val()||{};
         projects=d.projects||{};
