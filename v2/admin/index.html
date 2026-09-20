@@ -214,9 +214,11 @@ tr:hover td{background:var(--bg);}
 .td-num{font-family:var(--mono);font-size:13px;color:var(--text);text-align:right;}
 td input.edit-input{
   font-family:var(--mono);font-size:13px;color:var(--amber);
-  background:var(--amber-pale);border:1px solid var(--amber-mid);
-  border-radius:5px;padding:4px 6px;width:80px;text-align:right;outline:none;
+  background:transparent;border:none;border-bottom:1.5px solid var(--amber-mid);
+  border-radius:0;padding:3px 2px;width:72px;text-align:right;outline:none;
 }
+td input.edit-input:focus{border-bottom-color:var(--amber);}
+td input.edit-input[type="date"]{width:auto;min-width:100px;}
 .new-row td{background:var(--amber-pale);}
 .td-del{
   color:var(--text3);cursor:pointer;padding:3px;display:inline-flex;
@@ -264,8 +266,8 @@ tr.total-row td{background:var(--bg2);font-family:var(--mono);font-weight:500;co
   outline:none;transition:border-color .15s;
 }
 .form-group input:focus,.form-group select:focus{border-color:var(--amber);}
-.form-row{display:flex;gap:10px;}
-.form-row .form-group{flex:1;}
+.form-row{display:flex;gap:10px;flex-wrap:wrap;}
+.form-row .form-group{flex:1;min-width:140px;}
 
 /* Category builder */
 .cat-builder{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px;}
@@ -446,7 +448,7 @@ tr.total-row td{background:var(--bg2);font-family:var(--mono);font-weight:500;co
             <svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span class="btn-label">CSV</span>
           </button>
-          <button class="btn" onclick="openProjectModal(curProject)" title="編輯專案">
+          <button class="btn" onclick="openEditProjectModal()" title="編輯專案">
             <svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span class="btn-label">編輯</span>
           </button>
@@ -558,6 +560,7 @@ let projects={},curPid=null,curProject=null,detailCatIndex=0;
 let tableSort={field:'date',asc:false},tableEditMode=false,projectOrder=[],logUnsubscribe=null;
 
 window.closeModal=function(id){document.getElementById(id).style.display='none';};
+window.openEditProjectModal=function(){openProjectModal(curProject);};
 function fname(f){return typeof f==='string'?f:f.name;}
 function fnote(f){return typeof f==='string'?'':f.note||'';}
 function toast(msg,type='',dur=2400){
@@ -756,7 +759,7 @@ function renderTable(container,fields,entries,prefix){
   }
   if(tableEditMode){
     const nr=document.createElement('tr');nr.className='new-row';nr.id='newRow';
-    let ntd=`<td><input class="edit-input" id="newDate" type="date" style="width:130px;" min="${curProject.startDate||''}" max="${curProject.endDate||''}"></td>`;
+    let ntd=`<td><input class="edit-input" id="newDate" type="date" min="${curProject.startDate||''}" max="${curProject.endDate||''}"></td>`;
     fields.forEach((f,fi)=>{ntd+=`<td class="td-num"><input class="edit-input" id="newF${fi}" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0"></td>`;});
     ntd+='<td></td>';nr.innerHTML=ntd;tbody.appendChild(nr);
   }
