@@ -634,10 +634,18 @@ window.openDetail=function(id){
   tableSort='asc'; tableEditMode=false;
   var btn=document.getElementById('editDataBtn');
   btn.innerHTML=SVG_PENCIL+'<span style="margin-left:4px">編輯</span>'; btn.classList.remove('editing');
+  history.pushState({view:'detail',id:id},'',location.pathname+'?p='+id);
   showView('viewDetail');
   renderDetail(id);
 };
-window.backToEditor=function(){currentProjectId=null;showView('viewEditor');renderEditorProjects();};
+window.backToEditor=function(){currentProjectId=null;history.replaceState({view:'editor'},'',location.pathname);showView('viewEditor');renderEditorProjects();};
+window.addEventListener('popstate',function(e){
+  if(e.state&&e.state.view==='detail'){
+    window.openDetail(e.state.id);
+  } else {
+    currentProjectId=null;showView('viewEditor');renderEditorProjects();
+  }
+});
 window.openNewProjectModal=function(){
   editingProjectId=null;modalDirty=false;
   document.getElementById('projectModalTitle').textContent='新增活動';
