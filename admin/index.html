@@ -194,18 +194,6 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
 @media(min-width:600px){.overlay{align-items:center;padding:20px;}.modal{border-radius:16px;border:1px solid var(--line);}}
 .offline-banner{background:var(--danger);color:#fff;text-align:center;font-size:12px;padding:8px 20px;letter-spacing:.02em;display:none;}
 .offline-banner.show{display:block;}
-.log-item{display:flex;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line-light);font-size:12px;flex-wrap:wrap;}
-.log-ts{font-size:11px;color:var(--text3);flex-shrink:0;white-space:nowrap;min-width:72px;}
-.log-who{color:var(--accent);flex-shrink:0;font-weight:500;}
-.log-action{color:var(--text);font-weight:500;flex-shrink:0;}
-.log-detail{color:var(--text3);font-size:11px;flex-basis:100%;padding-left:82px;margin-top:-4px;line-height:1.5;}
-.log-tag{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;letter-spacing:.03em;}
-.log-tag-add{background:var(--success-pale);color:var(--success);}
-.log-tag-edit{background:var(--accent-pale);color:var(--accent);}
-.log-tag-del{background:var(--danger-pale);color:var(--danger);}
-.log-tag-overwrite{background:var(--danger-pale);color:var(--danger);font-weight:600;}
-.log-tag-sys{background:var(--line);color:var(--text3);}
-.log-who-helper{color:var(--success);flex-shrink:0;font-weight:500;}
 @media(max-width:480px){
 /* Topbar */
 .brand-name{display:none;}
@@ -286,7 +274,6 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
       <div class="ph-row">
         <div class="ph-title">專案</div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-ghost btn-sm" onclick="openLogModal()">操作記錄</button>
           <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增專案</button>
         </div>
       </div>
@@ -376,16 +363,6 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
   </div>
 </div>
 
-<div class="overlay" id="logModal">
-  <div class="modal" style="max-height:80vh;display:flex;flex-direction:column">
-    <div class="modal-handle"></div>
-    <div class="modal-title">操作記錄</div>
-    <div id="logList" style="overflow-y:auto;flex:1;padding-bottom:8px"></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('logModal')">關閉</button>
-    </div>
-  </div>
-</div>
 
 <div class="toast-wrap" id="toastWrap"></div>
 
@@ -732,7 +709,6 @@ window.downloadCSV=function(){
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download=csvFname;a.click();URL.revokeObjectURL(url);
 };
-window.openLogModal=function(){openModal('logModal');};
 
 window.onDS=function(e){dragSrcEl=e.currentTarget;dragSrcEl.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dragSrcEl.dataset.id);};
 window.onDO=function(e){e.preventDefault();e.currentTarget.classList.add('drag-over');};
@@ -769,13 +745,7 @@ window.onDP=function(e){e.preventDefault();};
     // Service Worker
     if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});
 
-    function writeLog(action,detail){
-      var user=auth.currentUser;if(!user)return;
-      var t=Date.now();
-      set(ref(db,'tracker/logs/'+t),{t:t,u:user.email.replace(DOMAIN,''),a:action,d:detail||''}).catch(function(){});
-    }
-
-    window.doLogin=async function(){
+window.doLogin=async function(){
       var user=document.getElementById('loginUser').value.trim();
       var pass=document.getElementById('loginPass').value;
       var errEl=document.getElementById('loginError');
@@ -805,6 +775,7 @@ window.onDP=function(e){e.preventDefault();};
       document.getElementById('userInfo').style.display='flex';
       document.getElementById('userName').textContent=displayName;
       setSyncStatus('syncing','連線中...');
+      remove(ref(db,'tracker/logs')).catch(function(){});
       onValue(ref(db,'tracker'),function(snap){
         var d=snap.val()||{};
         projects=d.projects||{};
@@ -818,22 +789,6 @@ window.onDP=function(e){e.preventDefault();};
         refreshView();
       },function(err){setSyncStatus('error','連線失敗');});
 
-      onValue(query(ref(db,'tracker/logs'),limitToLast(200)),function(snap){
-        var logs=snap.val()||{};
-        var keys=Object.keys(logs).sort().reverse();
-        var el=document.getElementById('logList');
-        if(!keys.length){el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:16px 0;text-align:center">尚無記錄</div>';return;}
-        el.innerHTML=keys.map(function(k){
-          var l=logs[k],dt=new Date(parseInt(k));
-          var ts=(dt.getMonth()+1)+'/'+(dt.getDate())+' '+dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
-          var a=l.a||'';
-          var tagClass=a==='覆蓋填報'?'log-tag-overwrite':a.indexOf('填報')>=0||a.indexOf('新增')>=0?'log-tag-add':a.indexOf('刪除')>=0?'log-tag-del':a.indexOf('系統')>=0?'log-tag-sys':'log-tag-edit';
-          var tag='<span class="log-tag '+tagClass+'">'+esc(a)+'</span>';
-          var detail=l.d?'<div class="log-detail">'+esc(l.d)+'</div>':'';
-          var whoClass=l.u==='協助者'?'log-who-helper':'log-who';
-          return '<div class="log-item"><span class="log-ts">'+ts+'</span><span class="'+whoClass+'">'+esc(l.u||'?')+'</span>'+tag+detail+'</div>';
-        }).join('');
-      },function(){});
     });
 
     window.saveProject=async function(){
@@ -888,19 +843,6 @@ window.onDP=function(e){e.preventDefault();};
         modalDirty=false;closeModal('projectModal');
         var _catList=categories.map(function(c){return c.name;}).join('、');
         toast((isNew?'已新增專案，類別：':'已更新專案，類別：')+_catList,'ok');
-        if(isNew){
-          var catSummary=categories.map(function(c){return c.name+'['+c.fields.join('、')+']';}).join('；');
-          writeLog('新增專案',name+'｜'+start+'～'+end+'｜狀態:'+(status==='active'?'進行中':'已結束')+'｜類別:'+catSummary);
-        }else{
-          var _chg=[];
-          if(_old&&_old.name!==name)_chg.push('名稱:'+_old.name+'→'+name);
-          if(_old&&(_old.startDate!==start||_old.endDate!==end))_chg.push('日期:'+_old.startDate+'～'+_old.endDate+'→'+start+'～'+end);
-          var _os=_old?(_old.status||'active'):'active';
-          if(_os!==status)_chg.push('狀態:'+(_os==='active'?'進行中':'已結束')+'→'+(status==='active'?'進行中':'已結束'));
-          var _oc=JSON.stringify(_old?(_old.categories||_old.fields||[]):''),_nc=JSON.stringify(categories);
-          if(_oc!==_nc)_chg.push('類別/項目已變更');
-          writeLog('編輯專案',name+(_chg.length?'｜'+_chg.join('｜'):'（無異動）'));
-        }
       }catch(e){toast('儲存失敗：'+e.message,'err');setSyncStatus('error','儲存失敗');}
     };
 
@@ -921,7 +863,6 @@ window.onDP=function(e){e.preventDefault();};
         showView('viewEditor');
         renderEditorProjects();
         toast('專案已刪除');
-        writeLog('刪除專案',p?p.name:editingProjectId);
       }catch(e){toast('刪除失敗：'+e.message,'err');}
     };
 
@@ -939,9 +880,6 @@ window.onDP=function(e){e.preventDefault();};
       fields.forEach(function(_,i){obj['f'+i]=parseInt(document.getElementById('mf_'+i).value)||0;});
       try{
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey),obj);
-        var p2=projects[currentProjectId];
-        var vals=fields.map(function(f,i){return fname(f)+':'+obj['f'+i];}).join('、');
-        writeLog('手動新增數據',date+' @ '+p2.name+'｜'+vals);
         closeModal('manualModal');toast('\u2705 數據已儲存','ok');
       }catch(e){toast('儲存失敗：'+e.message,'err');}
     };
@@ -959,11 +897,6 @@ window.onDP=function(e){e.preventDefault();};
       });
       try{
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey),obj);
-        var chg=fields.map(function(f,i){
-          var ov=parseInt(oldEntry['f'+i]||0),nv=obj['f'+i];
-          return ov!==nv?fname(f)+':'+ov+'→'+nv:null;
-        }).filter(Boolean);
-        writeLog('編輯數據',dateStr+' @ '+p.name+'｜'+(chg.length?chg.join('、'):'（無異動）'));
       }
       catch(e){toast('儲存失敗：'+e.message,'err');}
     };
@@ -974,7 +907,6 @@ window.onDP=function(e){e.preventDefault();};
       if(!confirm(dateStr+' 的數據確定刪除？'))return;
       try{
         await remove(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey));
-        writeLog('刪除數據',dateStr+' @ '+(projects[currentProjectId]?projects[currentProjectId].name:currentProjectId));
         toast('已刪除 '+dateStr);
       }catch(e){toast('刪除失敗：'+e.message,'err');}
     };
@@ -997,9 +929,6 @@ window.onDP=function(e){e.preventDefault();};
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey),obj);
         dateEl.value='';
         fields.forEach(function(_,i){var el=document.getElementById('newRowVal_'+i);if(el)el.value='';});
-        var pn=projects[currentProjectId];
-        var vals2=fields.map(function(f,i){return fname(f)+':'+obj['f'+i];}).join('、');
-        writeLog('新增數據',d+' @ '+pn.name+'｜'+vals2);
         toast('\u2705 已新增 '+d,'ok');
       }catch(e){toast('新增失敗：'+e.message,'err');}
     };
