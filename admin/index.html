@@ -516,18 +516,23 @@ function renderChangelog(changelog){
   if(!el)return;
   var keys=Object.keys(changelog).sort().reverse();
   if(!keys.length){el.innerHTML='';return;}
-  var rows=keys.map(function(k){
-    var c=changelog[k];
-    var dt=new Date(parseInt(k));
-    var ts=(dt.getMonth()+1)+'/'+(dt.getDate())+' '+dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
-    var badge=c.overwrite?'<span class="cl-badge">覆蓋</span>':'';
-    var cat=c.cat?'<span style="color:var(--text3);font-size:11px;margin-left:4px">· '+esc(c.cat)+'</span>':'';
-    var chgHtml=(c.changes||[]).map(function(ch){
-      return '<span style="color:var(--text3)">'+esc(ch.label)+'</span> <span class="cl-arrow">'+ch.from+'→</span><strong style="color:var(--text)">'+ch.to+'</strong>';
-    }).join('　');
-    return '<div class="cl-item"><div class="cl-time">'+ts+'</div><div><div class="cl-device">'+esc(c.device||'未知裝置')+badge+cat+'</div><div class="cl-changes">'+chgHtml+'</div></div></div>';
-  }).join('');
-  el.innerHTML='<div class="changelog-section"><div class="changelog-header">數據變動紀錄</div>'+rows+'</div>';
+  var body;
+  if(!keys.length){
+    body='<div style="padding:24px 18px;text-align:center;color:var(--text3);font-size:12px">尚無變動紀錄（上線後的填報才會記錄）</div>';
+  } else {
+    body=keys.map(function(k){
+      var c=changelog[k];
+      var dt=new Date(parseInt(k));
+      var ts=(dt.getMonth()+1)+'/'+(dt.getDate())+' '+dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
+      var badge=c.overwrite?'<span class="cl-badge">覆蓋</span>':'';
+      var cat=c.cat?'<span style="color:var(--text3);font-size:11px;margin-left:5px">· '+esc(c.cat)+'</span>':'';
+      var chgHtml=(c.changes||[]).map(function(ch){
+        return '<span style="color:var(--text3)">'+esc(ch.label)+'</span> <span class="cl-arrow">'+ch.from+'→</span><strong style="color:var(--text)">'+ch.to+'</strong>';
+      }).join('　');
+      return '<div class="cl-item"><div class="cl-time">'+ts+'</div><div><div class="cl-device">'+esc(c.device||'未知裝置')+badge+cat+'</div><div class="cl-changes">'+chgHtml+'</div></div></div>';
+    }).join('');
+  }
+  el.innerHTML='<div class="changelog-section"><div class="changelog-header">數據變動紀錄</div>'+body+'</div>';
 }
 
 function renderTable(p,fields,entries,prefix){

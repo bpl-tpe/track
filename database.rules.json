@@ -9,14 +9,16 @@
             "$date": {
               ".write": true
             }
+          },
+          "changelog": {
+            "$entry": {
+              ".write": true
+            }
           }
         }
       },
       "projectOrder": {
         ".write": "auth != null"
-      },
-      "logs": {
-        ".write": true
       }
     }
   }
