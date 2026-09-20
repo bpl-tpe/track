@@ -59,6 +59,12 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
   outline:none;transition:border-color .15s;margin-bottom:14px;
 }
 .login-card input:focus{border-color:var(--amber);}
+.pw-wrap{position:relative;margin-bottom:14px;}
+.pw-wrap input{margin-bottom:0;}
+.pw-toggle{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:14px;color:var(--text3);padding:4px;
+}
 .btn-login{
   width:100%;padding:13px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
   text-transform:uppercase;color:#fff;background:var(--text);border:none;
@@ -139,11 +145,14 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .pi-badge.ended{background:var(--bg);color:var(--text3);border:1px solid var(--line);}
 .sidebar-footer{
   padding:10px 12px;border-top:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;flex-direction:column;gap:6px;
 }
+.sidebar-footer-row{display:flex;align-items:center;justify-content:space-between;}
 .user-info{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.06em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .btn-logout{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--text3);background:none;border:none;cursor:pointer;text-transform:uppercase;padding:6px 0;}
 .btn-logout:hover{color:var(--red);}
+.sidebar-helper-link{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--teal);background:none;border:none;cursor:pointer;text-align:left;padding:0;text-decoration:none;display:block;}
+.sidebar-helper-link:hover{text-decoration:underline;}
 
 /* Main area */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
@@ -208,6 +217,7 @@ td input.edit-input{
 .new-row td{background:var(--amber-pale);}
 .td-del{color:var(--text3);cursor:pointer;font-size:15px;padding:2px 4px;}
 .td-del:hover{color:var(--red);}
+tr.total-row td{background:var(--bg2);font-family:var(--mono);font-weight:500;color:var(--text);border-top:2px solid var(--line);}
 
 /* Modal */
 .modal-overlay{
@@ -288,7 +298,15 @@ td input.edit-input{
 .log-item{padding:10px 0;border-bottom:1px solid var(--line-light);display:flex;align-items:flex-start;gap:12px;}
 .log-item:last-child{border-bottom:none;}
 .log-time{font-family:var(--mono);font-size:9px;color:var(--text3);white-space:nowrap;padding-top:2px;}
+.log-body{flex:1;min-width:0;}
+.log-action-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .log-action{font-size:13px;color:var(--text2);}
+.log-tag{font-family:var(--mono);font-size:8px;letter-spacing:.06em;padding:2px 6px;border-radius:4px;}
+.log-tag-add{background:var(--teal-pale);color:var(--teal);}
+.log-tag-edit{background:var(--amber-pale);color:var(--amber);}
+.log-tag-del{background:var(--red-pale);color:var(--red);}
+.log-tag-sys{background:var(--bg2);color:var(--text3);}
+.log-who{font-family:var(--mono);font-size:9px;color:#1A6AB5;background:#EAF2FF;padding:1px 6px;border-radius:4px;}
 .log-detail{font-size:11px;color:var(--text3);margin-top:2px;}
 
 /* Toast */
@@ -340,7 +358,10 @@ td input.edit-input{
       <div style="padding:11px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:0 8px 8px 0;font-family:var(--mono);font-size:12px;color:var(--text3);white-space:nowrap;">@bpl.com</div>
     </div>
     <label class="lbl" for="loginPass">密碼</label>
-    <input id="loginPass" type="password" placeholder="••••••••">
+    <div class="pw-wrap">
+      <input id="loginPass" type="password" placeholder="••••••••">
+      <button class="pw-toggle" type="button" onclick="togglePw()" title="顯示/隱藏密碼">👁</button>
+    </div>
     <button class="btn-login" onclick="doLogin()">登入</button>
     <div class="login-err" id="loginErr"></div>
   </div>
@@ -376,8 +397,11 @@ td input.edit-input{
     </div>
     <div class="project-list" id="projectList"></div>
     <div class="sidebar-footer">
-      <div class="user-info" id="userEmail">—</div>
-      <button class="btn-logout" onclick="doLogout()">登出</button>
+      <div class="sidebar-footer-row">
+        <div class="user-info" id="userEmail">—</div>
+        <button class="btn-logout" onclick="doLogout()">登出</button>
+      </div>
+      <a class="sidebar-helper-link" href="/v2/" title="前往協助者頁面">← 協助者頁面</a>
     </div>
   </div>
 
@@ -410,15 +434,15 @@ td input.edit-input{
 <div class="toast-wrap" id="toastWrap"></div>
 
 <!-- Project modal -->
-<div class="modal-overlay" id="projectModal" style="display:none;" onclick="if(event.target===this)window.closeModal('projectModal')">
+<div class="modal-overlay" id="projectModal" style="display:none;" onclick="if(event.target===this)tryCloseProjectModal()">
   <div class="modal">
     <div class="modal-head">
       <div class="modal-title" id="projectModalTitle">新增專案</div>
-      <div class="modal-close" onclick="window.closeModal('projectModal')">×</div>
+      <div class="modal-close" onclick="tryCloseProjectModal()">×</div>
     </div>
     <div class="modal-body" id="projectModalBody"></div>
     <div class="modal-footer">
-      <button class="btn" onclick="window.closeModal('projectModal')">取消</button>
+      <button class="btn" onclick="tryCloseProjectModal()">取消</button>
       <button class="btn primary" onclick="saveProject()">儲存</button>
     </div>
   </div>
@@ -451,7 +475,7 @@ td input.edit-input{
 </div>
 
 <script>
-/* ─── Sidebar toggle (must be global for onclick) ─── */
+/* ─── Sidebar & password toggle (must be global for onclick) ─── */
 function toggleSidebar(){
   const s=document.getElementById('sidebar');
   const o=document.getElementById('sidebarOverlay');
@@ -462,12 +486,16 @@ function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').classList.remove('open');
 }
+function togglePw(){
+  const i=document.getElementById('loginPass');
+  i.type=i.type==='password'?'text':'password';
+}
 </script>
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getDatabase,ref,onValue,set,remove,push,get}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import{getDatabase,ref,onValue,set,update,remove,push,get,query,limitToLast,orderByKey}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const FB={
   apiKey:'AIzaSyBFucVUrmJ0eslklp1QZMwLj2JCU05wTIQ',
@@ -490,8 +518,9 @@ let detailCatIndex=0;
 let tableSort={field:'date',asc:false};
 let tableEditMode=false;
 let projectOrder=[];
+let logUnsubscribe=null;
 
-/* ── Global helpers (accessible from onclick) ─────── */
+/* ── Global helpers ─────────────────────────────── */
 window.closeModal=function(id){document.getElementById(id).style.display='none';};
 function fname(f){return typeof f==='string'?f:f.name;}
 function fnote(f){return typeof f==='string'?'':f.note||'';}
@@ -504,11 +533,11 @@ function toast(msg,type='',dur=2400){
 }
 function fmtDate(s){if(!s)return'—';const[y,m,d]=s.split('-');return`${parseInt(m)}月${parseInt(d)}日`;}
 function fmtDateFull(s){if(!s)return'—';const[y,m,d]=s.split('-');return`${y}/${m}/${d}`;}
-function writeLog(action,detail){
-  push(ref(db,'tracker/logs'),{t:Date.now(),u:auth.currentUser?.email||'admin(v2)',a:action,d:detail});
+function writeLog(action,detail,tag='sys'){
+  push(ref(db,'tracker/logs'),{t:Date.now(),u:auth.currentUser?.email||'admin(v2)',a:action,d:detail,tag});
 }
 
-/* ── Auth ─────────────────────────────────────────── */
+/* ── Auth ────────────────────────────────────────── */
 window.doLogin=async function(){
   const u=document.getElementById('loginUser').value.trim();
   const p=document.getElementById('loginPass').value;
@@ -535,8 +564,12 @@ onAuthStateChanged(auth,user=>{
 
 /* ── Projects ─────────────────────────────────────── */
 function loadProjects(){
-  onValue(ref(db,'tracker/projects'),snap=>{
-    projects=snap.val()||{};
+  onValue(ref(db,'tracker'),snap=>{
+    const data=snap.val()||{};
+    projects=data.projects||{};
+    if(data.projectOrder&&Array.isArray(data.projectOrder)){
+      projectOrder=data.projectOrder;
+    }
     renderProjectList();
     if(curPid&&projects[curPid])showDetail(curPid);
     else if(curPid&&!projects[curPid]){
@@ -545,6 +578,11 @@ function loadProjects(){
       document.getElementById('mainDetail').style.display='none';
     }
   });
+}
+
+function saveProjectOrder(){
+  const cur=projectOrder.filter(k=>projects[k]);
+  update(ref(db,'tracker'),{projectOrder:cur});
 }
 
 function renderProjectList(){
@@ -581,6 +619,7 @@ function renderProjectList(){
       if(fi<0||ti<0)return;
       projectOrder.splice(fi,1);projectOrder.splice(ti,0,from);
       renderProjectList();
+      saveProjectOrder();
     });
     list.appendChild(div);
   });
@@ -605,7 +644,6 @@ function renderDetail(){
   const body=document.getElementById('mainBody');
   body.innerHTML='';
 
-  // Category tabs
   const tabsDiv=document.createElement('div');tabsDiv.className='cat-tabs';
   cats.forEach((cat,i)=>{
     const t=document.createElement('div');
@@ -623,7 +661,6 @@ function renderDetail(){
 
   renderStat(body,fields,entries);
 
-  // Table toolbar
   const toolbar=document.createElement('div');toolbar.className='table-toolbar';
   toolbar.innerHTML=`
     <div style="font-family:var(--mono);font-size:10px;color:var(--text3);">共 ${Object.keys(entries).length} 筆</div>
@@ -645,7 +682,7 @@ function renderStat(container,fields,entries){
   fields.forEach((f,fi)=>{
     let total=0;Object.values(entries).forEach(e=>{const v=e[`f${fi}`];if(v!=null&&!isNaN(+v))total+=+v;});
     const c=document.createElement('div');c.className='stat-card';
-    c.innerHTML=`<div class="stat-label">${fname(f)}</div><div class="stat-num">${total.toLocaleString()}</div><div class="stat-unit">人次累計</div>`;
+    c.innerHTML=`<div class="stat-label">${fname(f)}</div><div class="stat-num">${total.toLocaleString()}</div><div class="stat-unit">累計</div>`;
     grid.appendChild(c);
   });
   container.appendChild(grid);
@@ -687,6 +724,18 @@ function renderTable(container,fields,entries,prefix){
     tr.innerHTML=td;tbody.appendChild(tr);
   });
 
+  // Total row
+  if(rows.length>0){
+    const totals=fields.map((f,fi)=>{
+      let s=0;rows.forEach(r=>{const v=r.data[`f${fi}`];if(v!=null&&!isNaN(+v))s+=+v;});return s;
+    });
+    const tr=document.createElement('tr');tr.className='total-row';
+    let td=`<td>合計</td>`;
+    totals.forEach(t=>{td+=`<td class="td-num">${t.toLocaleString()}</td>`;});
+    if(tableEditMode)td+='<td></td>';
+    tr.innerHTML=td;tbody.appendChild(tr);
+  }
+
   // New row
   if(tableEditMode){
     const nr=document.createElement('tr');nr.className='new-row';nr.id='newRow';
@@ -696,7 +745,6 @@ function renderTable(container,fields,entries,prefix){
   }
   table.appendChild(tbody);wrap.appendChild(table);container.appendChild(wrap);
 
-  // Edit blur save
   if(tableEditMode){
     wrap.querySelectorAll('.edit-input[data-key]').forEach(inp=>inp.addEventListener('blur',()=>window.saveRowEdit(inp)));
     wrap.querySelectorAll('.td-del[data-key]').forEach(s=>s.addEventListener('click',()=>window.deleteRow(s.dataset.key,s.dataset.date)));
@@ -704,15 +752,18 @@ function renderTable(container,fields,entries,prefix){
 }
 
 window.saveRowEdit=async function(inp){
-  const v=inp.value.trim();if(!v)return;
+  const v=inp.value.trim();if(v==='')return;
   if(isNaN(+v)||+v<0||!Number.isInteger(+v)){toast('請輸入有效整數','err');return;}
+  const oldSnap=await get(ref(db,`tracker/projects/${curPid}/entries/${inp.dataset.key}/f${inp.dataset.fi}`));
+  const oldV=oldSnap.val();
+  if(String(oldV)===v)return;
   await set(ref(db,`tracker/projects/${curPid}/entries/${inp.dataset.key}/f${inp.dataset.fi}`),+v);
-  writeLog('編輯數值',`${inp.dataset.key} f${inp.dataset.fi}=${v}`);
+  writeLog('編輯數值',`${inp.dataset.key} f${inp.dataset.fi}: ${oldV}→${v}`,'edit');
 };
 window.deleteRow=async function(key,date){
   if(!confirm(`確定刪除 ${fmtDate(date)} 的資料？`))return;
   await remove(ref(db,`tracker/projects/${curPid}/entries/${key}`));
-  writeLog('刪除列',key);toast('已刪除','ok');
+  writeLog('刪除列',key,'del');toast('已刪除','ok');
 };
 window.addNewRow=async function(){
   const d=document.getElementById('newDate')?.value;
@@ -720,16 +771,16 @@ window.addNewRow=async function(){
   if(curProject.startDate&&d<curProject.startDate||curProject.endDate&&d>curProject.endDate){toast('日期不在活動期間','err');return;}
   const prefix=`cat${detailCatIndex}_`;const key=`${prefix}${d}`;
   const fields=(curProject.categories||[])[detailCatIndex]?.fields||[];
+  const existing=(await get(ref(db,`tracker/projects/${curPid}/entries/${key}`))).val();
+  if(existing){toast(`${fmtDate(d)} 已有資料，請直接在表格中修改`,'err');return;}
   const data={};let any=false;
   fields.forEach((f,fi)=>{
     const v=document.getElementById(`newF${fi}`)?.value.trim();
     if(v!==''&&!isNaN(+v)&&+v>=0){data[`f${fi}`]=+v;any=true;}
   });
   if(!any){toast('請至少填寫一個欄位','err');return;}
-  const existing=(await get(ref(db,`tracker/projects/${curPid}/entries/${key}`))).val();
-  if(existing&&!confirm(`${fmtDate(d)} 已有資料，確定覆蓋？`))return;
   await set(ref(db,`tracker/projects/${curPid}/entries/${key}`),data);
-  writeLog('手動新增列',key);toast('已儲存','ok');
+  writeLog('新增列',key,'add');toast('已儲存','ok');
 };
 
 /* ── Manual modal ─────────────────────────────────── */
@@ -738,7 +789,7 @@ window.openManualModal=function(){
   if(!curProject)return;manualCatIndex=0;renderManualModal();
   document.getElementById('manualModal').style.display='flex';
 };
-function renderManualModal(){
+async function renderManualModal(){
   const cats=curProject.categories||[];
   const body=document.getElementById('manualModalBody');body.innerHTML='';
   const tabs=document.createElement('div');tabs.className='manual-cat-tabs';
@@ -750,14 +801,31 @@ function renderManualModal(){
   });
   body.appendChild(tabs);
   const cat=cats[manualCatIndex]||{fields:[]};
+  const today=new Date().toISOString().slice(0,10);
   const fg=document.createElement('div');fg.className='form-group';
-  fg.innerHTML=`<label>日期</label><input type="date" id="manDate" value="${new Date().toISOString().slice(0,10)}" min="${curProject.startDate||''}" max="${curProject.endDate||''}">`;
+  fg.innerHTML=`<label>日期</label><input type="date" id="manDate" value="${today}" min="${curProject.startDate||''}" max="${curProject.endDate||''}">`;
   body.appendChild(fg);
+
+  // Load existing values for today
+  await loadManualValues(today,cat,body);
+
+  document.getElementById('manDate').addEventListener('change',async function(){
+    await loadManualValues(this.value,cat,body);
+  });
+}
+async function loadManualValues(date,cat,body){
+  const prefix=`cat${manualCatIndex}_`;
+  const key=`${prefix}${date}`;
+  const snap=await get(ref(db,`tracker/projects/${curPid}/entries/${key}`));
+  const existing=snap.val()||{};
+  // Remove old field rows before re-rendering
+  body.querySelectorAll('.manual-field-row').forEach(el=>el.remove());
   (cat.fields||[]).forEach((f,fi)=>{
     const row=document.createElement('div');row.className='manual-field-row';
+    const existVal=existing[`f${fi}`]!=null?existing[`f${fi}`]:'';
     row.innerHTML=`
       <div class="manual-field-label">${fname(f)}${fnote(f)?`<div class="manual-field-note">${fnote(f)}</div>`:''}</div>
-      <input class="manual-field-input" id="manF${fi}" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="—">
+      <input class="manual-field-input" id="manF${fi}" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="—" value="${existVal}">
     `;body.appendChild(row);
   });
 }
@@ -775,32 +843,36 @@ window.saveManual=async function(){
     data[`f${fi}`]=+v;any=true;
   }
   if(!any){toast('請至少填寫一個欄位','err');return;}
-  const existing=(await get(ref(db,`tracker/projects/${curPid}/entries/${key}`))).val();
-  if(existing&&!confirm(`${fmtDate(d)} 已有資料，確定覆蓋？`))return;
   await set(ref(db,`tracker/projects/${curPid}/entries/${key}`),data);
-  writeLog('手動填報',`${key} by admin`);toast('已儲存','ok');window.closeModal('manualModal');
+  writeLog('手動填報',`${key}`,'add');toast('已儲存','ok');window.closeModal('manualModal');
 };
 
 /* ── Project modal ────────────────────────────────── */
-let editingPid=null,modalCats=[];
+let editingPid=null,modalCats=[],modalDirty=false;
+window.tryCloseProjectModal=function(){
+  if(modalDirty&&!confirm('設定尚未儲存，確定要關閉嗎？'))return;
+  modalDirty=false;
+  window.closeModal('projectModal');
+};
 window.openProjectModal=function(p){
-  editingPid=p?curPid:null;
+  editingPid=p?curPid:null;modalDirty=false;
   document.getElementById('projectModalTitle').textContent=p?'編輯專案':'新增專案';
   modalCats=p?(p.categories||[]).map(c=>({name:c.name,fields:(c.fields||[]).map(f=>typeof f==='string'?{name:f,note:''}:{name:f.name,note:f.note||''})}))
     :[{name:'人流回報',fields:[{name:'',note:''}]}];
   renderProjectModalBody(p);
   document.getElementById('projectModal').style.display='flex';
 };
+function markDirty(){modalDirty=true;}
 function renderProjectModalBody(p){
   const today=new Date().toISOString().slice(0,10);
   document.getElementById('projectModalBody').innerHTML=`
-    <div class="form-group"><label>專案名稱</label><input type="text" id="pName" value="${p?p.name:''}"></div>
+    <div class="form-group"><label>專案名稱</label><input type="text" id="pName" value="${p?p.name:''}" oninput="markDirty()"></div>
     <div class="form-row">
-      <div class="form-group"><label>開始日期</label><input type="date" id="pStart" value="${p?p.startDate||'':today}"></div>
-      <div class="form-group"><label>結束日期</label><input type="date" id="pEnd" value="${p?p.endDate||'':''}"></div>
+      <div class="form-group"><label>開始日期</label><input type="date" id="pStart" value="${p?p.startDate||'':today}" oninput="markDirty()"></div>
+      <div class="form-group"><label>結束日期</label><input type="date" id="pEnd" value="${p?p.endDate||'':''}" oninput="markDirty()"></div>
     </div>
     <div class="form-group"><label>狀態</label>
-      <select id="pStatus">
+      <select id="pStatus" onchange="markDirty()">
         <option value="active" ${(!p||p.status==='active')?'selected':''}>進行中</option>
         <option value="ended" ${p?.status==='ended'?'selected':''}>已結束</option>
       </select>
@@ -812,13 +884,14 @@ function renderProjectModalBody(p){
   document.getElementById('addCatBtn').onclick=()=>window.addCat();
   renderCatBuilders();
 }
+window.markDirty=markDirty;
 function renderCatBuilders(){
   const wrap=document.getElementById('catBuilders');wrap.innerHTML='';
   modalCats.forEach((cat,ci)=>{
     const div=document.createElement('div');div.className='cat-builder';
     let fh='';cat.fields.forEach((f,fi)=>{
       fh+=`<div class="field-item">
-        <input type="text" placeholder="欄位名稱" value="${f.name||''}" oninput="window.updateFieldName(${ci},${fi},this.value)">
+        <input type="text" placeholder="欄位名稱（最多6字）" maxlength="6" value="${f.name||''}" oninput="window.updateFieldName(${ci},${fi},this.value)">
         <input type="text" class="note-in" placeholder="備註（選填）" value="${f.note||''}" oninput="window.updateFieldNote(${ci},${fi},this.value)">
         <span class="field-del" onclick="window.removeField(${ci},${fi})">✕</span>
       </div>`;
@@ -834,13 +907,13 @@ function renderCatBuilders(){
     wrap.appendChild(div);
   });
 }
-window.updateCatName=(ci,v)=>{modalCats[ci].name=v;};
-window.updateFieldName=(ci,fi,v)=>{modalCats[ci].fields[fi].name=v;};
-window.updateFieldNote=(ci,fi,v)=>{modalCats[ci].fields[fi].note=v;};
-window.addCat=()=>{modalCats.push({name:'',fields:[{name:'',note:''}]});renderCatBuilders();};
-window.removeCat=(ci)=>{if(modalCats.length<=1){toast('至少要有一個分類','err');return;}modalCats.splice(ci,1);renderCatBuilders();};
-window.addField=(ci)=>{modalCats[ci].fields.push({name:'',note:''});renderCatBuilders();};
-window.removeField=(ci,fi)=>{if(modalCats[ci].fields.length<=1){toast('至少要有一個欄位','err');return;}modalCats[ci].fields.splice(fi,1);renderCatBuilders();};
+window.updateCatName=(ci,v)=>{modalCats[ci].name=v;markDirty();};
+window.updateFieldName=(ci,fi,v)=>{modalCats[ci].fields[fi].name=v;markDirty();};
+window.updateFieldNote=(ci,fi,v)=>{modalCats[ci].fields[fi].note=v;markDirty();};
+window.addCat=()=>{modalCats.push({name:'',fields:[{name:'',note:''}]});markDirty();renderCatBuilders();};
+window.removeCat=(ci)=>{if(modalCats.length<=1){toast('至少要有一個分類','err');return;}modalCats.splice(ci,1);markDirty();renderCatBuilders();};
+window.addField=(ci)=>{modalCats[ci].fields.push({name:'',note:''});markDirty();renderCatBuilders();};
+window.removeField=(ci,fi)=>{if(modalCats[ci].fields.length<=1){toast('至少要有一個欄位','err');return;}modalCats[ci].fields.splice(fi,1);markDirty();renderCatBuilders();};
 
 window.saveProject=async function(){
   const name=document.getElementById('pName')?.value.trim();
@@ -848,20 +921,40 @@ window.saveProject=async function(){
   const endDate=document.getElementById('pEnd')?.value;
   const status=document.getElementById('pStatus')?.value;
   if(!name){toast('請輸入專案名稱','err');return;}
+
+  // Validate categories
+  const catNames=new Set();
+  for(const c of modalCats){
+    const cn=(c.name||'').trim();
+    if(!cn){toast('分類名稱不能為空','err');return;}
+    if(catNames.has(cn)){toast(`分類名稱重複：${cn}`,'err');return;}
+    catNames.add(cn);
+    const fieldNames=new Set();
+    for(const f of c.fields){
+      const fn=(f.name||'').trim();
+      if(!fn)continue;
+      if(fn.length>6){toast(`欄位名稱「${fn}」超過6字元限制`,'err');return;}
+      if(fieldNames.has(fn)){toast(`分類「${cn}」內有重複欄位名稱：${fn}`,'err');return;}
+      fieldNames.add(fn);
+    }
+  }
+
   const categories=modalCats.map(c=>({
     name:c.name||'未命名',
     fields:c.fields.filter(f=>f.name.trim()).map(f=>f.note?{name:f.name,note:f.note}:f.name)
   })).filter(c=>c.fields.length);
   if(!categories.length){toast('請至少新增一個有效分類與欄位','err');return;}
-  const data={name,startDate:startDate||'',endDate:endDate||'',status,categories};
+
   if(editingPid){
-    data.entries=projects[editingPid].entries||{};
-    await set(ref(db,`tracker/projects/${editingPid}`),data);
-    writeLog('編輯專案',name);toast('已更新','ok');
+    // Use update to preserve entries
+    await update(ref(db,`tracker/projects/${editingPid}`),{name,startDate:startDate||'',endDate:endDate||'',status,categories});
+    writeLog('編輯專案',name,'edit');toast('已更新','ok');
   }else{
     const nr=push(ref(db,'tracker/projects'));
-    await set(nr,data);writeLog('新增專案',name);toast('已新增','ok');
+    await set(nr,{name,startDate:startDate||'',endDate:endDate||'',status,categories});
+    writeLog('新增專案',name,'add');toast('已新增','ok');
   }
+  modalDirty=false;
   window.closeModal('projectModal');
 };
 
@@ -870,27 +963,51 @@ window.deleteProject=async function(){
   if(!confirm(`確定要刪除「${curProject.name}」？此操作無法復原。`))return;
   const name=curProject.name;
   await remove(ref(db,`tracker/projects/${curPid}`));
-  writeLog('刪除專案',name);toast('已刪除','ok');
+  writeLog('刪除專案',name,'del');toast('已刪除','ok');
   curPid=null;curProject=null;
 };
 
 /* ── Log modal ────────────────────────────────────── */
-window.openLogModal=async function(){
+function getLogTag(v){
+  const tag=v.tag||'sys';
+  const map={add:'新增',edit:'修改',del:'刪除',overwrite:'覆蓋',sys:'系統'};
+  const cls={add:'log-tag-add',edit:'log-tag-edit',del:'log-tag-del',overwrite:'log-tag-del',sys:'log-tag-sys'};
+  return`<span class="log-tag ${cls[tag]||'log-tag-sys'}">${map[tag]||tag}</span>`;
+}
+window.openLogModal=function(){
   document.getElementById('logModal').style.display='flex';
   const body=document.getElementById('logModalBody');
   body.innerHTML='<div style="color:var(--text3);font-size:13px;">載入中…</div>';
-  const snap=await get(ref(db,'tracker/logs'));
-  const logs=snap.val()||{};
-  const entries=Object.entries(logs).sort((a,b)=>b[1].t-a[1].t).slice(0,200);
-  body.innerHTML='';
-  if(!entries.length){body.innerHTML='<div style="color:var(--text3);font-size:13px;">尚無紀錄</div>';return;}
-  entries.forEach(([,v])=>{
-    const dt=new Date(v.t);
-    const ts=`${(dt.getMonth()+1).toString().padStart(2,'0')}/${dt.getDate().toString().padStart(2,'0')} ${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}`;
-    const item=document.createElement('div');item.className='log-item';
-    item.innerHTML=`<div class="log-time">${ts}</div><div><div class="log-action">${v.a}</div><div class="log-detail">${v.d||''} · ${v.u||''}</div></div>`;
-    body.appendChild(item);
+  if(logUnsubscribe)logUnsubscribe();
+  const q=query(ref(db,'tracker/logs'),orderByKey(),limitToLast(200));
+  logUnsubscribe=onValue(q,snap=>{
+    const logs=snap.val()||{};
+    const entries=Object.entries(logs).sort((a,b)=>b[1].t-a[1].t);
+    body.innerHTML='';
+    if(!entries.length){body.innerHTML='<div style="color:var(--text3);font-size:13px;">尚無紀錄</div>';return;}
+    entries.forEach(([,v])=>{
+      const dt=new Date(v.t);
+      const ts=`${(dt.getMonth()+1).toString().padStart(2,'0')}/${dt.getDate().toString().padStart(2,'0')} ${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}`;
+      const item=document.createElement('div');item.className='log-item';
+      item.innerHTML=`
+        <div class="log-time">${ts}</div>
+        <div class="log-body">
+          <div class="log-action-row">
+            ${getLogTag(v)}
+            <span class="log-action">${v.a}</span>
+            <span class="log-who">${(v.u||'').replace(DOMAIN,'')}</span>
+          </div>
+          ${v.d?`<div class="log-detail">${v.d}</div>`:''}
+        </div>`;
+      body.appendChild(item);
+    });
   });
+};
+// Unsubscribe log when modal closed
+const origClose=window.closeModal;
+window.closeModal=function(id){
+  if(id==='logModal'&&logUnsubscribe){logUnsubscribe();logUnsubscribe=null;}
+  origClose(id);
 };
 
 /* ── CSV export ───────────────────────────────────── */
@@ -900,18 +1017,25 @@ window.downloadCSV=function(){
   const lines=[];
   cats.forEach((cat,ci)=>{
     const prefix=`cat${ci}_`;const fields=cat.fields||[];
-    const header=['日期','分類',...fields.map(f=>fname(f))].join(',');
-    if(!lines.length)lines.push(header);
-    Object.entries(allEntries).filter(([k])=>k.startsWith(prefix)).forEach(([k,v])=>{
-      lines.push([k.replace(prefix,''),cat.name,...fields.map((f,fi)=>v[`f${fi}`]!=null?v[`f${fi}`]:'')].join(','));
+    const header=['日期',...fields.map(f=>`${cat.name}_${fname(f)}`)].join(',');
+    lines.push(header);
+    const catEntries=Object.entries(allEntries).filter(([k])=>k.startsWith(prefix));
+    const totals=fields.map(()=>0);
+    catEntries.sort((a,b)=>a[0]<b[0]?-1:1).forEach(([k,v])=>{
+      const row=[k.replace(prefix,''),...fields.map((f,fi)=>{const val=v[`f${fi}`]!=null?v[`f${fi}`]:'';if(!isNaN(+val)&&val!=='')totals[fi]+=+val;return val;})];
+      lines.push(row.join(','));
     });
+    lines.push(['合計',...totals].join(','));
+    lines.push('');
   });
   const blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=Object.assign(document.createElement('a'),{href:url,download:`${p.name}_export.csv`});
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-  writeLog('匯出CSV',p.name);
+  writeLog('匯出CSV',p.name,'sys');
 };
+
+const DOMAIN='@bpl.com';
 </script>
 </body>
 </html>
