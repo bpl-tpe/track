@@ -1,4 +1,4 @@
-var CACHE = 'track-v1';
+var CACHE = 'track-v2';
 var ASSETS = ['/index.html', '/admin/index.html', '/admin/'];
 
 self.addEventListener('install', function(e) {
