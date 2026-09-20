@@ -311,10 +311,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     <div id="periodStatRow"></div>
     <div class="table-section">
       <div class="table-header">
-        <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--line-light);">
-          <button id="tabData" onclick="switchDetailTab('data')" style="font-size:12px;font-weight:500;padding:5px 14px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;transition:all .15s;">數據</button>
-          <button id="tabLog" onclick="switchDetailTab('log')" style="font-size:12px;font-weight:500;padding:5px 14px;border:none;background:transparent;color:var(--text3);cursor:pointer;font-family:inherit;transition:all .15s;">變動紀錄</button>
-        </div>
+        <span class="table-label" style="color:var(--accent);font-weight:500;font-size:13px;">活動數據</span>
         <div class="table-actions" id="tableActions">
           <button class="tbl-btn" id="editDataBtn" onclick="toggleEditMode()" style="display:inline-flex;align-items:center;gap:4px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -326,7 +323,12 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
       <div id="tableWrap" class="table-wrap">
         <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
       </div>
-      <div id="changelogRow" style="display:none;padding:4px 0 8px"></div>
+    </div>
+    <div id="changelogSection" style="margin-top:32px;margin-bottom:40px">
+      <button onclick="toggleChangelog()" id="changelogToggleBtn" style="display:block;width:100%;text-align:center;font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:8px;letter-spacing:.04em;">
+        ▸ 查看數據變動紀錄
+      </button>
+      <div id="changelogRow" style="display:none;margin-top:8px"></div>
     </div>
   </div>
 </div>
@@ -484,13 +486,12 @@ function renderCatTabs(p){
   }).join('')+'</div></div>';
 }
 window.setDetailCat=function(i){detailCatIndex=i;renderDetail(currentProjectId);};
-window.switchDetailTab=function(tab){
-  var isData=tab==='data';
-  document.getElementById('tableWrap').style.display=isData?'':'none';
-  document.getElementById('changelogRow').style.display=isData?'none':'';
-  document.getElementById('tableActions').style.display=isData?'':'none';
-  document.getElementById('tabData').style.cssText='font-size:12px;font-weight:500;padding:5px 14px;border:none;cursor:pointer;font-family:inherit;transition:all .15s;'+(isData?'background:var(--accent);color:#fff;':'background:transparent;color:var(--text3);');
-  document.getElementById('tabLog').style.cssText='font-size:12px;font-weight:500;padding:5px 14px;border:none;cursor:pointer;font-family:inherit;transition:all .15s;'+(!isData?'background:var(--accent);color:#fff;':'background:transparent;color:var(--text3);');
+window.toggleChangelog=function(){
+  var row=document.getElementById('changelogRow');
+  var btn=document.getElementById('changelogToggleBtn');
+  var open=row.style.display==='none';
+  row.style.display=open?'':'none';
+  btn.textContent=(open?'▾':'▸')+' 查看數據變動紀錄';
 };
 
 function renderDetail(id){
@@ -520,6 +521,10 @@ function renderDetail(id){
     document.getElementById('periodStatRow').innerHTML=renderPeriodStat(fields,entries);
     renderTable(p,fields,entries,'');
   }
+  var clRow=document.getElementById('changelogRow');
+  if(clRow)clRow.style.display='none';
+  var clBtn=document.getElementById('changelogToggleBtn');
+  if(clBtn)clBtn.textContent='▸ 查看數據變動紀錄';
   renderChangelog(p.changelog||{});
 }
 
@@ -544,7 +549,7 @@ function renderChangelog(changelog){
       return '<div class="cl-item"><div class="cl-time">'+ts+'</div><div><div class="cl-device">'+esc(c.device||'未知裝置')+badge+cat+'</div><div class="cl-changes">'+chgHtml+'</div></div></div>';
     }).join('');
   }
-  el.innerHTML=body;
+  el.innerHTML='<div class="changelog-section">'+body+'</div>';
 }
 
 function renderTable(p,fields,entries,prefix){
