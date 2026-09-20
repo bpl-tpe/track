@@ -463,6 +463,13 @@ function formatDate(d){
   var week=['日','一','二','三','四','五','六'][dt.getDay()];
   return d+'（'+week+'）';
 }
+function formatDateShort(d){
+  // MM-DD（週）, no year
+  var parts=d.split('-');
+  var dt=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+  var week=['日','一','二','三','四','五','六'][dt.getDay()];
+  return parts[1]+'-'+parts[2]+'（'+week+'）';
+}
 function formatDateRange(start,end){
   return formatDate(start)+' ～ '+formatDate(end);
 }
@@ -595,10 +602,10 @@ function renderTable(p,fields,entries,prefix){
       var inputCells=rv.map(function(v,i){
         return '<td><input class="td-input" type="number" min="0" inputmode="numeric" id="edit_'+d+'_'+i+'" value="'+v+'" onblur="saveRowEdit(\''+entryKey+'\')"></td>';
       }).join('');
-      return '<tr><td style="padding-left:16px;font-weight:500;white-space:nowrap">'+formatDate(d)+'</td>'+inputCells+
+      return '<tr><td style="padding-left:16px;font-weight:500;white-space:nowrap">'+formatDateShort(d)+'</td>'+inputCells+
         '<td style="padding-right:16px"><button class="del-row-btn" onclick="deleteRow(\''+entryKey+'\')" title="刪除此日"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>';
     } else {
-      return '<tr><td>'+formatDate(d)+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
+      return '<tr><td>'+formatDateShort(d)+'</td>'+rv.map(function(v){return '<td>'+v.toLocaleString()+'</td>';}).join('')+'</tr>';
     }
   }).join('');
 
