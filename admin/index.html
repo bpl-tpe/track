@@ -325,7 +325,7 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
       </div>
     </div>
     <div style="margin-top:32px;margin-bottom:40px;text-align:center">
-      <button onclick="openChangelogModal()" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:8px;letter-spacing:.04em;">數據變動紀錄</button>
+      <button onclick="openChangelogModal()" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;padding:8px;letter-spacing:.06em;">—查看數據紀錄—</button>
     </div>
   </div>
 </div>
@@ -916,6 +916,21 @@ window.doLogin=async function(){
       }catch(e){toast('刪除失敗：'+e.message,'err');}
     };
 
+    function adminLog(pid,entryKey,fields,oldObj,newObj,action){
+      var t=Date.now();
+      var datePart=entryKey.replace(/^cat\d+_/,'');
+      var catMatch=entryKey.match(/^cat(\d+)_/);
+      var catName=catMatch&&projects[pid]&&projects[pid].categories?(projects[pid].categories[parseInt(catMatch[1])]||{}).name||null:null;
+      var user=auth.currentUser;
+      var changes=action==='刪除'?[]:fields.map(function(f,i){
+        return{label:fname(f),from:parseInt((oldObj||{})['f'+i]||0),to:parseInt((newObj||{})['f'+i]||0)};
+      });
+      set(ref(db,'tracker/projects/'+pid+'/changelog/'+t),{
+        t:t,date:datePart,cat:catName,device:'管理者'+(user?'（'+user.email+'）':''),
+        overwrite:action==='覆蓋',action:action,changes:changes
+      }).catch(function(){});
+    }
+
     window.saveManualEntry=async function(){
       var date=document.getElementById('manualDate').value;
       if(!date){toast('請選擇日期','err');return;}
@@ -928,8 +943,10 @@ window.doLogin=async function(){
       var entryKey=prefix+date;
       var obj={};
       fields.forEach(function(_,i){obj['f'+i]=parseInt(document.getElementById('mf_'+i).value)||0;});
+      var isOw=p.entries&&p.entries[entryKey]!=null;
       try{
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey),obj);
+        adminLog(currentProjectId,entryKey,fields,isOw?(p.entries[entryKey]):null,obj,isOw?'覆蓋':'新增');
         closeModal('manualModal');toast('\u2705 數據已儲存','ok');
       }catch(e){toast('儲存失敗：'+e.message,'err');}
     };
@@ -947,15 +964,19 @@ window.doLogin=async function(){
       });
       try{
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey),obj);
+        adminLog(currentProjectId,entryKey,fields,oldEntry,obj,'編輯');
       }
       catch(e){toast('儲存失敗：'+e.message,'err');}
     };
 
     window.deleteRow=async function(entryKey){
+      var p=projects[currentProjectId];
       var prefix=entryKey.match(/^(cat\d+_)/);
       var dateStr=prefix?entryKey.slice(prefix[0].length):entryKey;
+      var fields=p.categories&&prefix?((p.categories[parseInt(prefix[0].replace('cat','').replace('_',''))]||{}).fields||[]):(p.fields||[]);
       if(!confirm(dateStr+' 的數據確定刪除？'))return;
       try{
+        adminLog(currentProjectId,entryKey,fields,p.entries&&p.entries[entryKey],{},'刪除');
         await remove(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey));
         toast('已刪除 '+dateStr);
       }catch(e){toast('刪除失敗：'+e.message,'err');}
@@ -977,6 +998,7 @@ window.doLogin=async function(){
       });
       try{
         await set(ref(db,'tracker/projects/'+currentProjectId+'/entries/'+entryKey),obj);
+        adminLog(currentProjectId,entryKey,fields,{},obj,'新增');
         dateEl.value='';
         fields.forEach(function(_,i){var el=document.getElementById('newRowVal_'+i);if(el)el.value='';});
         toast('\u2705 已新增 '+d,'ok');
