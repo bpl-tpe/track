@@ -262,14 +262,28 @@ window.selectProject=function(id){
   dateEl.min=p.startDate||'';
   dateEl.max=p.endDate||'';
   renderCatSections(id,d);
+  history.pushState({view:'report',id:id},'',location.pathname+'?p='+id);
   showView('viewReport');
 };
 
 window.backToList=function(){
   if(dirtySet.size>0&&!confirm('有修改尚未送出，確定要離開？'))return;
   dirtySet.clear();
-  currentProjectId=null;showView('viewList');
+  currentProjectId=null;history.replaceState({view:'list'},'',location.pathname);showView('viewList');
 };
+
+window.addEventListener('popstate',function(e){
+  if(e.state&&e.state.view==='report'){
+    window.selectProject(e.state.id);
+  } else {
+    if(dirtySet.size>0&&!confirm('有修改尚未送出，確定要離開？')){
+      history.pushState({view:'report',id:currentProjectId},'',location.pathname+'?p='+currentProjectId);
+      return;
+    }
+    dirtySet.clear();
+    currentProjectId=null;showView('viewList');renderList();
+  }
+});
 
 window.onReportDateChange=function(){
   if(!currentProjectId)return;
