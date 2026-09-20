@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
   --bg:#F5F2EC;
   --bg2:#EDEAE3;
@@ -57,7 +57,7 @@ svg.ic{display:block;flex-shrink:0;pointer-events:none;}
 .login-sub{font-size:12px;color:var(--text3);margin-bottom:24px;}
 .lbl{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
 .login-card input{
-  display:block;width:100%;padding:11px 12px;font-size:15px;font-family:var(--sans);
+  display:block;width:100%;padding:11px 12px;font-size:16px;font-family:var(--sans);
   background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--text);
   outline:none;transition:border-color .15s;margin-bottom:14px;
 }
@@ -259,7 +259,7 @@ tr.total-row td{background:var(--bg2);font-family:var(--mono);font-weight:500;co
 .form-group{margin-bottom:16px;}
 .form-group label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
 .form-group input,.form-group select{
-  display:block;width:100%;padding:11px 12px;font-size:15px;font-family:var(--sans);
+  display:block;width:100%;padding:11px 12px;font-size:16px;font-family:var(--sans);
   background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--text);
   outline:none;transition:border-color .15s;
 }
@@ -417,7 +417,7 @@ tr.total-row td{background:var(--bg2);font-family:var(--mono);font-weight:500;co
         <button class="btn-logout" onclick="doLogout()">登出</button>
       </div>
       <a class="sidebar-helper-link" href="/v2/" title="前往協助者頁面">
-        <svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         協助者頁面
       </a>
     </div>
@@ -582,6 +582,7 @@ window.doLogin=async function(){
   catch(e){err.textContent='帳號或密碼錯誤';}
 };
 window.doLogout=async function(){await signOut(auth);};
+document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('loginPass').focus();});
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')window.doLogin();});
 
 onAuthStateChanged(auth,user=>{
@@ -689,7 +690,7 @@ function renderDetail(){
     <div style="font-family:var(--mono);font-size:10px;color:var(--text3);">共 ${Object.keys(entries).length} 筆</div>
     <div style="display:flex;gap:6px;">
       <button class="btn" id="editModeBtn">${tableEditMode?'完成':'編輯'}</button>
-      ${tableEditMode?'<button class="btn" id="addRowBtn">＋ 新增</button>':''}
+      ${tableEditMode?'<button class="btn" id="addRowBtn"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>':''}
     </div>`;
   body.appendChild(toolbar);
   toolbar.querySelector('#editModeBtn').onclick=()=>{tableEditMode=!tableEditMode;renderDetail();};
@@ -718,7 +719,9 @@ function renderTable(container,fields,entries,prefix){
     const vb=tableSort.field==='date'?b.date:(+b.data[tableSort.field]||0);
     return tableSort.asc?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0);
   });
-  const si=f=>tableSort.field===f?(tableSort.asc?'↑':'↓'):'';
+  const siUp=`<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`;
+  const siDn=`<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+  const si=f=>tableSort.field===f?(tableSort.asc?siUp:siDn):'';
   const table=document.createElement('table');
   const thead=document.createElement('thead');
   let th=`<tr><th data-s="date">日期 <span class="sort-icon">${si('date')}</span></th>`;
@@ -882,7 +885,7 @@ function renderProjectModalBody(p){
     </div>
     <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">分類與欄位</div>
     <div id="catBuilders"></div>
-    <button class="add-link" id="addCatBtn" style="margin-bottom:4px;">＋ 新增分類</button>
+    <button class="add-link" id="addCatBtn" style="margin-bottom:4px;">+ 新增分類</button>
   `;
   document.getElementById('addCatBtn').onclick=()=>window.addCat();
   renderCatBuilders();
@@ -901,7 +904,7 @@ function renderCatBuilders(){
     div.innerHTML=`
       <div class="cat-builder-head">
         <input type="text" placeholder="分類名稱" value="${cat.name||''}" oninput="window.updateCatName(${ci},this.value)">
-        <button class="add-link" onclick="window.addField(${ci})">＋ 欄位</button>
+        <button class="add-link" onclick="window.addField(${ci})">+ 欄位</button>
         ${modalCats.length>1?`<span class="field-del" onclick="window.removeCat(${ci})" title="刪除分類">${IC.trash}</span>`:''}
       </div>
       <div>${fh}</div>

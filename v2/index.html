@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+button,input,select{-webkit-tap-highlight-color:transparent;}
 :root{
   --bg:#F5F2EC;
   --surface:#FFFFFF;
@@ -30,6 +31,18 @@
   --sans:'Noto Sans TC',system-ui,sans-serif;
   --safe-top:env(safe-area-inset-top, 0px);
   --safe-bottom:env(safe-area-inset-bottom, 0px);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1A1C24;--surface:#252830;--surface2:#2A2C38;
+  --line:#363848;--line-light:#2E3040;
+  --amber-pale:#2A2010;--teal-pale:#0E2A22;
+  --text:#F0EDE6;--text2:#C8C4BA;--text3:#7A7870;
+}}
+:root[data-theme="dark"]{
+  --bg:#1A1C24;--surface:#252830;--surface2:#2A2C38;
+  --line:#363848;--line-light:#2E3040;
+  --amber-pale:#2A2010;--teal-pale:#0E2A22;
+  --text:#F0EDE6;--text2:#C8C4BA;--text3:#7A7870;
 }
 html{height:100%;background:var(--bg);}
 body{
@@ -240,7 +253,7 @@ body{
     </div>
     <div class="proj-list" id="projList"></div>
     <div class="list-footer">
-      <button class="admin-lnk" onclick="location.href='/v2/admin/'">管理後台 →</button>
+      <button class="admin-lnk" onclick="location.href='/v2/admin/'">管理後台 <svg style="display:inline-block;vertical-align:middle" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
     </div>
   </div>
 
@@ -249,8 +262,8 @@ body{
     <div class="topbar">
       <button class="tb-back" id="repBack"><svg class="tb-back-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>返回</button>
       <div class="tb-sync">
-        <div class="tb-dot ok"></div>
-        <span style="font-family:var(--mono);font-size:9px;color:var(--text3);">已同步</span>
+        <div class="tb-dot" id="syncDot2"></div>
+        <span id="syncText2" style="font-family:var(--mono);font-size:9px;color:var(--text3);">連線中</span>
       </div>
     </div>
     <div class="date-block" id="dateBlock">
@@ -284,9 +297,15 @@ function clamp(d,p){return p.startDate&&d<p.startDate?p.startDate:p.endDate&&d>p
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function setSyncStatus(s,t){
+  var cls='tb-dot '+(s==='ok'?'ok':s==='err'?'err':'sync');
   var dot=document.getElementById('syncDot');
-  dot.className='tb-dot '+(s==='ok'?'ok':s==='err'?'err':'sync');
-  document.getElementById('syncText').textContent=t;
+  if(dot)dot.className=cls;
+  var dot2=document.getElementById('syncDot2');
+  if(dot2)dot2.className=cls;
+  var tx=document.getElementById('syncText');
+  if(tx)tx.textContent=t;
+  var tx2=document.getElementById('syncText2');
+  if(tx2)tx2.textContent=t;
 }
 
 function toast(msg,type){
@@ -325,7 +344,8 @@ function renderList(){
     var afterEnd=p.endDate&&today>p.endDate;
     var inPeriod=!beforeStart&&!afterEnd;
     var badgeCls=inPeriod?'inperiod':beforeStart?'pending-start':'ended-p';
-    var badgeTxt=inPeriod?'● 進行中':beforeStart?'○ 尚未開始':'○ 活動已結束';
+    var dot='<span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;vertical-align:middle;"></span>';
+    var badgeTxt=inPeriod?dot+' 進行中':beforeStart?'○ 尚未開始':'○ 活動已結束';
     btn.innerHTML=
       '<div class="pc-name">'+esc(p.name)+'</div>'+
       '<div class="pc-dates">'+esc(p.startDate||'—')+' ～ '+esc(p.endDate||'—')+'</div>'+
@@ -385,7 +405,9 @@ function renderFields(){
   var ent=getEntry();
   var sb=document.getElementById('stBadge');
   sb.className='st-badge '+(ent?'reported':'pending');
-  sb.textContent=ent?'✓ 已回報':'● 尚未回報';
+  sb.innerHTML=ent
+    ?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>已回報'
+    :'<span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;vertical-align:middle;margin-right:4px"></span>尚未回報';
   var area=document.getElementById('fieldsArea');area.innerHTML='';
   (cat.fields||[]).forEach(function(f,fi){
     var val=ent?(ent['f'+fi]!=null?ent['f'+fi]:''):'';
