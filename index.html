@@ -166,6 +166,8 @@ body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:
 var projects = {};
 var projectOrder = [];
 var currentProjectId = null;
+var dirtySet = new Set(); // tracks cat-sections with unsaved changes
+var reportDatePrev = '';
 
 function setSyncStatus(s,t){document.getElementById('syncDot').className='sdot '+s;document.getElementById('syncText').textContent=t;}
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -245,19 +247,28 @@ window.selectProject=function(id){
   if(p.endDate&&d>p.endDate)d=p.endDate;
   var dateEl=document.getElementById('reportDate');
   dateEl.value=d;
+  reportDatePrev=d;
+  dirtySet.clear();
   dateEl.min=p.startDate||'';
   dateEl.max=p.endDate||'';
   renderCatSections(id,d);
   showView('viewReport');
 };
 
-window.backToList=function(){currentProjectId=null;showView('viewList');};
+window.backToList=function(){
+  if(dirtySet.size>0&&!confirm('有修改尚未送出，確定要離開？'))return;
+  dirtySet.clear();
+  currentProjectId=null;showView('viewList');
+};
 
 window.onReportDateChange=function(){
   if(!currentProjectId)return;
   var el=document.getElementById('reportDate');
   var d=el.value;
   if(!d)return;
+  if(dirtySet.size>0&&!confirm('有修改尚未送出，確定要切換日期？')){el.value=reportDatePrev;return;}
+  dirtySet.clear();
+  reportDatePrev=d;
   var p=projects[currentProjectId];
   if(p.startDate&&d<p.startDate){el.value=p.startDate;d=p.startDate;toast('只能選擇活動期間（'+p.startDate+'～'+p.endDate+'）的日期','err');}
   else if(p.endDate&&d>p.endDate){el.value=p.endDate;d=p.endDate;toast('只能選擇活動期間（'+p.startDate+'～'+p.endDate+'）的日期','err');}
@@ -322,7 +333,8 @@ function buildCatSection(pid,date,catIndex,catLabel,fields){
     inp.className='field-card-input';
     inp.id='cf_'+idPfx+'_'+fi;
     if(existing)inp.value=parseInt(existing['f'+fi]!=null?existing['f'+fi]:0);
-    inp.addEventListener('input',function(){card.classList.remove('has-error');var hint=card.querySelector('.field-err-hint');if(hint)hint.remove();});
+    inp.addEventListener('focus',function(){this.select();});
+    inp.addEventListener('input',function(){dirtySet.add(idPfx);card.classList.remove('has-error');var hint=card.querySelector('.field-err-hint');if(hint)hint.remove();});
     card.appendChild(inp);
     grid.appendChild(card);
   });
@@ -341,10 +353,10 @@ function doSubmit(pid,date,catIndex,catLabel,fields,entryKey,isOverwrite,section
     var el=document.getElementById('cf_'+idPfx+'_'+fi);
     return{label:fname(f),value:parseInt(el?el.value:0)||0};
   });
-  if(isOverwrite&&!confirm('該日期已填報過，確認覆蓋？'))return;
   if(!window._dbSet){toast('資料庫尚未就緒，請稍後','err');return;}
   var oldBanner=section.querySelector('.net-err-banner');if(oldBanner)oldBanner.remove();
   window._dbSet(pid,entryKey,values,isOverwrite,catLabel,function(){
+    dirtySet.delete(idPfx);
     var badge=section.querySelector('.cat-status');
     if(badge){badge.className='cat-status done';badge.innerHTML='<span class="cat-status-dot"></span>今日已回報';}
     btn.className='cat-submit-btn';
