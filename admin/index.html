@@ -277,14 +277,14 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
   </div>
 </div>
 
-<!-- 編輯者：專案列表 -->
+<!-- 編輯者：活動列表 -->
 <div class="view" id="viewEditor">
   <div class="wrap">
     <div class="ph">
       <div class="ph-row">
-        <div class="ph-title">專案</div>
+        <div class="ph-title">活動</div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增專案</button>
+          <button class="btn btn-outline btn-sm" onclick="openNewProjectModal()">新增活動</button>
         </div>
       </div>
       <div class="ph-line"></div>
@@ -293,10 +293,10 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
   </div>
 </div>
 
-<!-- 編輯者：專案詳情 -->
+<!-- 編輯者：活動詳情 -->
 <div class="view" id="viewDetail">
   <div class="wrap">
-    <button class="back-btn" onclick="backToEditor()">返回專案列表</button>
+    <button class="back-btn" onclick="backToEditor()">返回活動列表</button>
     <div class="ph">
       <div class="ph-row">
         <div>
@@ -330,11 +330,11 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
   </div>
 </div>
 
-<!-- MODAL: 新增/編輯專案 -->
+<!-- MODAL: 新增/編輯活動 -->
 <div class="overlay" id="projectModal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="projectModalTitle">新增專案</div>
+    <div class="modal-title" id="projectModalTitle">新增活動</div>
     <div class="modal-sub">活動資訊與登記項目</div>
     <div class="fg"><label class="fl">活動名稱</label><input class="fi" id="fieldName" placeholder=""></div>
     <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:4px">
@@ -348,11 +348,11 @@ input:checked+.tog-sl:before{transform:translateX(18px);}
     </div>
     <div class="section-divider">狀態</div>
     <div class="toggle-row">
-      <div><div class="toggle-label">進行中</div><div class="toggle-desc">開啟後協助者可看到此專案</div></div>
+      <div><div class="toggle-label">進行中</div><div class="toggle-desc">開啟後協助者可看到此活動</div></div>
       <label class="tog"><input type="checkbox" id="statusToggle" checked><span class="tog-sl"></span></label>
     </div>
     <div class="modal-foot modal-foot-space">
-      <button class="btn-danger-txt" id="deleteBtn" onclick="deleteProject()" style="display:none">刪除此專案</button>
+      <button class="btn-danger-txt" id="deleteBtn" onclick="deleteProject()" style="display:none">刪除此活動</button>
       <div style="display:flex;gap:10px">
         <button class="btn btn-ghost" onclick="closeProjectModal()">取消</button>
         <button class="btn btn-primary btn-sm" onclick="saveProject()">儲存</button>
@@ -436,7 +436,7 @@ function projDateDist(p,today){
 }
 function renderEditorProjects(){
   var el=document.getElementById('editorGrid');
-  if(!projectOrder.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128193;</div><p>尚無專案，點擊「新增」開始</p></div>';return;}
+  if(!projectOrder.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128193;</div><p>尚無活動，點擊「新增」開始</p></div>';return;}
   var today=(new Date()).toISOString().slice(0,10);
   var active=projectOrder.filter(function(k){return projects[k]&&projects[k].status==='active';});
   var inactive=projectOrder.filter(function(k){return projects[k]&&projects[k].status!=='active';});
@@ -640,7 +640,7 @@ window.openDetail=function(id){
 window.backToEditor=function(){currentProjectId=null;showView('viewEditor');renderEditorProjects();};
 window.openNewProjectModal=function(){
   editingProjectId=null;modalDirty=false;
-  document.getElementById('projectModalTitle').textContent='新增專案';
+  document.getElementById('projectModalTitle').textContent='新增活動';
   document.getElementById('fieldName').value='';
   document.getElementById('fieldStart').value='';
   document.getElementById('fieldEnd').value='';
@@ -912,7 +912,7 @@ window.doLogin=async function(){
         }
         modalDirty=false;closeModal('projectModal');
         var _catList=categories.map(function(c){return c.name;}).join('、');
-        toast((isNew?'已新增專案，類別：':'已更新專案，類別：')+_catList,'ok');
+        toast((isNew?'已新增活動，類別：':'已更新活動，類別：')+_catList,'ok');
       }catch(e){toast('儲存失敗：'+e.message,'err');setSyncStatus('error','儲存失敗');}
     };
 
@@ -920,7 +920,7 @@ window.doLogin=async function(){
       if(!editingProjectId)return;
       var p=projects[editingProjectId];
       var pname=p?p.name:editingProjectId;
-      if(!confirm('確定要刪除專案「'+pname+'」？\n\n所有填報數據將一併刪除，且無法復原。'))return;
+      if(!confirm('確定要刪除活動「'+pname+'」？\n\n所有填報數據將一併刪除，且無法復原。'))return;
       try{
         await remove(ref(db,'tracker/projects/'+editingProjectId));
         var newOrder=projectOrder.filter(function(k){return k!==editingProjectId;});
@@ -932,7 +932,7 @@ window.doLogin=async function(){
         currentProjectId=null;
         showView('viewEditor');
         renderEditorProjects();
-        toast('專案已刪除');
+        toast('活動已刪除');
       }catch(e){toast('刪除失敗：'+e.message,'err');}
     };
 
